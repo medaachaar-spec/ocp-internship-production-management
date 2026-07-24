@@ -1,0 +1,488 @@
+table Mesures
+	lineageTag: 50701915-2162-44a1-8ec8-5835d0429294
+
+	measure 'Nombre de voyages' =
+			
+			DISTINCTCOUNT('vw_TripSummary'[TripID])
+		formatString: 0
+		lineageTag: dedca479-b548-40ba-b280-b038c17ac7a5
+
+	measure 'Tonnage total' =
+			
+			CALCULATE(
+			    SUM('vw_TripSummary'[Tonnage]),
+			    'vw_TripSummary'[Status] = "Completed"
+			)
+		formatString: #,0.00
+		lineageTag: 2522cebf-3cc0-43b4-8d49-1063a434d62d
+
+	measure 'Nombre d''arrêts' =
+			
+			DISTINCTCOUNT('vw_StopAnalysis'[TruckStopID])
+		formatString: 0
+		lineageTag: 364bf53f-cb54-4118-a930-ffef34fdd6d1
+
+	measure 'Durée totale des arrêts (h)' =
+			
+			DIVIDE(
+			    SUM('vw_StopAnalysis'[StopDurationMinutes]),
+			    60
+			)
+		formatString: #,0.00
+		lineageTag: fa428468-fe4d-42b0-a258-3669c9ba297a
+
+	measure 'Nombre d''analyses qualité' =
+			
+			DISTINCTCOUNT('vw_QualityAnalysis'[QualityResultID])
+		formatString: 0
+		lineageTag: a0c92278-7f9a-4631-8323-f4f4115980c3
+
+	measure 'Voyages en attente de validation' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_TripSummary'[TripID]),
+			        'vw_TripSummary'[Status] = "PendingValidation"
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: 311dc45d-cdc0-43a2-9d5c-44b086120332
+
+	measure 'Voyages terminés' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT('vw_TripSummary'[TripID]),
+			    'vw_TripSummary'[Status] = "Completed"
+			)
+		formatString: 0
+		lineageTag: d9e220b8-4719-4698-ae98-90b0a741ba30
+
+	measure 'Voyages incomplets' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT('vw_TripSummary'[TripID]),
+			    'vw_TripSummary'[Status] = "Incomplete"
+			)
+		formatString: 0
+		lineageTag: 08a177f2-bd17-4e4b-89a8-c6ea99ffa99b
+
+	measure 'Voyages en cours' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT('vw_TripSummary'[TripID]),
+			    'vw_TripSummary'[Status] = "InProgress"
+			)
+		formatString: 0
+		lineageTag: 47c36c97-0de0-45a7-9227-a319a4fbaa77
+
+	measure 'Durée moyenne des voyages (min)' =
+			
+			CALCULATE(
+			    AVERAGE('vw_TripSummary'[TripDurationMinutes]),
+			    'vw_TripSummary'[Status] = "Completed"
+			)
+		formatString: 0.00
+		lineageTag: b06db606-a3d3-4e72-898a-aa80baf9f1af
+
+	measure 'Tonnage moyen par voyage terminé' =
+			
+			CALCULATE(
+			    AVERAGE('vw_TripSummary'[Tonnage]),
+			    'vw_TripSummary'[Status] = "Completed"
+			)
+		lineageTag: cf6233f2-8f5f-47bc-85b7-9da04a0dc9eb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Taux de voyages terminés' =
+			
+			DIVIDE(
+			    [Voyages terminés],
+			    [Nombre de voyages],
+			    0
+			)
+		formatString: 0.00\ %;-0.00\ %;0.00\ %
+		lineageTag: 7a5a140d-e6a2-4716-b03a-e8cfaca02dbb
+
+	measure 'Durée moyenne des arrêts (min)' =
+			
+			AVERAGE('vw_StopAnalysis'[StopDurationMinutes])
+		formatString: 0.00
+		lineageTag: 5e9b677c-c8eb-41a1-8946-55b4572259b9
+
+	measure 'Durée médiane des arrêts (min)' =
+			
+			MEDIAN('vw_StopAnalysis'[StopDurationMinutes])
+		formatString: 0.0
+		lineageTag: b150b3c4-6cbf-4ba4-80cb-11777571b416
+
+	measure 'Arrêts avec voyage associé' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_StopAnalysis'[TruckStopID]),
+			        NOT(ISBLANK('vw_StopAnalysis'[TripID]))
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: 5665d44e-b130-46eb-9322-3e6f34c8aa80
+
+	measure 'Arrêts sans voyage associé' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_StopAnalysis'[TruckStopID]),
+			        ISBLANK('vw_StopAnalysis'[TripID])
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: fa168b5b-5249-4c29-a68b-8771d395c969
+
+	measure 'Taux d''arrêts associés à un voyage' =
+			
+			DIVIDE(
+			    [Arrêts avec voyage associé],
+			    [Nombre d'arrêts],
+			    0
+			)
+		formatString: 0.00\ %;-0.00\ %;0.00\ %
+		lineageTag: 2124ebb3-66f4-4d4a-bca2-ad42271e4562
+
+	measure 'Arrêts ouverts' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_StopAnalysis'[TruckStopID]),
+			        ISBLANK('vw_StopAnalysis'[StopEndTime])
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: b267c258-6438-4bed-8031-67bc557c0bf4
+
+	measure 'Arrêts clôturés' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_StopAnalysis'[TruckStopID]),
+			        NOT(ISBLANK('vw_StopAnalysis'[StopEndTime]))
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: 0a652614-630d-482c-99fd-80162cc5589b
+
+	measure 'Arrêts validés' = ```
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_StopAnalysis'[TruckStopID]),
+			        'vw_StopAnalysis'[StopStatus] = "Validated"
+			    ),
+			    0
+			)
+			
+			```
+		formatString: 0
+		lineageTag: 4222aaae-45e2-48a1-8443-8fbd05d06060
+
+	measure 'P2O5 moyen' =
+			
+			AVERAGE('vw_QualityAnalysis'[P2O5Percent])
+		formatString: 0.000\ %;-0.000\ %;0.000\ %
+		lineageTag: 1fe41c2f-9180-4ace-b503-277f829c7b4a
+
+	measure 'P2O5 médian' =
+			
+			MEDIAN('vw_QualityAnalysis'[P2O5Percent])
+		formatString: 0.000\ %;-0.000\ %;0.000\ %
+		lineageTag: 2b2cce58-2b98-4778-8efb-3786b69a83a5
+
+	measure 'P2O5 minimum' =
+			
+			MIN('vw_QualityAnalysis'[P2O5Percent])
+		formatString: 0.000\ %;-0.000\ %;0.000\ %
+		lineageTag: f37e99c9-0c0c-4808-8ef9-528966e83a7e
+
+	measure 'P2O5 maximum' =
+			
+			MAX('vw_QualityAnalysis'[P2O5Percent])
+		formatString: 0.000\ %;-0.000\ %;0.000\ %
+		lineageTag: 4ba21882-2d5c-4d77-988b-35615ae2d82e
+
+	measure 'Analyses avec voyage associé' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_QualityAnalysis'[QualityResultID]),
+			        NOT(ISBLANK('vw_QualityAnalysis'[TripID]))
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: 929d2ba1-fe8f-4bfd-be2c-b86173194fd1
+
+	measure 'Analyses sans voyage associé' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_QualityAnalysis'[QualityResultID]),
+			        ISBLANK('vw_QualityAnalysis'[TripID])
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: 492683e9-6f45-4e7c-bac6-c3faee1ffb1f
+
+	measure 'Taux d''analyses associées à un voyage' =
+			
+			DIVIDE(
+			    [Analyses avec voyage associé],
+			    [Nombre d'analyses qualité],
+			    0
+			)
+		formatString: 0.00\ %;-0.00\ %;0.00\ %
+		lineageTag: f1a0b737-5119-48ce-b4cf-a0e9daab7338
+
+	measure 'Analyses avec résultat P2O5' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_QualityAnalysis'[QualityResultID]),
+			        NOT(ISBLANK('vw_QualityAnalysis'[P2O5Percent]))
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: 74f7a99d-41bd-4448-b694-6ea67d53f833
+
+	measure 'Analyses sans résultat P2O5' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_QualityAnalysis'[QualityResultID]),
+			        ISBLANK('vw_QualityAnalysis'[P2O5Percent])
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: e48a6322-c31a-4252-b065-2f6226d449d6
+
+	measure 'Nombre de camions' =
+			
+			DISTINCTCOUNT('vw_TruckPerformance'[TruckID])
+		formatString: 0
+		lineageTag: 1aa3025f-3131-4e99-89ee-597ef768224b
+
+	measure 'Moyenne de voyages par camion' =
+			
+			DIVIDE(
+			    [Nombre de voyages],
+			    [Nombre de camions],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: 6eea22e2-a380-4439-8367-1732489dbada
+
+	measure 'Moyenne de voyages terminés par camion' =
+			
+			DIVIDE(
+			    [Voyages terminés],
+			    [Nombre de camions],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: af474238-36c9-40e3-896b-83d4d31d82e6
+
+	measure 'Tonnage moyen par camion' =
+			
+			DIVIDE(
+			    [Tonnage total],
+			    [Nombre de camions],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: 04b9c6fd-e8cc-40bf-9267-9a21a9d63b26
+
+	measure 'Durée moyenne cumulée des arrêts par camion (h)' =
+			
+			DIVIDE(
+			    [Durée totale des arrêts (h)],
+			    [Nombre de camions],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: e98c3240-9e26-4e14-a673-9c18470ff3fb
+
+	measure 'Nombre moyen d''arrêts par camion' =
+			
+			DIVIDE(
+			    [Nombre d'arrêts],
+			    [Nombre de camions],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: 0f67dd38-036d-4460-b549-c29a8bb5350e
+
+	measure 'Capacité nominale moyenne' =
+			
+			AVERAGE('vw_TruckPerformance'[RatedPayloadTonnes])
+		formatString: 0.00
+		lineageTag: 1fa03faa-6202-4c0c-96fa-d91e47e4d271
+
+	measure 'Nombre de camions avec activité' =
+			
+			COALESCE(
+			    DISTINCTCOUNT('vw_TripSummary'[TruckID]),
+			    0
+			)
+		formatString: 0
+		lineageTag: 4d63f37e-d92e-4eaf-a9e2-39f466e1321a
+
+	measure 'Nombre de camions sans voyage' =
+			
+			[Nombre de camions] - [Nombre de camions avec activité]
+		formatString: 0
+		lineageTag: 1fa544db-b204-425e-bb05-de344383bbcc
+
+	measure 'Nombre de camions avec arrêt' =
+			
+			COALESCE(
+			    DISTINCTCOUNT('vw_StopAnalysis'[TruckID]),
+			    0
+			)
+		formatString: 0
+		lineageTag: 265ff374-e521-4902-87ed-fca179171ae5
+
+	measure 'Nombre de conducteurs' =
+			
+			DISTINCTCOUNT('vw_DriverPerformance'[DriverID])
+		formatString: 0
+		lineageTag: d1782e0c-7a17-4fcb-9b72-baf45feda807
+
+	measure 'Conducteurs actifs' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_DriverPerformance'[DriverID]),
+			        'vw_DriverPerformance'[DriverStatus] = "Active"
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: b6f38c56-aa7a-40a6-8190-cfdeac5668bc
+
+	measure 'Moyenne de voyages par conducteur' =
+			
+			DIVIDE(
+			    [Nombre de voyages],
+			    [Nombre de conducteurs],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: d70e43f4-3243-4b85-aab7-8ff5a255886f
+
+	measure 'Moyenne de voyages terminés par conducteur' =
+			
+			DIVIDE(
+			    [Voyages terminés],
+			    [Nombre de conducteurs],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: d9ccd7a0-f61f-4107-a22b-c099c3797a3e
+
+	measure 'Tonnage moyen par conducteur' =
+			
+			DIVIDE(
+			    [Tonnage total],
+			    [Nombre de conducteurs],
+			    0
+			)
+		formatString: 0.00
+		lineageTag: 9d94fdab-f3f2-4b2a-9c66-ca80a531d470
+
+	measure 'Nombre moyen d''arrêts liés par conducteur' =
+			
+			VAR LinkedStopCount =
+			    COALESCE(
+			        CALCULATE(
+			            DISTINCTCOUNT('vw_StopAnalysis'[TruckStopID]),
+			            NOT(ISBLANK('vw_StopAnalysis'[DriverID]))
+			        ),
+			        0
+			    )
+			RETURN
+			    DIVIDE(
+			        LinkedStopCount,
+			        [Nombre de conducteurs],
+			        0
+			    )
+		formatString: 0.00
+		lineageTag: 17c2e25d-56c0-4d0f-9a91-fe72745400e6
+
+	measure 'Durée moyenne cumulée des arrêts liés par conducteur (h)' =
+			
+			VAR LinkedStopMinutes =
+			    COALESCE(
+			        CALCULATE(
+			            SUM('vw_StopAnalysis'[StopDurationMinutes]),
+			            NOT(ISBLANK('vw_StopAnalysis'[DriverID]))
+			        ),
+			        0
+			    )
+			RETURN
+			    DIVIDE(
+			        LinkedStopMinutes,
+			        60 * [Nombre de conducteurs],
+			        0
+			    )
+		formatString: 0.00
+		lineageTag: de919b0e-f0df-4b7c-baff-ec4754728299
+
+	measure 'Nombre de conducteurs avec activité' =
+			
+			COALESCE(
+			    DISTINCTCOUNT('vw_TripSummary'[DriverID]),
+			    0
+			)
+		formatString: 0
+		lineageTag: 478d5f5e-bd6f-4d66-8456-53ee6e025b47
+
+	measure 'Nombre de conducteurs sans voyage' =
+			
+			[Nombre de conducteurs] - [Nombre de conducteurs avec activité]
+		formatString: 0
+		lineageTag: 5aeac68b-acf8-4e34-bcfb-36027ff7f33a
+
+	measure 'Nombre de conducteurs avec arrêt lié' =
+			
+			COALESCE(
+			    CALCULATE(
+			        DISTINCTCOUNT('vw_StopAnalysis'[DriverID]),
+			        NOT(ISBLANK('vw_StopAnalysis'[DriverID]))
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: 2b713942-c77d-428a-b426-75855bf68001
+
+	column Value
+		isHidden
+		formatString: 0
+		lineageTag: 03b0b4c6-5d4f-4050-ae47-2b7a8406aaeb
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Mesures = calculated
+		mode: import
+		source = { BLANK() }
+
+	annotation PBI_Id = 9cf63edfa1544f69b128f17782c46f31
+

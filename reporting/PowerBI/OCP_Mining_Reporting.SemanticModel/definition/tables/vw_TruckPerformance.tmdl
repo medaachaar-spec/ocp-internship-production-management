@@ -1,0 +1,353 @@
+table vw_TruckPerformance
+	lineageTag: e4f4003d-230d-4a89-8d03-34b3b417705f
+
+	column TruckID
+		dataType: int64
+		formatString: 0
+		lineageTag: 14aa22b7-5d38-4d8b-8f05-f831b7ed1f9c
+		summarizeBy: count
+		sourceColumn: TruckID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckCode
+		dataType: string
+		lineageTag: e24cd36d-4a47-4ef7-a597-9b393159c41e
+		summarizeBy: none
+		sourceColumn: TruckCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckModel
+		dataType: string
+		lineageTag: 1ca05523-1b34-4dc3-b39c-9d7eb72087ef
+		summarizeBy: none
+		sourceColumn: TruckModel
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckStatus
+		dataType: string
+		lineageTag: 734a03fe-e647-4b04-bb97-ddb883ff155d
+		summarizeBy: none
+		sourceColumn: TruckStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	column RatedPayloadTonnes
+		dataType: double
+		lineageTag: 44df8891-94df-4bd3-9c28-e5a7e29ca21c
+		summarizeBy: sum
+		sourceColumn: RatedPayloadTonnes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TotalTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: 3ae6806c-1d4f-408c-847d-9e95bb3bc14f
+		summarizeBy: sum
+		sourceColumn: TotalTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompletedTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: 60342693-ea25-4224-b618-ebe01c653769
+		summarizeBy: sum
+		sourceColumn: CompletedTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column IncompleteTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: f3017cee-591b-4034-a6f0-cb9bd84c61ee
+		summarizeBy: sum
+		sourceColumn: IncompleteTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompletionRatePercent
+		dataType: double
+		lineageTag: 3fd758cc-23e6-4fdb-bbe2-1b7ece88a6f4
+		summarizeBy: sum
+		sourceColumn: CompletionRatePercent
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ActiveTripDays
+		dataType: int64
+		formatString: 0
+		lineageTag: 41aa497b-4c99-4ec8-8689-5dd0b4ea8bdc
+		summarizeBy: sum
+		sourceColumn: ActiveTripDays
+
+		annotation SummarizationSetBy = Automatic
+
+	column FirstTripDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 53ca3be6-ad2a-4728-82cc-6b4a5f281e9c
+		summarizeBy: none
+		sourceColumn: FirstTripDate
+
+		variation Variation
+			isDefault
+			relationship: fe074ff4-7808-43e7-bfde-4bf27ab7d627
+			defaultHierarchy: LocalDateTable_8b32b9ac-18e6-41da-a930-ee0cc0f51ad2.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column LastTripDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 31fa7526-9169-493c-9e0d-aa018a29a909
+		summarizeBy: none
+		sourceColumn: LastTripDate
+
+		variation Variation
+			isDefault
+			relationship: 4b6dec73-39e8-4031-99e4-611f228c17ca
+			defaultHierarchy: LocalDateTable_d81549f5-2c7a-4757-b0dd-02208bf15730.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column TripsPerActiveDay
+		dataType: double
+		lineageTag: 10316290-6434-4f17-ac21-2d474c76dbb6
+		summarizeBy: sum
+		sourceColumn: TripsPerActiveDay
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column HasTrips
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 482ca9ca-a8fb-495c-af51-dfee00a6a578
+		summarizeBy: none
+		sourceColumn: HasTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalTonnage
+		dataType: double
+		lineageTag: 41e9faaa-3225-4b30-966e-15b96fb69f53
+		summarizeBy: sum
+		sourceColumn: TotalTonnage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AveragePayloadTonnes
+		dataType: double
+		lineageTag: ae92edff-fe84-423f-9e91-d70c31595791
+		summarizeBy: sum
+		sourceColumn: AveragePayloadTonnes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MinimumPayloadTonnes
+		dataType: double
+		lineageTag: 35d73ab6-093e-44d3-9a94-4f40766f7b22
+		summarizeBy: sum
+		sourceColumn: MinimumPayloadTonnes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MaximumPayloadTonnes
+		dataType: double
+		lineageTag: 1da38e48-4802-4c5a-b4f3-47fa638d2c85
+		summarizeBy: sum
+		sourceColumn: MaximumPayloadTonnes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AveragePayloadUtilizationPercent
+		dataType: double
+		lineageTag: ffc57d7a-65e6-4406-8426-f53de0704b8f
+		summarizeBy: sum
+		sourceColumn: AveragePayloadUtilizationPercent
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AverageTripDurationMinutes
+		dataType: double
+		lineageTag: a29c7edf-3fe3-4559-8311-b72838205f04
+		summarizeBy: sum
+		sourceColumn: AverageTripDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MinimumTripDurationMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: 22263be4-d550-48d0-92f4-c033ca2ec74c
+		summarizeBy: sum
+		sourceColumn: MinimumTripDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column MaximumTripDurationMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: e9713b05-ea1b-4f02-bbd5-ee95440934bd
+		summarizeBy: sum
+		sourceColumn: MaximumTripDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalStopCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 32792e7b-c0fa-4794-9c64-119f2cffee50
+		summarizeBy: sum
+		sourceColumn: TotalStopCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompletedStopCount
+		dataType: int64
+		formatString: 0
+		lineageTag: e14a97b7-b93a-4235-8ba1-24c1c2bb6d84
+		summarizeBy: sum
+		sourceColumn: CompletedStopCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalDowntimeMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: 3231f2c2-4d72-4e67-acff-a30364768dcf
+		summarizeBy: sum
+		sourceColumn: TotalDowntimeMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column AverageStopDurationMinutes
+		dataType: double
+		lineageTag: 45c22920-8267-4b50-b8fb-a26d8ad04009
+		summarizeBy: sum
+		sourceColumn: AverageStopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MaximumStopDurationMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: fcd1dc4f-73e5-4bb4-9a85-e2548d9a1d0d
+		summarizeBy: sum
+		sourceColumn: MaximumStopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopsWithTripCount
+		dataType: int64
+		formatString: 0
+		lineageTag: e13267e8-4d45-461a-8ba7-012ac197578c
+		summarizeBy: sum
+		sourceColumn: StopsWithTripCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopsWithoutTripCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 32c02df5-e9f7-4156-9240-e2cd6c75beba
+		summarizeBy: sum
+		sourceColumn: StopsWithoutTripCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column HasStops
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4c0e50f0-b155-4841-b134-9b5951e18e3d
+		summarizeBy: none
+		sourceColumn: HasStops
+
+		annotation SummarizationSetBy = Automatic
+
+	column QualityResultCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 254273b9-c98b-4363-9534-41bada1e1c7f
+		summarizeBy: sum
+		sourceColumn: QualityResultCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column AverageP2O5
+		dataType: double
+		lineageTag: f196a4d0-06b0-436d-819c-812b2ca4b4e3
+		summarizeBy: sum
+		sourceColumn: AverageP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MinimumP2O5
+		dataType: double
+		lineageTag: 2326f99c-a521-47f6-af9a-e12621846913
+		summarizeBy: sum
+		sourceColumn: MinimumP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MaximumP2O5
+		dataType: double
+		lineageTag: 5d282dd9-bb46-4047-96d8-0f6d5c39ce49
+		summarizeBy: sum
+		sourceColumn: MaximumP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column HasQualityResults
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b5029aff-4cf6-4a45-ba8a-363c0e49066b
+		summarizeBy: none
+		sourceColumn: HasQualityResults
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_TruckPerformance = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("localhost", "OCP_Mining_Prototype"),
+				    dbo_vw_TruckPerformance = Source{[Schema="dbo",Item="vw_TruckPerformance"]}[Data]
+				in
+				    dbo_vw_TruckPerformance
+
+	annotation PBI_ResultType = Table
+

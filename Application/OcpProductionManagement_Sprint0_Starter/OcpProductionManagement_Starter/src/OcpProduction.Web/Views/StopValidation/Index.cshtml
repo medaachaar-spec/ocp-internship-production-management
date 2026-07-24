@@ -1,0 +1,181 @@
+@model OcpProduction.Web.ViewModels.Stops.PendingStopValidationIndexViewModel
+@using System.Globalization
+@using OcpProduction.Application.Stops.Models
+@using OcpProduction.Web.ViewModels.Stops
+@{
+    ViewData["Title"] = "Arrêts à valider";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<div class="page-header">
+    <h1>Centre de validation</h1>
+    <p class="text-muted mb-0">Examinez les arrêts clôturés en attente de validation.</p>
+</div>
+
+<nav class="nav nav-pills gap-2 mb-4" aria-label="Files du centre de validation">
+    <a class="nav-link" asp-controller="Validation" asp-action="Index">Voyages à valider</a>
+    <a class="nav-link active" aria-current="page" asp-action="Index">Arrêts à valider</a>
+</nav>
+
+<section class="card border-0 shadow-sm mb-4" aria-labelledby="stop-validation-filter-title">
+    <div class="card-body">
+        <h2 id="stop-validation-filter-title" class="h5 mb-3">Filtres</h2>
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <label for="stop-validation-search" class="form-label">Recherche</label>
+                <input id="stop-validation-search"
+                       name="Search"
+                       value="@Model.Criteria.Search"
+                       class="form-control"
+                       placeholder="Arrêt, voyage, camion ou motif" />
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label for="stop-validation-date-from" class="form-label">Clôturé du</label>
+                <input id="stop-validation-date-from"
+                       name="DateFrom"
+                       type="date"
+                       value="@(Model.Criteria.DateFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label for="stop-validation-date-to" class="form-label">Au</label>
+                <input id="stop-validation-date-to"
+                       name="DateTo"
+                       type="date"
+                       value="@(Model.Criteria.DateTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <label for="stop-validation-truck" class="form-label">Camion</label>
+                <select id="stop-validation-truck" name="TruckId" class="form-select">
+                    <option value="">Tous</option>
+                    @foreach (var truck in Model.FilterOptions.Trucks)
+                    {
+                        <option value="@truck.Value" selected="@(Model.Criteria.TruckId == truck.Value ? "selected" : null)">@truck.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <label for="stop-validation-reason" class="form-label">Motif</label>
+                <select id="stop-validation-reason" name="StopReasonId" class="form-select">
+                    <option value="">Tous</option>
+                    @foreach (var reason in Model.FilterOptions.StopReasons)
+                    {
+                        <option value="@reason.Value" selected="@(Model.Criteria.StopReasonId == reason.Value ? "selected" : null)">@reason.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <label for="stop-validation-page-size" class="form-label">Résultats par page</label>
+                <select id="stop-validation-page-size" name="PageSize" class="form-select">
+                    @foreach (var pageSize in StopSearchCriteria.AllowedPageSizes)
+                    {
+                        <option value="@pageSize" selected="@(Model.Criteria.PageSize == pageSize ? "selected" : null)">@pageSize</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section aria-labelledby="pending-stop-validation-title">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 id="pending-stop-validation-title" class="h5 mb-0">Arrêts à valider</h2>
+        <span class="text-muted">@Model.Results.TotalItems.ToString("N0", frenchCulture) en attente</span>
+    </div>
+
+    @if (Model.Results.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body trip-empty-state text-center">
+                <h3 class="h5">Aucun arrêt en attente</h3>
+                <p class="text-muted mb-0">Aucun arrêt clôturé n’est actuellement en attente de validation.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm trip-results-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 trip-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Arrêt</th>
+                            <th scope="col">Voyage</th>
+                            <th scope="col">Camion</th>
+                            <th scope="col">Motif</th>
+                            <th scope="col">Début</th>
+                            <th scope="col">Fin</th>
+                            <th scope="col">Durée</th>
+                            <th scope="col"><span class="visually-hidden">Action</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stop in Model.Results.Items)
+                        {
+                            <tr>
+                                <th scope="row">#@stop.StopId</th>
+                                <td>@(stop.TripId is null ? "—" : $"#{stop.TripId}")</td>
+                                <td>@stop.TruckCode</td>
+                                <td>@stop.StopReasonName <small class="text-muted">(@stop.StopReasonCode)</small></td>
+                                <td>@stop.StartTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</td>
+                                <td>@stop.EndTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</td>
+                                <td>@StopPresentation.FormatDuration(stop.DurationMinutes)</td>
+                                <td class="text-end">
+                                    <a asp-controller="Stops"
+                                       asp-action="Details"
+                                       asp-all-route-data="@Model.ReviewRouteValues(stop.StopId)"
+                                       class="btn btn-outline-primary btn-sm">Examiner</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+                <nav aria-label="Pagination des arrêts à valider">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
+                            @if (Model.Results.HasPreviousPage)
+                            {
+                                <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Précédent</span>
+                            }
+                        </li>
+                        @foreach (var page in Model.VisiblePages)
+                        {
+                            <li class="page-item @(page == Model.Results.Page ? "active" : null)">
+                                @if (page == Model.Results.Page)
+                                {
+                                    <span class="page-link" aria-current="page">@(page)</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(page)">@(page)</a>
+                                }
+                            </li>
+                        }
+                        <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
+                            @if (Model.Results.HasNextPage)
+                            {
+                                <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Suivant</span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    }
+</section>

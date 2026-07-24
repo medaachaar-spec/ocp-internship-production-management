@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "9fd8453373925ad45930",
+  "position": {
+    "x": 36,
+    "y": 0,
+    "z": 0,
+    "height": 300,
+    "width": 300,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Mesures"
+                    }
+                  },
+                  "Property": "Durée totale des arrêts (h)"
+                }
+              },
+              "queryRef": "Mesures.Durée totale des arrêts (h)",
+              "nativeQueryRef": "Durée totale des arrêts (h)"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

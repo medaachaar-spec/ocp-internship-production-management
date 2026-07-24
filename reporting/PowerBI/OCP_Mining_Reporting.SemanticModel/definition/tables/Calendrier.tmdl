@@ -1,0 +1,86 @@
+table Calendrier
+	lineageTag: 9ef01ea6-8098-4fd8-8212-aafbdcbe1ca0
+	dataCategory: Time
+
+	column Date
+		isKey
+		formatString: General Date
+		lineageTag: 69f9905b-5f46-4721-af30-b446f41e4ef6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column NuméroMois =
+			
+			MONTH('Calendrier'[Date])
+		formatString: 0
+		lineageTag: 4a45717d-91fa-4d19-a9bc-e5651de7d5fe
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Année =
+			
+			YEAR('Calendrier'[Date])
+		formatString: 0
+		lineageTag: 939659af-f9fe-45b9-af35-95c43f837a92
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mois =
+			
+			FORMAT('Calendrier'[Date], "MMMM")
+		lineageTag: 5dc9b1eb-2d90-4976-81b0-dca7f7ddb8b8
+		summarizeBy: none
+		sortByColumn: NuméroMois
+
+		annotation SummarizationSetBy = Automatic
+
+	column AnnéeMois =
+			
+			FORMAT('Calendrier'[Date], "yyyy-MM")
+		lineageTag: bd558f28-8e05-4129-9094-84713b34441c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Trimestre =
+			
+			"T" & QUARTER('Calendrier'[Date])
+		lineageTag: 853d7fea-2228-48fc-8097-58f4e6e6f3d4
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column JourSemaine =
+			
+			FORMAT('Calendrier'[Date], "dddd")
+		lineageTag: 6354394f-df46-4d78-9d0b-d61a856524dc
+		summarizeBy: none
+		sortByColumn: NuméroJourSemaine
+
+		annotation SummarizationSetBy = Automatic
+
+	column NuméroJourSemaine =
+			
+			WEEKDAY('Calendrier'[Date], 2)
+		formatString: 0
+		lineageTag: 9a1f4fcf-124a-42d0-8e69-8812f4f4b8ad
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Calendrier = calculated
+		mode: import
+		source =
+				
+				CALENDAR(
+				    MIN('vw_TripSummary'[TripDate]),
+				    MAX('vw_TripSummary'[TripDate])
+				)
+
+	annotation PBI_Id = fb78178fa3f941f88f6814ad8983cda5
+

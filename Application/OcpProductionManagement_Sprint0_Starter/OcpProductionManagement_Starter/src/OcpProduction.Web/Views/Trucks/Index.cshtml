@@ -1,0 +1,106 @@
+@model OcpProduction.Web.ViewModels.Trucks.TruckIndexViewModel
+@using System.Globalization
+@using OcpProduction.Application.Trucks.Models
+@using OcpProduction.Web.ViewModels.Trucks
+@{
+    ViewData["Title"] = "Camions";
+    var culture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<div class="page-header">
+    <h1>Camions</h1>
+    <p class="text-muted mb-0">Consultez les équipements enregistrés et leur activité opérationnelle.</p>
+</div>
+
+<section class="card border-0 shadow-sm mb-4" aria-labelledby="truck-filter-title">
+    <div class="card-body">
+        <h2 id="truck-filter-title" class="h5 mb-3">Filtres</h2>
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <label for="truck-search" class="form-label">Recherche</label>
+                <input id="truck-search" name="Search" value="@Model.Criteria.Search" class="form-control" placeholder="Code, immatriculation ou modèle" />
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label for="truck-status" class="form-label">Statut réel</label>
+                <select id="truck-status" name="Status" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    @foreach (var status in Model.FilterOptions.Statuses)
+                    {
+                        <option value="@status" selected="@(Model.Criteria.Status == status ? "selected" : null)">@TruckPresentation.GetStatusLabel(status)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label for="truck-model" class="form-label">Modèle ou type</label>
+                <select id="truck-model" name="Model" class="form-select">
+                    <option value="">Tous les modèles</option>
+                    @foreach (var truckModel in Model.FilterOptions.Models)
+                    {
+                        <option value="@truckModel" selected="@(Model.Criteria.Model == truckModel ? "selected" : null)">@truckModel</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label for="truck-page-size" class="form-label">Par page</label>
+                <select id="truck-page-size" name="PageSize" class="form-select">
+                    @foreach (var size in TruckSearchCriteria.AllowedPageSizes)
+                    {
+                        <option value="@size" selected="@(Model.Criteria.PageSize == size ? "selected" : null)">@size</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section aria-labelledby="truck-results-title">
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+        <h2 id="truck-results-title" class="h5 mb-0">Équipements enregistrés</h2>
+        <p id="truck-summary" class="text-muted mb-0"><strong>@Model.Results.TotalItems.ToString("N0", culture)</strong> camion@(Model.Results.TotalItems == 1 ? "" : "s")</p>
+    </div>
+    @if (Model.Results.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm"><div class="card-body trip-empty-state text-center">
+            <h3 class="h5">Aucun camion</h3>
+            <p class="text-muted">Aucun camion ne correspond aux critères sélectionnés.</p>
+            <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser les filtres</a>
+        </div></div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm trip-results-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 fleet-table" aria-describedby="truck-summary">
+                    <thead><tr><th scope="col">Camion</th><th scope="col">Modèle ou type</th><th scope="col">Capacité</th><th scope="col">Statut réel</th><th scope="col" class="text-end">Voyages</th><th scope="col" class="text-end">Arrêts</th><th scope="col">Dernière activité</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
+                    <tbody>
+                    @foreach (var truck in Model.Results.Items)
+                    {
+                        <tr>
+                            <th scope="row"><span class="d-block">@truck.TruckCode</span><small class="text-muted">@TruckPresentation.OrFallback(truck.RegistrationNumber)</small></th>
+                            <td>@TruckPresentation.OrFallback(truck.Model)</td>
+                            <td>@TruckPresentation.FormatTonnage(truck.RatedPayloadTonnes)</td>
+                            <td><span class="badge @TruckPresentation.GetStatusBadgeClass(truck.Status, truck.IsActive)">@TruckPresentation.GetStatusLabel(truck.Status)</span></td>
+                            <td class="text-end">@truck.TripCount.ToString("N0", culture)</td>
+                            <td class="text-end">@truck.StopCount.ToString("N0", culture)</td>
+                            <td>@TruckPresentation.FormatDate(TruckPresentation.LatestActivity(truck.LastTripActivity, truck.LastStopActivity))</td>
+                            <td class="text-end"><a asp-action="Details" asp-all-route-data="@Model.DetailsRouteValues(truck.TruckId)" class="btn btn-sm btn-outline-primary" aria-label="Voir le camion @truck.TruckCode">Voir</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+                <nav aria-label="Pagination des camions"><ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">@if (Model.Results.HasPreviousPage) { <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a> } else { <span class="page-link" aria-disabled="true">Précédent</span> }</li>
+                    @foreach (var pageNumber in Model.VisiblePages) { <li class="page-item @(pageNumber == Model.Results.Page ? "active" : null)">@if (pageNumber == Model.Results.Page) { <span class="page-link" aria-current="page">@pageNumber</span> } else { <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(pageNumber)">@pageNumber</a> }</li> }
+                    <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">@if (Model.Results.HasNextPage) { <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a> } else { <span class="page-link" aria-disabled="true">Suivant</span> }</li>
+                </ul></nav>
+            </div>
+        </div>
+    }
+</section>

@@ -1,0 +1,96 @@
+@model OcpProduction.Web.ViewModels.Stops.StopCloseViewModel
+@using System.Globalization
+@using OcpProduction.Application.Stops.Models
+@using OcpProduction.Web.ViewModels.Stops
+@{
+    ViewData["Title"] = $"Clôturer l’arrêt #{Model.Stop.StopId}";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Stops" asp-action="Index" asp-all-route-data="@StopNavigation.ForList(Model.ReturnCriteria)">Arrêts</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Clôturer #@Model.Stop.StopId</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <h1>Clôturer l’arrêt #@Model.Stop.StopId</h1>
+    <p class="text-muted mb-0">Renseignez l’heure de fin avant de transmettre l’arrêt au superviseur.</p>
+</div>
+
+<div class="card border-0 shadow-sm trip-form-card">
+    <div class="card-body p-4">
+        <section aria-labelledby="stop-close-summary-title" class="mb-4">
+            <h2 id="stop-close-summary-title" class="h5 mb-3">Récapitulatif</h2>
+            <dl class="trip-details-grid trip-details-grid-wide mb-0">
+                <div><dt>Arrêt</dt><dd>#@Model.Stop.StopId</dd></div>
+                <div><dt>Début</dt><dd>@Model.Stop.StartTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</dd></div>
+                <div><dt>Camion</dt><dd>@Model.Stop.TruckCode</dd></div>
+                <div><dt>Motif</dt><dd>@Model.Stop.StopReasonName (@Model.Stop.StopReasonCode)</dd></div>
+                <div><dt>Conducteur</dt><dd>@(string.IsNullOrWhiteSpace(Model.Stop.DriverCode) ? "—" : $"{Model.Stop.DriverCode} - {Model.Stop.DriverName}")</dd></div>
+                <div><dt>Poste</dt><dd>@(Model.Stop.WorkShiftName ?? "—")</dd></div>
+                <div>
+                    <dt>État</dt>
+                    <dd><span class="badge @StopPresentation.GetStateBadgeClass(StopStates.Open)">@StopPresentation.GetStateLabel(StopStates.Open)</span></dd>
+                </div>
+                <div>
+                    <dt>Validation</dt>
+                    <dd><span class="badge @StopPresentation.GetValidationStatusBadgeClass(Model.Stop.ValidationStatus)">@StopPresentation.GetValidationStatusLabel(Model.Stop.ValidationStatus)</span></dd>
+                </div>
+            </dl>
+        </section>
+
+        <div class="alert alert-warning" role="alert">
+            Après la clôture, l’arrêt sera transmis au superviseur et ne pourra plus être modifié par l’agent.
+        </div>
+
+        <form asp-controller="StopWorkflow"
+              asp-action="Close"
+              asp-route-id="@Model.Stop.StopId"
+              method="post"
+              asp-antiforgery="true"
+              data-submit-once>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <input asp-for="Input.StopId" type="hidden" />
+            <input asp-for="ReturnCriteria.Search" type="hidden" />
+            <input asp-for="ReturnCriteria.DateFrom" type="hidden" />
+            <input asp-for="ReturnCriteria.DateTo" type="hidden" />
+            <input asp-for="ReturnCriteria.TruckId" type="hidden" />
+            <input asp-for="ReturnCriteria.StopReasonId" type="hidden" />
+            <input asp-for="ReturnCriteria.State" type="hidden" />
+            <input asp-for="ReturnCriteria.ValidationStatus" type="hidden" />
+            <input asp-for="ReturnCriteria.TripId" type="hidden" />
+            <input asp-for="ReturnCriteria.Page" type="hidden" />
+            <input asp-for="ReturnCriteria.PageSize" type="hidden" />
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.EndTime" class="form-label">
+                        Date et heure de fin <span class="trip-required" aria-hidden="true">*</span>
+                    </label>
+                    <input asp-for="Input.EndTime"
+                           asp-format="{0:yyyy-MM-ddTHH:mm}"
+                           type="datetime-local"
+                           class="form-control"
+                           min="@Model.Stop.StartTime.ToString("yyyy-MM-ddTHH:mm", CultureInfo.InvariantCulture)"
+                           required />
+                    <span asp-validation-for="Input.EndTime" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-success">Clôturer et transmettre</button>
+                <a asp-controller="Stops"
+                   asp-action="Details"
+                   asp-all-route-data="@Model.DetailsRouteValues"
+                   class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="~/Views/Stops/_StopFormScripts.cshtml" />
+}

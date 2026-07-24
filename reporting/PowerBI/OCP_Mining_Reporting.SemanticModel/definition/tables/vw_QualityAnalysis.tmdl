@@ -1,0 +1,290 @@
+table vw_QualityAnalysis
+	lineageTag: bbad3141-96f3-4417-a47c-e96e549c7ff5
+
+	column QualityResultID
+		dataType: int64
+		formatString: 0
+		lineageTag: 37adaee1-cb0e-465c-a23d-89b634b9d820
+		summarizeBy: count
+		sourceColumn: QualityResultID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TripID
+		dataType: int64
+		formatString: 0
+		lineageTag: c56016cb-1823-430f-b7a0-7cff18396aac
+		summarizeBy: count
+		sourceColumn: TripID
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointID
+		dataType: int64
+		formatString: 0
+		lineageTag: 4bd21e01-f986-4f14-a087-17b40b647aaf
+		summarizeBy: count
+		sourceColumn: LoadingPointID
+
+		annotation SummarizationSetBy = Automatic
+
+	column AnalysisDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 9734fcd8-569d-4d98-927b-a1a4fd0eaa65
+		summarizeBy: none
+		sourceColumn: AnalysisDate
+
+		variation Variation
+			isDefault
+			relationship: 29047bc0-ccbd-42d6-baa8-7b8d9f25072b
+			defaultHierarchy: LocalDateTable_b016c94b-735b-44b2-bb2a-312c325fc668.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+	column QualityDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 3258238f-8441-44aa-a7a2-658ea5222b9a
+		summarizeBy: none
+		sourceColumn: QualityDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column QualityUnit
+		dataType: string
+		lineageTag: a68321d1-75a3-456e-92d2-04b5b9d8a3ef
+		summarizeBy: none
+		sourceColumn: QualityUnit
+
+		annotation SummarizationSetBy = Automatic
+
+	column P2O5Percent
+		dataType: double
+		lineageTag: 43b4551c-8f87-4dc5-af69-3fd3a44baaa4
+		summarizeBy: sum
+		sourceColumn: P2O5Percent
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TargetValue
+		dataType: double
+		lineageTag: a2c82db5-dcd7-4354-afde-a4a65bd77305
+		summarizeBy: sum
+		sourceColumn: TargetValue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column QualityStatus
+		dataType: string
+		lineageTag: b80e3361-4f94-4271-8338-860111c92418
+		summarizeBy: none
+		sourceColumn: QualityStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	column HasLinkedTrip
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 16479066-e29c-4451-8d21-51e7b98c1305
+		summarizeBy: none
+		sourceColumn: HasLinkedTrip
+
+		annotation SummarizationSetBy = Automatic
+
+	column TripDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ff304d24-55be-4ab1-b02a-5cf3f1264ea6
+		summarizeBy: none
+		sourceColumn: TripDate
+
+		variation Variation
+			isDefault
+			relationship: 79f07494-f7cd-4ad8-83d5-2871425cab9c
+			defaultHierarchy: LocalDateTable_2a047d47-ad63-4189-a890-406b970a22dc.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column TripStatus
+		dataType: string
+		lineageTag: fa30c326-fda0-438b-890c-2d1f92f9e118
+		summarizeBy: none
+		sourceColumn: TripStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckID
+		dataType: int64
+		formatString: 0
+		lineageTag: b451117c-0e4e-4b4a-ab9b-575684d9e2ac
+		summarizeBy: count
+		sourceColumn: TruckID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckCode
+		dataType: string
+		lineageTag: 24b49477-b4ad-43c6-a9d0-70f09efcb212
+		summarizeBy: none
+		sourceColumn: TruckCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column DriverID
+		dataType: int64
+		formatString: 0
+		lineageTag: 55c9a577-bcb6-49da-8d2d-22fa53d07c1b
+		summarizeBy: count
+		sourceColumn: DriverID
+
+		annotation SummarizationSetBy = Automatic
+
+	column DriverCode
+		dataType: string
+		lineageTag: c3e4151e-6af1-478d-816e-4b93b9888f2c
+		summarizeBy: none
+		sourceColumn: DriverCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column DriverFullName
+		dataType: string
+		lineageTag: c3bddc97-473a-4f4e-b920-52040a36e2b9
+		summarizeBy: none
+		sourceColumn: DriverFullName
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftID
+		dataType: int64
+		formatString: 0
+		lineageTag: dab2c655-0149-46d9-a0f3-5806d70f827d
+		summarizeBy: count
+		sourceColumn: ShiftID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftCode
+		dataType: string
+		lineageTag: 89539ceb-b909-4259-80b6-a6b35efd179c
+		summarizeBy: none
+		sourceColumn: ShiftCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftName
+		dataType: string
+		lineageTag: 17386e2b-e2f6-49fa-b6a5-ccedcefe726e
+		summarizeBy: none
+		sourceColumn: ShiftName
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointCode
+		dataType: string
+		lineageTag: 1f3abdfb-072b-4a94-a152-e7a9aa71884b
+		summarizeBy: none
+		sourceColumn: LoadingPointCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointName
+		dataType: string
+		lineageTag: 231f92ff-42d5-49e4-88f5-a8124d4c3ce6
+		summarizeBy: none
+		sourceColumn: LoadingPointName
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationID
+		dataType: int64
+		formatString: 0
+		lineageTag: d5c260b7-0aa2-496b-a92e-8b623b58364d
+		summarizeBy: count
+		sourceColumn: DestinationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationCode
+		dataType: string
+		lineageTag: d8ac547f-28f4-4561-b829-f1b4078a1e03
+		summarizeBy: none
+		sourceColumn: DestinationCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationName
+		dataType: string
+		lineageTag: 6ee75f98-8391-4261-ac52-bfd966ccb579
+		summarizeBy: none
+		sourceColumn: DestinationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsP2O5Measurement
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 9d1f35a4-4c8f-43bc-9868-74a6ecc92d7f
+		summarizeBy: none
+		sourceColumn: IsP2O5Measurement
+
+		annotation SummarizationSetBy = Automatic
+
+	column HasValidP2O5
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6b10e2fb-1e6e-4f9a-90d8-165d90edacb7
+		summarizeBy: none
+		sourceColumn: HasValidP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+	column LatestResultForTrip
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6c680403-22aa-4c41-aa53-876463b8a79e
+		summarizeBy: none
+		sourceColumn: LatestResultForTrip
+
+		annotation SummarizationSetBy = Automatic
+
+	column AnalysisSequenceForTrip
+		dataType: int64
+		formatString: 0
+		lineageTag: 61b86017-171c-40c9-8c61-9be316f43918
+		summarizeBy: sum
+		sourceColumn: AnalysisSequenceForTrip
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResultCountForTrip
+		dataType: int64
+		formatString: 0
+		lineageTag: ae4dac0c-239d-40b3-94cd-838ad403051c
+		summarizeBy: sum
+		sourceColumn: ResultCountForTrip
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_QualityAnalysis = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("localhost", "OCP_Mining_Prototype"),
+				    dbo_vw_QualityAnalysis = Source{[Schema="dbo",Item="vw_QualityAnalysis"]}[Data]
+				in
+				    dbo_vw_QualityAnalysis
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

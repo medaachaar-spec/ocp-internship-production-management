@@ -1,0 +1,75 @@
+@model OcpProduction.Web.ViewModels.HomeDashboardViewModel
+@{
+    ViewData["Title"] = "Accueil";
+    var role = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Utilisateur";
+}
+<div class="page-header d-flex justify-content-between align-items-start">
+    <div>
+        <h1>Tableau de bord</h1>
+        <p class="text-muted">Bienvenue @User.Identity?.Name - rôle : @role</p>
+    </div>
+    <span class="badge text-bg-success">Sprint 0</span>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-label">Application</div>
+            <div class="metric-value">Opérationnelle</div>
+            <div class="metric-help">MVC, cookie et rôles chargés</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-label">Base SQL Server</div>
+            <div class="metric-value">Connectée</div>
+            <div class="metric-help">Connexion opérationnelle à OCP_Mining_Prototype</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-label">Prochaine livraison</div>
+            <div class="metric-value">Voyages</div>
+            <div class="metric-help">Liste, filtres et détail</div>
+        </div>
+    </div>
+</div>
+
+@if (Model.PendingValidationCount is { } pendingValidationCount &&
+     Model.PendingStopValidationCount is { } pendingStopValidationCount)
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">Centre de validation</h2>
+            <div class="row g-3">
+                <div class="col-md-6 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <p class="text-muted mb-0">
+                        <strong>@pendingValidationCount</strong>
+                        @(pendingValidationCount == 1 ? "voyage attend" : "voyages attendent") la validation.
+                    </p>
+                    <a asp-controller="Validation" asp-action="Index" class="btn btn-outline-primary btn-sm">Voyages à valider</a>
+                </div>
+                <div class="col-md-6 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <p class="text-muted mb-0">
+                        <strong>@pendingStopValidationCount</strong>
+                        @(pendingStopValidationCount == 1 ? "arrêt attend" : "arrêts attendent") la validation.
+                    </p>
+                    <a asp-controller="StopValidation" asp-action="Index" class="btn btn-outline-primary btn-sm">Arrêts à valider</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h2 class="h5">État du Sprint 0</h2>
+        <ul class="mb-0">
+            <li>Authentification par cookie configurée.</li>
+            <li>Cinq rôles et six politiques d’autorisation configurés.</li>
+            <li>Menu dynamique adapté au rôle connecté.</li>
+            <li>Connexion SQL Server opérationnelle.</li>
+            <li>Scaffolding Database-First terminé : 9 tables et 12 vues intégrées.</li>
+        </ul>
+    </div>
+</div>

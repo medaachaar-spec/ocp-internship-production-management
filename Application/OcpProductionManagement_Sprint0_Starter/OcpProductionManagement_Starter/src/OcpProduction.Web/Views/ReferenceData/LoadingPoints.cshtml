@@ -1,0 +1,11 @@
+@model OcpProduction.Web.ViewModels.ReferenceData.LoadingPointListViewModel
+
+@{ ViewData["Title"] = "Points de chargement"; }
+<partial name="_ReferenceMessages" />
+<div class="d-flex justify-content-between align-items-start gap-3 mb-4"><div><h1 class="h3">Points de chargement</h1><p class="text-muted mb-0">Modification limitée aux lignes non utilisées.</p></div><a class="btn btn-primary" asp-action="CreateLoadingPoint">Nouveau point</a></div>
+<div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Code</th><th>Nom</th><th>Zone</th><th>Usage</th><th>État</th><th class="text-end">Actions</th></tr></thead><tbody>
+@foreach (var item in Model.Items)
+{
+    <tr><td>@item.Code</td><td>@item.Name</td><td>@(item.ZoneName ?? "—")</td><td>@(item.TripUsageCount + item.QualityUsageCount)</td><td><span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">@(item.IsActive ? "Actif" : "Inactif")</span></td><td class="text-end">@if (item.CanEdit) { <a class="btn btn-sm btn-outline-secondary" asp-action="EditLoadingPoint" asp-route-id="@item.Id">Modifier</a> } <form method="post" class="d-inline" asp-action="SetLoadingPointActive" asp-route-id="@item.Id">@Html.AntiForgeryToken()<input type="hidden" name="isActive" value="@(!item.IsActive)" /><button class="btn btn-sm btn-outline-primary" type="submit">@(item.IsActive ? "Désactiver" : "Activer")</button></form></td></tr>
+}
+</tbody></table></div>

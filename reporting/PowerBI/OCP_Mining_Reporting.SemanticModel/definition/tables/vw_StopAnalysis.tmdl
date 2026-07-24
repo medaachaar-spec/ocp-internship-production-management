@@ -1,0 +1,326 @@
+table vw_StopAnalysis
+	lineageTag: 75bead44-2617-45b9-aeaf-98385e0e393f
+
+	column TruckStopID
+		dataType: int64
+		formatString: 0
+		lineageTag: 482650d1-5d69-4406-9869-029c52620662
+		summarizeBy: count
+		sourceColumn: TruckStopID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckID
+		dataType: int64
+		formatString: 0
+		lineageTag: ecad1323-fd12-4921-a9e2-3f861cb9d340
+		summarizeBy: count
+		sourceColumn: TruckID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckCode
+		dataType: string
+		lineageTag: 74bdca78-c0cc-4f6c-9926-26910ce6eeca
+		summarizeBy: none
+		sourceColumn: TruckCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column TripID
+		dataType: int64
+		formatString: 0
+		lineageTag: b5d42e19-fc39-461e-b647-3626a57dc822
+		summarizeBy: count
+		sourceColumn: TripID
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopReasonID
+		dataType: int64
+		formatString: 0
+		lineageTag: 7468d044-71e8-4c23-9289-81e87684562f
+		summarizeBy: count
+		sourceColumn: StopReasonID
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopReasonCode
+		dataType: string
+		lineageTag: f9f8ce09-d932-4c12-bb8c-ebc15c542710
+		summarizeBy: none
+		sourceColumn: StopReasonCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopReasonName
+		dataType: string
+		lineageTag: 9df4af26-4a78-4e0b-9e6b-9bee76bb5571
+		summarizeBy: none
+		sourceColumn: StopReasonName
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopCategory
+		dataType: string
+		lineageTag: 6793b05f-3dc9-40f7-acfd-16aa283f98b0
+		summarizeBy: none
+		sourceColumn: StopCategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsPlanned
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 1baf8486-007c-4b41-9c09-2e59987fd156
+		summarizeBy: none
+		sourceColumn: IsPlanned
+
+		annotation SummarizationSetBy = Automatic
+
+	column PlannedUnplannedLabel
+		dataType: string
+		lineageTag: 778ac7a9-81b6-451d-a44c-6feaf1b9e37f
+		summarizeBy: none
+		sourceColumn: PlannedUnplannedLabel
+
+		annotation SummarizationSetBy = Automatic
+
+	column HasLinkedTrip
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 624df8d0-bae6-46a1-8322-0fcb5c1f0044
+		summarizeBy: none
+		sourceColumn: HasLinkedTrip
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopStatus
+		dataType: string
+		lineageTag: c1e64d7e-a33b-4804-952e-a21e72e17c6d
+		summarizeBy: none
+		sourceColumn: StopStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopStartTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: f9ee70a8-6bb0-4fb8-ba25-256c3409f01c
+		summarizeBy: none
+		sourceColumn: StopStartTime
+
+		variation Variation
+			isDefault
+			relationship: b2d48637-bdd9-4ca0-9493-1d77376e0bc1
+			defaultHierarchy: LocalDateTable_4f2fa569-92f8-43ad-a456-e98ee92c62fc.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopEndTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 560eb732-2bea-4324-8876-e2a398f1e009
+		summarizeBy: none
+		sourceColumn: StopEndTime
+
+		variation Variation
+			isDefault
+			relationship: 1c37274b-75f3-419f-bedb-0b55adb39d53
+			defaultHierarchy: LocalDateTable_f6445c55-709f-4cc2-b92a-1e1605204919.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 266ca7c7-63c5-4f42-bd4e-1a78e11e0ae7
+		summarizeBy: none
+		sourceColumn: StopDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column StopYear
+		dataType: int64
+		formatString: 0
+		lineageTag: 456ef9b9-4c46-428c-9337-5ecd20e4d81a
+		summarizeBy: sum
+		sourceColumn: StopYear
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopMonthNumber
+		dataType: int64
+		formatString: 0
+		lineageTag: 4c5e1192-c440-4e68-8eb7-27d4f9a49f45
+		summarizeBy: sum
+		sourceColumn: StopMonthNumber
+
+		annotation SummarizationSetBy = Automatic
+
+	column StopDurationMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: e887a101-f359-444d-a922-a7e48a7d996d
+		summarizeBy: sum
+		sourceColumn: StopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsCompletedStop
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 9f4452f9-69c2-456e-9cca-588a961382ea
+		summarizeBy: none
+		sourceColumn: IsCompletedStop
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsOpenStop
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6f6e9143-93d9-4422-bfb1-b26845570aa3
+		summarizeBy: none
+		sourceColumn: IsOpenStop
+
+		annotation SummarizationSetBy = Automatic
+
+	column TripDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 6d1ff750-2ace-4578-8638-1e9cb2654618
+		summarizeBy: none
+		sourceColumn: TripDate
+
+		variation Variation
+			isDefault
+			relationship: 1a60d6e9-d8ae-4c74-8581-79f41d1ae2e1
+			defaultHierarchy: LocalDateTable_5b84dfad-2cc0-4700-9789-b7dd9c2e1750.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column DriverID
+		dataType: int64
+		formatString: 0
+		lineageTag: db0a2869-4d61-4e26-8b85-aa952d39e9f6
+		summarizeBy: count
+		sourceColumn: DriverID
+
+		annotation SummarizationSetBy = Automatic
+
+	column DriverCode
+		dataType: string
+		lineageTag: 965057b0-b07f-48bc-83ef-805435672b5b
+		summarizeBy: none
+		sourceColumn: DriverCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column DriverFullName
+		dataType: string
+		lineageTag: 622cfba1-5d81-44ab-9c91-1e6fcdc4ec55
+		summarizeBy: none
+		sourceColumn: DriverFullName
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftID
+		dataType: int64
+		formatString: 0
+		lineageTag: 4bb52094-b638-4468-b3fb-e3ee708a30d7
+		summarizeBy: count
+		sourceColumn: ShiftID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftCode
+		dataType: string
+		lineageTag: d3a1714f-8e47-4075-ad91-acfa11c56520
+		summarizeBy: none
+		sourceColumn: ShiftCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftName
+		dataType: string
+		lineageTag: 0a5ba628-6467-4c7b-aee5-b534dc8dcd9e
+		summarizeBy: none
+		sourceColumn: ShiftName
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointID
+		dataType: int64
+		formatString: 0
+		lineageTag: 0401b217-968b-432d-a9e8-0df8e8e72354
+		summarizeBy: count
+		sourceColumn: LoadingPointID
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointCode
+		dataType: string
+		lineageTag: f9a25105-2e17-46d2-958b-f46e3306fab5
+		summarizeBy: none
+		sourceColumn: LoadingPointCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointName
+		dataType: string
+		lineageTag: 8fa04921-7287-45e0-9c13-1ee65366a723
+		summarizeBy: none
+		sourceColumn: LoadingPointName
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationID
+		dataType: int64
+		formatString: 0
+		lineageTag: abe17198-20be-4e46-b485-b2773040117d
+		summarizeBy: count
+		sourceColumn: DestinationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationCode
+		dataType: string
+		lineageTag: c4934ec8-558c-4a5d-831f-e28d5e89f569
+		summarizeBy: none
+		sourceColumn: DestinationCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationName
+		dataType: string
+		lineageTag: 42c46635-877d-4a7c-b346-476811cdfdff
+		summarizeBy: none
+		sourceColumn: DestinationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column TripStatus
+		dataType: string
+		lineageTag: bb08f7e1-2ce8-43c8-90eb-f848d2d52f96
+		summarizeBy: none
+		sourceColumn: TripStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_StopAnalysis = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("localhost", "OCP_Mining_Prototype"),
+				    dbo_vw_StopAnalysis = Source{[Schema="dbo",Item="vw_StopAnalysis"]}[Data]
+				in
+				    dbo_vw_StopAnalysis
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

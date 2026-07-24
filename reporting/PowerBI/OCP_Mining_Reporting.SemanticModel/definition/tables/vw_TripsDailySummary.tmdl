@@ -1,0 +1,93 @@
+table vw_TripsDailySummary
+	lineageTag: a6b80136-1058-4600-a59c-1f36972426b5
+
+	column TripDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 2453b01a-4299-4e1a-a816-ca3f24962c18
+		summarizeBy: none
+		sourceColumn: TripDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column TotalTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: 94c91ebe-23e3-43d6-8403-bb5583cda995
+		summarizeBy: sum
+		sourceColumn: TotalTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompletedTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: 0abc3e81-06fd-41a8-86ae-20e1e0ac5083
+		summarizeBy: sum
+		sourceColumn: CompletedTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column IncompleteTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: d4fb4b0c-d579-4efc-97af-f2592879567a
+		summarizeBy: sum
+		sourceColumn: IncompleteTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalTonnage
+		dataType: double
+		lineageTag: daa87458-4ea2-48de-907f-00185b6a96b5
+		summarizeBy: sum
+		sourceColumn: TotalTonnage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AverageTripDurationMinutes
+		dataType: double
+		lineageTag: fa119fdb-2d18-43cc-a174-d5aa98724608
+		summarizeBy: sum
+		sourceColumn: AverageTripDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LongTripCount
+		dataType: int64
+		formatString: 0
+		lineageTag: b3fb0f41-6567-48e5-810b-7275830bad3c
+		summarizeBy: sum
+		sourceColumn: LongTripCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column LongTripRate
+		dataType: double
+		lineageTag: 5cefb932-1531-4ee0-a76a-aaefd3a57272
+		summarizeBy: sum
+		sourceColumn: LongTripRate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_TripsDailySummary = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("localhost", "OCP_Mining_Prototype"),
+				    dbo_vw_TripsDailySummary = Source{[Schema="dbo",Item="vw_TripsDailySummary"]}[Data]
+				in
+				    dbo_vw_TripsDailySummary
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

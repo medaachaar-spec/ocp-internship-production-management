@@ -1,0 +1,62 @@
+@model OcpProduction.Web.ViewModels.Performance.TruckPerformanceDetailsViewModel
+@using OcpProduction.Web.ViewModels.Performance
+
+@{
+    ViewData["Title"] = "Détail performance camion";
+    var performance = Model.Performance;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">@performance.TruckCode</h1>
+        <p class="text-muted mb-0">@PerformancePresentation.OrDash(performance.TruckModel) · @PerformancePresentation.GetTruckStatusLabel(performance.TruckStatus)</p>
+    </div>
+    <a class="btn btn-outline-secondary"
+       asp-controller="Performance"
+       asp-action="Trucks"
+       asp-route-Search="@Model.ReturnCriteria.Search"
+       asp-route-Status="@Model.ReturnCriteria.Status"
+       asp-route-Sort="@Model.ReturnCriteria.Sort"
+       asp-route-Page="@Model.ReturnCriteria.Page"
+       asp-route-PageSize="@Model.ReturnCriteria.PageSize">Retour</a>
+</div>
+
+<div class="alert alert-info" role="note">
+    Ces indicateurs proviennent de <code>vw_TruckPerformance</code> et couvrent tout l'historique disponible.
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="metric-card"><span>Voyages</span><strong>@PerformancePresentation.FormatNumber(performance.TotalTrips)</strong></div></div>
+    <div class="col-md-3"><div class="metric-card"><span>Tonnage</span><strong>@PerformancePresentation.FormatDecimal(performance.TotalTonnage, " t")</strong></div></div>
+    <div class="col-md-3"><div class="metric-card"><span>Taux complété</span><strong>@PerformancePresentation.FormatPercent(performance.CompletionRatePercent)</strong></div></div>
+    <div class="col-md-3"><div class="metric-card"><span>Arrêts</span><strong>@PerformancePresentation.FormatNumber(performance.TotalStopCount)</strong></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <section class="content-panel">
+            <h2 class="h5">Production</h2>
+            <dl class="row mb-0">
+                <dt class="col-sm-6">Voyages complétés</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.CompletedTrips)</dd>
+                <dt class="col-sm-6">Voyages non complétés</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.IncompleteTrips)</dd>
+                <dt class="col-sm-6">Charge utile nominale</dt><dd class="col-sm-6">@PerformancePresentation.FormatDecimal(performance.RatedPayloadTonnes, " t")</dd>
+                <dt class="col-sm-6">Charge moyenne</dt><dd class="col-sm-6">@PerformancePresentation.FormatDecimal(performance.AveragePayloadTonnes, " t")</dd>
+                <dt class="col-sm-6">Utilisation moyenne</dt><dd class="col-sm-6">@PerformancePresentation.FormatPercent(performance.AveragePayloadUtilizationPercent)</dd>
+                <dt class="col-sm-6">Durée moyenne voyage</dt><dd class="col-sm-6">@PerformancePresentation.FormatMinutes(performance.AverageTripDurationMinutes)</dd>
+            </dl>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="content-panel">
+            <h2 class="h5">Arrêts et qualité</h2>
+            <dl class="row mb-0">
+                <dt class="col-sm-6">Arrêts clôturés</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.CompletedStopCount)</dd>
+                <dt class="col-sm-6">Durée totale arrêts</dt><dd class="col-sm-6">@PerformancePresentation.FormatMinutes(performance.TotalDowntimeMinutes)</dd>
+                <dt class="col-sm-6">Durée moyenne arrêt</dt><dd class="col-sm-6">@PerformancePresentation.FormatMinutes(performance.AverageStopDurationMinutes)</dd>
+                <dt class="col-sm-6">Résultats qualité</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.QualityResultCount)</dd>
+                <dt class="col-sm-6">P2O5 moyen</dt><dd class="col-sm-6">@PerformancePresentation.FormatDecimal(performance.AverageP2O5, " %")</dd>
+                <dt class="col-sm-6">Période voyages</dt><dd class="col-sm-6">@PerformancePresentation.FormatDate(performance.FirstTripDate) - @PerformancePresentation.FormatDate(performance.LastTripDate)</dd>
+            </dl>
+        </section>
+    </div>
+</div>

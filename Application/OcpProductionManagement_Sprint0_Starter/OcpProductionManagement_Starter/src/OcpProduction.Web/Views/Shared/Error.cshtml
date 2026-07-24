@@ -1,0 +1,12 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Erreur";
+}
+<div class="page-header">
+    <h1>Une erreur est survenue</h1>
+    <p class="text-muted">L'opération n'a pas pu être terminée.</p>
+</div>
+@if (Model.ShowRequestId)
+{
+    <div class="alert alert-secondary">Identifiant de diagnostic : <code>@Model.RequestId</code></div>
+}

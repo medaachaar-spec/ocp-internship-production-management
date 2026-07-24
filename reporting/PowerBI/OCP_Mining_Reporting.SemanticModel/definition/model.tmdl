@@ -1,0 +1,43 @@
+model Model
+	culture: fr-FR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: fr-FR
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["vw_ExecutiveDashboard","vw_GlobalProductionSummary","vw_TripsDailySummary","vw_StopAnalysis","vw_StopsByReason","vw_DriverPerformance","vw_TruckPerformance","vw_QualityAnalysis","vw_TripSummary"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table vw_ExecutiveDashboard
+ref table DateTableTemplate_11e2db64-03a0-495c-96fd-dc3c395badb2
+ref table LocalDateTable_7600e596-2b10-44c3-aa44-2838c8e037ee
+ref table LocalDateTable_be0dcf8a-106e-41b8-be3c-5a06e5663c21
+ref table vw_GlobalProductionSummary
+ref table vw_TripsDailySummary
+ref table vw_StopAnalysis
+ref table LocalDateTable_4f2fa569-92f8-43ad-a456-e98ee92c62fc
+ref table LocalDateTable_f6445c55-709f-4cc2-b92a-1e1605204919
+ref table LocalDateTable_5b84dfad-2cc0-4700-9789-b7dd9c2e1750
+ref table vw_StopsByReason
+ref table vw_DriverPerformance
+ref table LocalDateTable_32b38f51-0cc8-4add-bd0a-3aa8ff859937
+ref table LocalDateTable_5fca48ed-36f5-4081-aed8-fb08388c18ba
+ref table vw_TruckPerformance
+ref table LocalDateTable_8b32b9ac-18e6-41da-a930-ee0cc0f51ad2
+ref table LocalDateTable_d81549f5-2c7a-4757-b0dd-02208bf15730
+ref table vw_QualityAnalysis
+ref table LocalDateTable_b016c94b-735b-44b2-bb2a-312c325fc668
+ref table LocalDateTable_2a047d47-ad63-4189-a890-406b970a22dc
+ref table vw_TripSummary
+ref table LocalDateTable_6c0b4708-51d3-4d5e-9804-104759c48e90
+ref table LocalDateTable_bcc59c89-0b29-47e1-89f6-d9d3e5ea4a43
+ref table Calendrier
+ref table Mesures
+
+ref cultureInfo fr-FR
+

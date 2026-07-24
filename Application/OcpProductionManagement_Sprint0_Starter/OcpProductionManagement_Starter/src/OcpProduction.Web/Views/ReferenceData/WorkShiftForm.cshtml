@@ -1,0 +1,14 @@
+@model OcpProduction.Web.ViewModels.ReferenceData.WorkShiftFormViewModel
+
+@{ ViewData["Title"] = Model.IsEdit ? "Modifier un poste" : "Créer un poste"; }
+
+<h1 class="h3 mb-4">@ViewData["Title"]</h1>
+<form method="post" class="card border-0 shadow-sm"><div class="card-body row g-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="col-md-4"><label asp-for="Input.Code" class="form-label">Code</label><input asp-for="Input.Code" class="form-control" readonly="@Model.IsEdit" /><span asp-validation-for="Input.Code" class="text-danger"></span></div>
+    <div class="col-md-4"><label asp-for="Input.Name" class="form-label">Nom</label><input asp-for="Input.Name" class="form-control" /><span asp-validation-for="Input.Name" class="text-danger"></span></div>
+    <div class="col-md-2"><label asp-for="Input.StartTime" class="form-label">Début</label><input asp-for="Input.StartTime" type="time" class="form-control" /><span asp-validation-for="Input.StartTime" class="text-danger"></span></div>
+    <div class="col-md-2"><label asp-for="Input.EndTime" class="form-label">Fin</label><input asp-for="Input.EndTime" type="time" class="form-control" /><span asp-validation-for="Input.EndTime" class="text-danger"></span></div>
+    <div class="col-12 form-check ms-2"><input asp-for="Input.IsActive" class="form-check-input" /><label asp-for="Input.IsActive" class="form-check-label">Actif</label></div>
+</div><div class="card-footer bg-white d-flex gap-2"><button class="btn btn-primary" type="submit">Enregistrer</button><a class="btn btn-outline-secondary" asp-action="WorkShifts">Annuler</a></div></form>

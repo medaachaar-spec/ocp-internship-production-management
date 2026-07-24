@@ -1,0 +1,166 @@
+@model OcpProduction.Web.ViewModels.Trips.PendingValidationIndexViewModel
+@using System.Globalization
+@using OcpProduction.Application.Trips.Models
+@{
+    ViewData["Title"] = "Centre de validation";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<div class="page-header">
+    <h1>Centre de validation</h1>
+    <p class="text-muted mb-0">Examinez les voyages clôturés en attente de validation.</p>
+</div>
+
+<nav class="nav nav-pills gap-2 mb-4" aria-label="Files du centre de validation">
+    <a class="nav-link active" aria-current="page" asp-action="Index">Voyages à valider</a>
+    <a class="nav-link" asp-controller="StopValidation" asp-action="Index">Arrêts à valider</a>
+</nav>
+
+<section class="card border-0 shadow-sm mb-4" aria-labelledby="validation-filter-title">
+    <div class="card-body">
+        <h2 id="validation-filter-title" class="h5 mb-3">Filtres</h2>
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-lg-5 col-md-6">
+                <label for="validation-search" class="form-label">Recherche</label>
+                <input id="validation-search"
+                       name="Search"
+                       value="@Model.Criteria.Search"
+                       class="form-control"
+                       placeholder="Voyage, camion, conducteur ou trajet" />
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label for="validation-date-from" class="form-label">Date de début</label>
+                <input id="validation-date-from"
+                       name="DateFrom"
+                       type="date"
+                       value="@(Model.Criteria.DateFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label for="validation-date-to" class="form-label">Date de fin</label>
+                <input id="validation-date-to"
+                       name="DateTo"
+                       type="date"
+                       value="@(Model.Criteria.DateTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-3 col-md-4">
+                <label for="validation-page-size" class="form-label">Résultats par page</label>
+                <select id="validation-page-size" name="PageSize" class="form-select">
+                    @foreach (var pageSize in TripSearchCriteria.AllowedPageSizes)
+                    {
+                        <option value="@pageSize" selected="@(Model.Criteria.PageSize == pageSize ? "selected" : null)">@pageSize</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section aria-labelledby="pending-validation-title">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 id="pending-validation-title" class="h5 mb-0">Voyages à valider</h2>
+        <span class="text-muted">@Model.Results.TotalItems.ToString("N0", frenchCulture) en attente</span>
+    </div>
+
+    @if (Model.Results.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body trip-empty-state text-center">
+                <h3 class="h5">Aucun voyage en attente</h3>
+                <p class="text-muted mb-0">Aucun voyage n’est actuellement en attente de validation.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm trip-results-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 trip-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Voyage</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Camion</th>
+                            <th scope="col">Conducteur</th>
+                            <th scope="col">Poste</th>
+                            <th scope="col">Chargement</th>
+                            <th scope="col">Destination</th>
+                            <th scope="col">Début</th>
+                            <th scope="col">Fin</th>
+                            <th scope="col" class="text-end">Tonnage</th>
+                            <th scope="col"><span class="visually-hidden">Action</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trip in Model.Results.Items)
+                        {
+                            <tr>
+                                <th scope="row">#@trip.TripId</th>
+                                <td>@trip.TripDate.ToString("dd/MM/yyyy", frenchCulture)</td>
+                                <td>@trip.TruckCode</td>
+                                <td>@trip.DriverCode - @trip.DriverDisplayName</td>
+                                <td>@trip.WorkShiftName</td>
+                                <td>@trip.LoadingPointName</td>
+                                <td>@trip.DestinationName</td>
+                                <td>@trip.StartTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</td>
+                                <td>@(trip.EndTime?.ToString("dd/MM/yyyy HH:mm", frenchCulture) ?? "—")</td>
+                                <td class="text-end">@(trip.Tonnage?.ToString("N2", frenchCulture) ?? "—")</td>
+                                <td class="text-end">
+                                    <a asp-controller="Trips"
+                                       asp-action="Details"
+                                       asp-all-route-data="@Model.ReviewRouteValues(trip.TripId)"
+                                       class="btn btn-outline-primary btn-sm">Examiner</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+                <nav aria-label="Pagination des voyages à valider">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
+                            @if (Model.Results.HasPreviousPage)
+                            {
+                                <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Précédent</span>
+                            }
+                        </li>
+                        @foreach (var page in Model.VisiblePages)
+                        {
+                            <li class="page-item @(page == Model.Results.Page ? "active" : null)">
+                                @if (page == Model.Results.Page)
+                                {
+                                    <span class="page-link" aria-current="page">@(page)</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(page)">@(page)</a>
+                                }
+                            </li>
+                        }
+                        <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
+                            @if (Model.Results.HasNextPage)
+                            {
+                                <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Suivant</span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    }
+</section>

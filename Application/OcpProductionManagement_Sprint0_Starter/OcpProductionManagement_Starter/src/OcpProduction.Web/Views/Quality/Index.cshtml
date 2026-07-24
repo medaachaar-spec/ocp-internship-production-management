@@ -1,0 +1,244 @@
+@model OcpProduction.Web.ViewModels.Quality.QualityIndexViewModel
+@using System.Globalization
+@using OcpProduction.Application.Quality.Models
+@using OcpProduction.Web.ViewModels.Quality
+@{
+    ViewData["Title"] = "Résultats qualité";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+    var resultLabel = Model.Results.TotalItems == 1 ? "analyse trouvée" : "analyses trouvées";
+}
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Résultats qualité</h1>
+        <p class="text-muted mb-0">Consultez les analyses qualité enregistrées pour les opérations de production.</p>
+    </div>
+    <a asp-action="Create" asp-all-route-data="@Model.CreateRouteValues" class="btn btn-primary">Nouvelle analyse</a>
+</div>
+
+<section class="card border-0 shadow-sm mb-4" aria-labelledby="quality-filter-title">
+    <div class="card-body">
+        <h2 id="quality-filter-title" class="h5 mb-3">Filtres</h2>
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <label for="quality-search" class="form-label">Recherche</label>
+                <input id="quality-search"
+                       name="Search"
+                       value="@Model.Criteria.Search"
+                       class="form-control"
+                       placeholder="Analyse, camion, conducteur ou trajet" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="quality-date-from" class="form-label">Date de début</label>
+                <input id="quality-date-from"
+                       name="DateFrom"
+                       type="date"
+                       value="@(Model.Criteria.DateFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="quality-date-to" class="form-label">Date de fin</label>
+                <input id="quality-date-to"
+                       name="DateTo"
+                       type="date"
+                       value="@(Model.Criteria.DateTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="quality-trip" class="form-label">Voyage</label>
+                <input id="quality-trip"
+                       name="TripId"
+                       type="number"
+                       min="0"
+                       value="@Model.Criteria.TripId"
+                       class="form-control"
+                       placeholder="Identifiant" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="quality-truck" class="form-label">Camion</label>
+                <select id="quality-truck" name="TruckId" class="form-select">
+                    <option value="">Tous les camions</option>
+                    @foreach (var option in Model.FilterOptions.Trucks)
+                    {
+                        <option value="@option.Value"
+                                selected="@(Model.Criteria.TruckId == option.Value ? "selected" : null)">@option.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="quality-min" class="form-label">P₂O₅ minimal</label>
+                <input id="quality-min"
+                       name="P2O5Min"
+                       type="number"
+                       min="0"
+                       step="0.001"
+                       value="@(Model.Criteria.P2O5Min?.ToString(CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="quality-max" class="form-label">P₂O₅ maximal</label>
+                <input id="quality-max"
+                       name="P2O5Max"
+                       type="number"
+                       min="0"
+                       step="0.001"
+                       value="@(Model.Criteria.P2O5Max?.ToString(CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <label for="quality-status" class="form-label">Statut enregistré</label>
+                <select id="quality-status" name="Status" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    @foreach (var status in Model.FilterOptions.Statuses)
+                    {
+                        <option value="@status"
+                                selected="@(Model.Criteria.Status == status ? "selected" : null)">@QualityPresentation.GetStatusLabel(status)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="quality-page-size" class="form-label">Résultats par page</label>
+                <select id="quality-page-size" name="PageSize" class="form-select">
+                    @foreach (var pageSize in QualitySearchCriteria.AllowedPageSizes)
+                    {
+                        <option value="@pageSize"
+                                selected="@(Model.Criteria.PageSize == pageSize ? "selected" : null)">@pageSize</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-5 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section aria-labelledby="quality-results-title">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 id="quality-results-title" class="h5 mb-0">Analyses enregistrées</h2>
+        <p id="quality-result-summary" class="text-muted mb-0">
+            <strong>@Model.Results.TotalItems.ToString("N0", frenchCulture)</strong> @resultLabel
+        </p>
+    </div>
+
+    @if (Model.Results.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body trip-empty-state text-center">
+                <h3 class="h5">Aucun résultat</h3>
+                <p class="text-muted">Aucun résultat qualité ne correspond aux critères sélectionnés.</p>
+                <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser les filtres</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm trip-results-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 trip-table" aria-describedby="quality-result-summary">
+                    <thead>
+                        <tr>
+                            <th scope="col">Analyse</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Voyage</th>
+                            <th scope="col">Camion</th>
+                            <th scope="col">Point de chargement</th>
+                            <th scope="col">Destination</th>
+                            <th scope="col" class="text-end">P₂O₅</th>
+                            <th scope="col">Statut enregistré</th>
+                            <th scope="col"><span class="visually-hidden">Action</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var result in Model.Results.Items)
+                        {
+                            <tr>
+                                <th scope="row">#@result.QualityResultId</th>
+                                <td>@QualityPresentation.FormatDate(result.AnalysisDate)</td>
+                                <td>@(result.TripId?.ToString(CultureInfo.InvariantCulture) ?? "—")</td>
+                                <td>@QualityPresentation.OrFallback(result.TruckCode)</td>
+                                <td>
+                                    <span class="d-block">@QualityPresentation.OrFallback(result.LoadingPointName)</span>
+                                    @if (!string.IsNullOrWhiteSpace(result.LoadingPointCode))
+                                    {
+                                        <small class="text-muted">@result.LoadingPointCode</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="d-block">@QualityPresentation.OrFallback(result.DestinationName)</span>
+                                    @if (!string.IsNullOrWhiteSpace(result.DestinationCode))
+                                    {
+                                        <small class="text-muted">@result.DestinationCode</small>
+                                    }
+                                </td>
+                                <td class="text-end">@QualityPresentation.FormatMeasurement(result.P2O5Value, result.QualityUnit)</td>
+                                <td>
+                                    <span class="badge @QualityPresentation.GetStatusBadgeClass(result.Status)">
+                                        @QualityPresentation.GetStatusLabel(result.Status)
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group" aria-label="Actions de l’analyse @result.QualityResultId">
+                                        <a asp-action="Details"
+                                           asp-all-route-data="@Model.DetailsRouteValues(result.QualityResultId)"
+                                           class="btn btn-outline-primary"
+                                           aria-label="Voir l’analyse @result.QualityResultId">Voir</a>
+                                        @if (QualityEditability.IsEditable(result.Status))
+                                        {
+                                            <a asp-action="Edit"
+                                               asp-all-route-data="@Model.EditRouteValues(result.QualityResultId)"
+                                               class="btn btn-outline-secondary"
+                                               aria-label="Modifier l’analyse @result.QualityResultId">Modifier</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+                <nav aria-label="Pagination des analyses qualité">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
+                            @if (Model.Results.HasPreviousPage)
+                            {
+                                <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Précédent</span>
+                            }
+                        </li>
+                        @foreach (var pageNumber in Model.VisiblePages)
+                        {
+                            <li class="page-item @(pageNumber == Model.Results.Page ? "active" : null)">
+                                @if (pageNumber == Model.Results.Page)
+                                {
+                                    <span class="page-link" aria-current="page">@pageNumber</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(pageNumber)">@pageNumber</a>
+                                }
+                            </li>
+                        }
+                        <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
+                            @if (Model.Results.HasNextPage)
+                            {
+                                <a class="page-link" asp-action="Index" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Suivant</span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    }
+</section>

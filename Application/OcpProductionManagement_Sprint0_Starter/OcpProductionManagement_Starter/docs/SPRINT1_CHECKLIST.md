@@ -1,0 +1,88 @@
+# Sprint 1 Part 1 checklist
+
+- [x] Sprint 0 Git baseline is clean and recorded
+- [x] Functional, navigation, UI/UX, technical, and database documentation reviewed
+- [x] Actual generated EF property and DbSet names mapped before implementation
+- [x] `vw_TripSummary` used for the list and filter values
+- [x] `vw_TripDetails`, `vw_TripSummary`, and `Trip` joined read-only for details
+- [x] All Voyages queries use `AsNoTracking`
+- [x] Search and all filters execute server-side
+- [x] Deterministic ordering, `CountAsync`, `Skip`, and `Take` implemented
+- [x] Page sizes limited to 10, 20, and 50
+- [x] Invalid page and page-size values normalized safely
+- [x] Filters and page are preserved through pagination and details navigation
+- [x] French responsive list, explicit empty state, and read-only details page implemented
+- [x] Sidebar Voyages entry is active and role-aware
+- [x] `TripsController` is protected by `CanManageTrips`
+- [x] AgentProduction and Superviseur policy access preserved
+- [x] Anonymous access redirects to login
+- [x] Unauthorized AgentQualite access redirects to Access Denied
+- [x] No POST or write action exists in the Voyages controller or views
+- [x] Focused model, controller, route-state, authorization, and DI tests added
+- [x] Restore and formatting verification pass
+- [x] Debug build passes with 0 warnings and 0 errors
+- [x] Tests pass: 26 passed, 0 failed, 0 skipped
+- [x] NuGet reports no vulnerable direct or transitive packages
+- [x] Runtime acceptance suite passes: 22 checks, 0 failed
+- [x] Desktop, detail, and responsive browser checks pass without console errors
+- [x] Database fingerprint is unchanged after runtime testing
+- [x] No migration, database write, schema change, model regeneration, or secret exposure occurred
+- [x] No task-owned application/browser process or temporary screenshot remains
+- [x] Sprint 1 Part 1 local checkpoint created before write operations started
+
+# Sprint 1 Part 2 checklist
+
+- [x] Clean Part 1 checkpoint `0a6c6c2` confirmed before implementation
+- [x] Generated `Trip` entity, DbContext mapping, foreign keys, defaults, checks, nullability, and existing values inspected
+- [x] Validated functional, navigation, UI/UX, technical, and database documentation reviewed
+- [x] Separate operational `TripDate` retained instead of deriving it from `StartTime`
+- [x] Dedicated Create/Edit input models prevent generated-entity binding and overposting
+- [x] Creation explicitly sets the confirmed initial status `InProgress`
+- [x] Editing preserves `TripID`, `CreatedAt`, and `Status`
+- [x] Active/selectable trucks, drivers, shifts, loading points, and destinations enforced in options and writes
+- [x] French required-field, time-order, tonnage, comments-length, and service validation implemented
+- [x] Browser dot and French comma decimal separators handled safely for tonnage
+- [x] `ITripWriteService` and explicit result model implemented in Application
+- [x] `TripWriteService` uses `AddAsync`, tracked updates, `SaveChangesAsync`, and cancellation tokens
+- [x] GET/POST Create and Edit actions protected by `CanManageTrips`
+- [x] Both POST actions use antiforgery and Edit verifies route ID against input ID
+- [x] Create/Edit forms, success messages, filter-preserving navigation, and duplicate-submit protection implemented
+- [x] No Delete, Close, Submit, Validate, Reject, or Cancel workflow endpoint exists
+- [x] Existing list, filters, pagination, details, diagnostics, authentication, and logout regression checks pass
+- [x] Rollback integration test verifies successful creation and editing without leaving a row
+- [x] Before/after `Trip` count is 800 and fingerprint is `268283528`
+- [x] Restore, format, formatting verification, and Debug build pass with 0 warnings and 0 errors
+- [x] Tests pass: 55 passed, 0 failed, 0 skipped
+- [x] NuGet reports no vulnerable direct or transitive packages
+- [x] Runtime smoke suite passes: 18 checks, 0 failed
+- [x] Desktop and 768 px Edge checks pass without overflow, browser exceptions, or console errors
+- [x] No migration, schema change, generated-model edit, raw SQL write, secret exposure, or permanent test data exists
+- [x] Sprint 1 Part 3 was not included in the Part 2 implementation
+
+# Sprint 1 Part 3 checklist
+
+- [x] Controlled database compatibility change verified and checkpointed as `47a59f8`
+- [x] `CK_Trip_Status` permits all six expected values and remains enabled and trusted
+- [x] Database compatibility rollback test preserves count 801 and fingerprint `1490482480`
+- [x] Technical statuses centralized as `InProgress`, `PendingValidation`, and `Completed`
+- [x] French labels centralized as En cours, À valider, and Validé
+- [x] Only `InProgress → PendingValidation → Completed` is allowed server-side
+- [x] Closure requires an end time, strictly positive tonnage, and an `InProgress` row
+- [x] Closure GET/POST uses `CanManageTrips`; POST uses antiforgery
+- [x] Supervisor pending-validation queue uses server-side search, filters, pagination, and `CanValidate`
+- [x] Validation POST uses `CanValidate`, antiforgery, and accepts no operational fields or status
+- [x] Pending and completed voyages are hidden from ordinary Edit actions
+- [x] GET Edit, POST Edit, and `TripWriteService` independently enforce the status lock
+- [x] State-aware list/details actions and centralized status badges implemented
+- [x] Supervisor-only dashboard indicator and validation-center navigation implemented
+- [x] No rejection, correction, reopening, cancellation, deletion, audit history, validator identity, or validation date implemented
+- [x] Generated EF entities and DbContext remain unchanged
+- [x] No migration, schema change, raw SQL write, or permanent workflow test data exists
+- [x] Rollback integration test verifies create, close, queue, validate, repeated-transition rejection, edit locks, related rows, and cleanup
+- [x] Restore and formatting verification pass
+- [x] Debug build passes with 0 warnings and 0 errors
+- [x] Tests pass: 81 passed, 0 failed, 0 skipped
+- [x] NuGet reports no vulnerable direct or transitive packages
+- [x] Authenticated HTTP smoke test verifies login, list, filters, pagination, details, closure validation, queue, authorization, Diagnostics, logout, and anonymous redirects
+- [x] Port 5085 is free after runtime testing and no task-owned application process remains
+- [x] Automated visual-browser control was unavailable; concise manual visual acceptance remains recommended

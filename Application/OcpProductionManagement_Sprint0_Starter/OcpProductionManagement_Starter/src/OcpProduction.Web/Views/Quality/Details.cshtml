@@ -1,0 +1,164 @@
+@model OcpProduction.Web.ViewModels.Quality.QualityDetailsViewModel
+@using OcpProduction.Web.ViewModels.Quality
+@{
+    ViewData["Title"] = $"Détail de l’analyse #{Model.Result.QualityResultId}";
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues">Résultats qualité</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Analyse #@Model.Result.QualityResultId</li>
+    </ol>
+</nav>
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Détail de l’analyse #@Model.Result.QualityResultId</h1>
+        <p class="text-muted mb-0">Consultation en lecture seule de la mesure et de son contexte enregistré.</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="badge fs-6 @QualityPresentation.GetStatusBadgeClass(Model.Result.Status)">
+            @QualityPresentation.GetStatusLabel(Model.Result.Status)
+        </span>
+        @if (Model.CanEdit)
+        {
+            <a asp-action="Edit" asp-all-route-data="@Model.EditRouteValues" class="btn btn-primary">Modifier</a>
+        }
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-general-title">
+            <div class="card-body">
+                <h2 id="quality-general-title" class="h5 mb-3">Informations générales</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Identifiant</dt>
+                        <dd>#@Model.Result.QualityResultId</dd>
+                    </div>
+                    <div>
+                        <dt>Date d’analyse</dt>
+                        <dd>@QualityPresentation.FormatDate(Model.Result.AnalysisDate)</dd>
+                    </div>
+                    <div>
+                        <dt>Créé le</dt>
+                        <dd>@QualityPresentation.FormatDate(Model.Result.CreatedAt)</dd>
+                    </div>
+                    <div>
+                        <dt>Statut enregistré</dt>
+                        <dd>@QualityPresentation.GetStatusLabel(Model.Result.Status)</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-measure-title">
+            <div class="card-body">
+                <h2 id="quality-measure-title" class="h5 mb-3">Mesure qualité</h2>
+                <p class="display-6 mb-3">@QualityPresentation.FormatMeasurement(Model.Result.QualityValue, Model.Result.QualityUnit)</p>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Unité enregistrée</dt>
+                        <dd>@QualityPresentation.OrFallback(Model.Result.QualityUnit)</dd>
+                    </div>
+                    <div>
+                        <dt>Valeur cible enregistrée</dt>
+                        <dd>@QualityPresentation.FormatMeasurement(Model.Result.TargetValue, Model.Result.QualityUnit)</dd>
+                    </div>
+                </dl>
+                <p class="text-muted small mt-3 mb-0">Les valeurs sont affichées sans interprétation de conformité.</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-trip-title">
+            <div class="card-body">
+                <h2 id="quality-trip-title" class="h5 mb-3">Voyage associé</h2>
+                @if (Model.Result.TripId is { } tripId)
+                {
+                    <p class="mb-2">Voyage #@tripId</p>
+                    @if (Model.CanViewTrip)
+                    {
+                        <a asp-controller="Trips" asp-action="Details" asp-route-id="@tripId" class="btn btn-sm btn-outline-primary">Voir le voyage</a>
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">Le détail du voyage n’est pas accessible avec votre rôle.</p>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Aucun voyage associé.</p>
+                }
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-context-title">
+            <div class="card-body">
+                <h2 id="quality-context-title" class="h5 mb-3">Contexte opérationnel</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Camion</dt>
+                        <dd>@QualityPresentation.OrFallback(Model.Result.TruckCode)</dd>
+                    </div>
+                    <div>
+                        <dt>Conducteur</dt>
+                        <dd>@QualityPresentation.OrFallback(Model.Result.DriverDisplayName)</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.Result.DriverCode))
+                        {
+                            <small class="text-muted">@Model.Result.DriverCode</small>
+                        }
+                    </div>
+                    <div>
+                        <dt>Poste</dt>
+                        <dd>@QualityPresentation.OrFallback(Model.Result.WorkShiftName)</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.Result.WorkShiftCode))
+                        {
+                            <small class="text-muted">@Model.Result.WorkShiftCode</small>
+                        }
+                    </div>
+                    <div>
+                        <dt>Point de chargement</dt>
+                        <dd>@QualityPresentation.OrFallback(Model.Result.LoadingPointName)</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.Result.LoadingPointCode))
+                        {
+                            <small class="text-muted">@Model.Result.LoadingPointCode</small>
+                        }
+                    </div>
+                    <div>
+                        <dt>Destination</dt>
+                        <dd>@QualityPresentation.OrFallback(Model.Result.DestinationName)</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.Result.DestinationCode))
+                        {
+                            <small class="text-muted">@Model.Result.DestinationCode</small>
+                        }
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12">
+        <section class="card border-0 shadow-sm" aria-labelledby="quality-comments-title">
+            <div class="card-body">
+                <h2 id="quality-comments-title" class="h5 mb-3">Observation</h2>
+                <p class="trip-observation mb-0">@(string.IsNullOrWhiteSpace(Model.Result.Comments) ? "Aucune observation enregistrée." : Model.Result.Comments)</p>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="mt-4">
+    @if (Model.CanEdit)
+    {
+        <a asp-action="Edit" asp-all-route-data="@Model.EditRouteValues" class="btn btn-primary">Modifier</a>
+    }
+    <a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues" class="btn btn-outline-secondary">Retour à la liste</a>
+</div>

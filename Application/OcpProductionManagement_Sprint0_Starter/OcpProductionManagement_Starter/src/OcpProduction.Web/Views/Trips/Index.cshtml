@@ -1,0 +1,254 @@
+@model OcpProduction.Web.ViewModels.Trips.TripIndexViewModel
+@using System.Globalization
+@using OcpProduction.Application.Trips
+@using OcpProduction.Application.Trips.Models
+@using OcpProduction.Web.ViewModels.Trips
+@{
+    ViewData["Title"] = "Voyages";
+    var resultLabel = Model.Results.TotalItems == 1 ? "voyage trouvé" : "voyages trouvés";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Voyages</h1>
+        <p class="text-muted mb-0">Consultez et recherchez les voyages enregistrés.</p>
+    </div>
+    <a asp-action="Create"
+       asp-all-route-data="@Model.CreateRouteValues"
+       class="btn btn-primary">Nouveau voyage</a>
+</div>
+
+<section class="card border-0 shadow-sm mb-4" aria-labelledby="trip-filter-title">
+    <div class="card-body">
+        <h2 id="trip-filter-title" class="h5 mb-3">Filtres</h2>
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <label for="trip-search" class="form-label">Recherche</label>
+                <input id="trip-search"
+                       name="Search"
+                       value="@Model.Criteria.Search"
+                       class="form-control"
+                       placeholder="Voyage, camion, conducteur ou trajet" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="trip-date-from" class="form-label">Date de début</label>
+                <input id="trip-date-from"
+                       name="DateFrom"
+                       type="date"
+                       value="@(Model.Criteria.DateFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <label for="trip-date-to" class="form-label">Date de fin</label>
+                <input id="trip-date-to"
+                       name="DateTo"
+                       type="date"
+                       value="@(Model.Criteria.DateTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))"
+                       class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="trip-truck" class="form-label">Camion</label>
+                <select id="trip-truck" name="TruckId" class="form-select">
+                    <option value="">Tous les camions</option>
+                    @foreach (var option in Model.FilterOptions.Trucks)
+                    {
+                        <option value="@option.Value"
+                                selected="@(Model.Criteria.TruckId == option.Value ? "selected" : null)">@option.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="trip-driver" class="form-label">Conducteur</label>
+                <select id="trip-driver" name="DriverId" class="form-select">
+                    <option value="">Tous les conducteurs</option>
+                    @foreach (var option in Model.FilterOptions.Drivers)
+                    {
+                        <option value="@option.Value"
+                                selected="@(Model.Criteria.DriverId == option.Value ? "selected" : null)">@option.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <label for="trip-shift" class="form-label">Poste</label>
+                <select id="trip-shift" name="WorkShiftId" class="form-select">
+                    <option value="">Tous les postes</option>
+                    @foreach (var option in Model.FilterOptions.WorkShifts)
+                    {
+                        <option value="@option.Value"
+                                selected="@(Model.Criteria.WorkShiftId == option.Value ? "selected" : null)">@option.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <label for="trip-status" class="form-label">Statut</label>
+                <select id="trip-status" name="Status" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    @foreach (var status in Model.FilterOptions.Statuses)
+                    {
+                        <option value="@status"
+                                selected="@(Model.Criteria.Status == status ? "selected" : null)">@TripPresentation.GetStatusLabel(status)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <label for="trip-page-size" class="form-label">Résultats par page</label>
+                <select id="trip-page-size" name="PageSize" class="form-select">
+                    @foreach (var pageSize in TripSearchCriteria.AllowedPageSizes)
+                    {
+                        <option value="@pageSize"
+                                selected="@(Model.Criteria.PageSize == pageSize ? "selected" : null)">@pageSize</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section aria-labelledby="trip-results-title">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 id="trip-results-title" class="h5 mb-0">Résultats</h2>
+        <p id="trip-result-summary" class="text-muted mb-0">
+            <strong>@Model.Results.TotalItems.ToString("N0", frenchCulture)</strong> @resultLabel
+        </p>
+    </div>
+
+    @if (Model.Results.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body trip-empty-state text-center">
+                <h3 class="h5">Aucun résultat</h3>
+                <p class="text-muted">Aucun voyage ne correspond aux critères sélectionnés.</p>
+                <a asp-action="Index" class="btn btn-outline-secondary">Réinitialiser les filtres</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm trip-results-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 trip-table" aria-describedby="trip-result-summary">
+                    <thead>
+                        <tr>
+                            <th scope="col">Voyage</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Camion</th>
+                            <th scope="col">Conducteur</th>
+                            <th scope="col">Poste</th>
+                            <th scope="col">Trajet</th>
+                            <th scope="col">Horaires</th>
+                            <th scope="col">Durée</th>
+                            <th scope="col" class="text-end">Tonnage</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col"><span class="visually-hidden">Action</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trip in Model.Results.Items)
+                        {
+                            <tr>
+                                <th scope="row">#@trip.TripId</th>
+                                <td>@trip.TripDate.ToString("dd/MM/yyyy", frenchCulture)</td>
+                                <td>@trip.TruckCode</td>
+                                <td>
+                                    <span class="d-block">@trip.DriverCode</span>
+                                    <small class="text-muted">@trip.DriverDisplayName</small>
+                                </td>
+                                <td>@trip.WorkShiftName</td>
+                                <td class="trip-route">
+                                    <span>@trip.LoadingPointName</span>
+                                    <span aria-hidden="true">→</span>
+                                    <span>@trip.DestinationName</span>
+                                </td>
+                                <td>
+                                    <span class="d-block">@trip.StartDateTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</span>
+                                    <small class="text-muted">
+                                        Fin : @(trip.EndDateTime?.ToString("dd/MM/yyyy HH:mm", frenchCulture) ?? "—")
+                                    </small>
+                                </td>
+                                <td>@TripPresentation.FormatDuration(trip.DurationMinutes)</td>
+                                <td class="text-end">@(trip.Tonnage?.ToString("N2", frenchCulture) ?? "—")</td>
+                                <td>
+                                    <span class="badge @TripPresentation.GetStatusBadgeClass(trip.Status)">
+                                        @TripPresentation.GetStatusLabel(trip.Status)
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group" aria-label="Actions du voyage @trip.TripId">
+                                        <a asp-action="Details"
+                                           asp-all-route-data="@Model.DetailsRouteValues(trip.TripId)"
+                                           class="btn btn-outline-primary"
+                                           aria-label="Voir le voyage @trip.TripId">Voir</a>
+                                        @if (TripStatuses.IsEditable(trip.Status))
+                                        {
+                                            <a asp-action="Edit"
+                                               asp-all-route-data="@Model.EditRouteValues(trip.TripId)"
+                                               class="btn btn-outline-secondary"
+                                               aria-label="Modifier le voyage @trip.TripId">Modifier</a>
+                                            <a asp-controller="TripWorkflow"
+                                               asp-action="Close"
+                                               asp-all-route-data="@Model.CloseRouteValues(trip.TripId)"
+                                               class="btn btn-outline-success"
+                                               aria-label="Clôturer le voyage @trip.TripId">Clôturer</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+                <nav aria-label="Pagination des voyages">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
+                            @if (Model.Results.HasPreviousPage)
+                            {
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Précédent</span>
+                            }
+                        </li>
+                        @foreach (var page in Model.VisiblePages)
+                        {
+                            <li class="page-item @(page == Model.Results.Page ? "active" : null)">
+                                @if (page == Model.Results.Page)
+                                {
+                                    <span class="page-link" aria-current="page">@(page)</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link"
+                                       asp-action="Index"
+                                       asp-all-route-data="@Model.RouteValuesFor(page)">@(page)</a>
+                                }
+                            </li>
+                        }
+                        <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
+                            @if (Model.Results.HasNextPage)
+                            {
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Suivant</span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    }
+</section>

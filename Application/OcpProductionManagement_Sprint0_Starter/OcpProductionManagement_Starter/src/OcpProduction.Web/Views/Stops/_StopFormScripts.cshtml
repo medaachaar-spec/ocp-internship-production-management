@@ -1,0 +1,19 @@
+<partial name="_ValidationScriptsPartial" />
+<script>
+    (() => {
+        document.querySelectorAll("form[data-submit-once]").forEach((form) => {
+            form.addEventListener("submit", () => {
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                const submitButton = form.querySelector("[data-submit-button]");
+                window.setTimeout(() => {
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                    }
+                }, 0);
+            });
+        });
+    })();
+</script>

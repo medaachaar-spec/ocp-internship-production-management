@@ -1,0 +1,81 @@
+relationship 7f303eab-d11c-4bca-9f70-5699e276faef
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_ExecutiveDashboard.DataStartDate
+	toColumn: LocalDateTable_7600e596-2b10-44c3-aa44-2838c8e037ee.Date
+
+relationship 631e98fb-444f-4be3-8717-9cbf05873a5d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_ExecutiveDashboard.DataEndDate
+	toColumn: LocalDateTable_be0dcf8a-106e-41b8-be3c-5a06e5663c21.Date
+
+relationship b2d48637-bdd9-4ca0-9493-1d77376e0bc1
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_StopAnalysis.StopStartTime
+	toColumn: LocalDateTable_4f2fa569-92f8-43ad-a456-e98ee92c62fc.Date
+
+relationship 1c37274b-75f3-419f-bedb-0b55adb39d53
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_StopAnalysis.StopEndTime
+	toColumn: LocalDateTable_f6445c55-709f-4cc2-b92a-1e1605204919.Date
+
+relationship 1a60d6e9-d8ae-4c74-8581-79f41d1ae2e1
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_StopAnalysis.TripDate
+	toColumn: LocalDateTable_5b84dfad-2cc0-4700-9789-b7dd9c2e1750.Date
+
+relationship f40dfff1-3bc0-49d9-ae42-79ad70479a76
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_DriverPerformance.FirstTripDate
+	toColumn: LocalDateTable_32b38f51-0cc8-4add-bd0a-3aa8ff859937.Date
+
+relationship 3827322e-95f2-450b-b3c7-726e0ee50a9d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_DriverPerformance.LastTripDate
+	toColumn: LocalDateTable_5fca48ed-36f5-4081-aed8-fb08388c18ba.Date
+
+relationship fe074ff4-7808-43e7-bfde-4bf27ab7d627
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_TruckPerformance.FirstTripDate
+	toColumn: LocalDateTable_8b32b9ac-18e6-41da-a930-ee0cc0f51ad2.Date
+
+relationship 4b6dec73-39e8-4031-99e4-611f228c17ca
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_TruckPerformance.LastTripDate
+	toColumn: LocalDateTable_d81549f5-2c7a-4757-b0dd-02208bf15730.Date
+
+relationship 29047bc0-ccbd-42d6-baa8-7b8d9f25072b
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_QualityAnalysis.AnalysisDate
+	toColumn: LocalDateTable_b016c94b-735b-44b2-bb2a-312c325fc668.Date
+
+relationship 79f07494-f7cd-4ad8-83d5-2871425cab9c
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_QualityAnalysis.TripDate
+	toColumn: LocalDateTable_2a047d47-ad63-4189-a890-406b970a22dc.Date
+
+relationship 96257057-701b-425b-b752-5f371cfd3ad3
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_TripSummary.StartTime
+	toColumn: LocalDateTable_6c0b4708-51d3-4d5e-9804-104759c48e90.Date
+
+relationship 2e41530f-38b9-46ba-8768-5f2688be3e46
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_TripSummary.EndTime
+	toColumn: LocalDateTable_bcc59c89-0b29-47e1-89f6-d9d3e5ea4a43.Date
+
+relationship 7313cf35-31eb-7dbe-88b5-72eaaa9773ec
+	fromColumn: vw_TripSummary.TripDate
+	toColumn: Calendrier.Date
+
+relationship 4aeaef3f-211e-27e6-9d21-2745783dfa65
+	fromColumn: vw_StopAnalysis.StopDate
+	toColumn: Calendrier.Date
+
+relationship d9161459-2e04-8543-3634-83a499ea1b3e
+	fromColumn: vw_QualityAnalysis.QualityDate
+	toColumn: Calendrier.Date
+
+relationship c48f5011-da46-ec0f-9edf-d3ae6b57649b
+	fromColumn: vw_TripsDailySummary.TripDate
+	toColumn: Calendrier.Date
+

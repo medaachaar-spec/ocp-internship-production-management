@@ -1,0 +1,84 @@
+table vw_StopsByReason
+	lineageTag: 121d450f-c684-4847-b31e-c38f673823f4
+
+	column StopReasonID
+		dataType: int64
+		formatString: 0
+		lineageTag: ce6fb094-8a66-40d8-9afb-11a033c835df
+		summarizeBy: count
+		sourceColumn: StopReasonID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ReasonCode
+		dataType: string
+		lineageTag: 225f49bb-b4bc-4d9a-ac58-3b1158f613a9
+		summarizeBy: none
+		sourceColumn: ReasonCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column ReasonName
+		dataType: string
+		lineageTag: e531e0e3-2da8-4297-8915-2b22259778ff
+		summarizeBy: none
+		sourceColumn: ReasonName
+
+		annotation SummarizationSetBy = Automatic
+
+	column ReasonCategory
+		dataType: string
+		lineageTag: e63a4f9c-7c8c-4d61-80ff-a20ae7179bbb
+		summarizeBy: none
+		sourceColumn: ReasonCategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsPlanned
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 500b5377-e02c-4df1-82fa-729577a2c482
+		summarizeBy: none
+		sourceColumn: IsPlanned
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalStops
+		dataType: int64
+		formatString: 0
+		lineageTag: 9fa7e01b-c75e-4169-a966-6de7f3000e58
+		summarizeBy: sum
+		sourceColumn: TotalStops
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalDowntimeMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: 2d84055f-f5e2-4920-acf0-148904aad0d3
+		summarizeBy: sum
+		sourceColumn: TotalDowntimeMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column AverageStopDurationMinutes
+		dataType: double
+		lineageTag: d6f59421-8757-4148-b818-89db6e97269d
+		summarizeBy: sum
+		sourceColumn: AverageStopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_StopsByReason = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("localhost", "OCP_Mining_Prototype"),
+				    dbo_vw_StopsByReason = Source{[Schema="dbo",Item="vw_StopsByReason"]}[Data]
+				in
+				    dbo_vw_StopsByReason
+
+	annotation PBI_ResultType = Table
+

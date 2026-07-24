@@ -1,0 +1,121 @@
+@model OcpProduction.Web.ViewModels.Trips.ITripFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<input asp-for="ReturnCriteria.Search" type="hidden" />
+<input asp-for="ReturnCriteria.DateFrom" type="hidden" />
+<input asp-for="ReturnCriteria.DateTo" type="hidden" />
+<input asp-for="ReturnCriteria.TruckId" type="hidden" />
+<input asp-for="ReturnCriteria.DriverId" type="hidden" />
+<input asp-for="ReturnCriteria.WorkShiftId" type="hidden" />
+<input asp-for="ReturnCriteria.Status" type="hidden" />
+<input asp-for="ReturnCriteria.Page" type="hidden" />
+<input asp-for="ReturnCriteria.PageSize" type="hidden" />
+
+<fieldset>
+    <legend class="h5 mb-3">Informations opérationnelles</legend>
+    <p class="text-muted small mb-4"><span aria-hidden="true">*</span> Champs obligatoires</p>
+
+    <div class="row g-3">
+        <div class="col-lg-4 col-md-6">
+            <label asp-for="Input.TripDate" class="form-label">
+                Date opérationnelle <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <input asp-for="Input.TripDate" type="date" class="form-control" required />
+            <span asp-validation-for="Input.TripDate" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <label asp-for="Input.StartTime" class="form-label">
+                Date et heure de début <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <input asp-for="Input.StartTime"
+                   asp-format="{0:yyyy-MM-ddTHH:mm}"
+                   type="datetime-local"
+                   class="form-control"
+                   required />
+            <span asp-validation-for="Input.StartTime" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <label asp-for="Input.WorkShiftId" class="form-label">
+                Poste <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <select asp-for="Input.WorkShiftId" class="form-select" required>
+                <option value="">Sélectionnez un poste</option>
+                @foreach (var option in Model.Options.WorkShifts)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.WorkShiftId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6 col-md-6">
+            <label asp-for="Input.TruckId" class="form-label">
+                Camion <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <select asp-for="Input.TruckId" class="form-select" required>
+                <option value="">Sélectionnez un camion disponible</option>
+                @foreach (var option in Model.Options.Trucks)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.TruckId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6 col-md-6">
+            <label asp-for="Input.DriverId" class="form-label">
+                Conducteur <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <select asp-for="Input.DriverId" class="form-select" required>
+                <option value="">Sélectionnez un conducteur actif</option>
+                @foreach (var option in Model.Options.Drivers)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.DriverId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6 col-md-6">
+            <label asp-for="Input.LoadingPointId" class="form-label">
+                Point de chargement <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <select asp-for="Input.LoadingPointId" class="form-select" required>
+                <option value="">Sélectionnez un point de chargement</option>
+                @foreach (var option in Model.Options.LoadingPoints)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.LoadingPointId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6 col-md-6">
+            <label asp-for="Input.DestinationId" class="form-label">
+                Destination <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <select asp-for="Input.DestinationId" class="form-select" required>
+                <option value="">Sélectionnez une destination</option>
+                @foreach (var option in Model.Options.Destinations)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.DestinationId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Input.Comments" class="form-label">Observation</label>
+            <textarea asp-for="Input.Comments"
+                      class="form-control"
+                      rows="4"
+                      maxlength="500"
+                      placeholder="Ajoutez une observation opérationnelle si nécessaire."></textarea>
+            <div class="form-text">500 caractères maximum.</div>
+            <span asp-validation-for="Input.Comments" class="text-danger small"></span>
+        </div>
+    </div>
+</fieldset>

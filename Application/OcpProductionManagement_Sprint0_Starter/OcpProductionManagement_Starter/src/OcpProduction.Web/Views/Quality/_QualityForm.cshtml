@@ -1,0 +1,89 @@
+@model OcpProduction.Web.ViewModels.Quality.IQualityFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<input asp-for="ReturnCriteria.Search" type="hidden" />
+<input asp-for="ReturnCriteria.DateFrom" type="hidden" />
+<input asp-for="ReturnCriteria.DateTo" type="hidden" />
+<input asp-for="ReturnCriteria.TripId" type="hidden" />
+<input asp-for="ReturnCriteria.TruckId" type="hidden" />
+<input asp-for="ReturnCriteria.P2O5Min" type="hidden" />
+<input asp-for="ReturnCriteria.P2O5Max" type="hidden" />
+<input asp-for="ReturnCriteria.Status" type="hidden" />
+<input asp-for="ReturnCriteria.Page" type="hidden" />
+<input asp-for="ReturnCriteria.PageSize" type="hidden" />
+
+<fieldset>
+    <legend class="h5 mb-3">Mesure et contexte</legend>
+    <p class="text-muted small mb-4"><span aria-hidden="true">*</span> Champs obligatoires</p>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <label asp-for="Input.AnalysisDate" class="form-label">
+                Date et heure d’analyse <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <input asp-for="Input.AnalysisDate"
+                   asp-format="{0:yyyy-MM-ddTHH:mm}"
+                   type="datetime-local"
+                   class="form-control"
+                   required />
+            <span asp-validation-for="Input.AnalysisDate" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6">
+            <label asp-for="Input.QualityValue" class="form-label">
+                Valeur P₂O₅ <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <div class="input-group">
+                <input asp-for="Input.QualityValue"
+                       type="text"
+                       inputmode="decimal"
+                       class="form-control"
+                       placeholder="Ex. 30,125"
+                       required />
+                <span class="input-group-text">% P₂O₅</span>
+            </div>
+            <div class="form-text">Valeur positive ou nulle, avec trois décimales au maximum.</div>
+            <span asp-validation-for="Input.QualityValue" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6">
+            <label asp-for="Input.TripId" class="form-label">Voyage associé</label>
+            <input asp-for="Input.TripId"
+                   type="number"
+                   min="0"
+                   class="form-control"
+                   placeholder="Identifiant du voyage" />
+            <div class="form-text">Le voyage reste facultatif lorsque le point de chargement est renseigné.</div>
+            <span asp-validation-for="Input.TripId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6">
+            <label asp-for="Input.LoadingPointId" class="form-label">Point de chargement</label>
+            <select asp-for="Input.LoadingPointId" class="form-select">
+                <option value="">Sélectionnez un point ou indiquez un voyage</option>
+                @foreach (var option in Model.Options.LoadingPoints)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <div class="form-text">Lorsqu’un voyage et un point sont renseignés, ils doivent correspondre.</div>
+            <span asp-validation-for="Input.LoadingPointId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Input.Comments" class="form-label">Observation</label>
+            <textarea asp-for="Input.Comments"
+                      class="form-control"
+                      rows="4"
+                      maxlength="500"
+                      placeholder="Ajoutez le contexte utile de l’analyse si nécessaire."></textarea>
+            <div class="form-text">500 caractères maximum.</div>
+            <span asp-validation-for="Input.Comments" class="text-danger small"></span>
+        </div>
+    </div>
+</fieldset>
+
+<div class="alert alert-info mt-4 mb-0" role="status">
+    L’unité et le statut initial sont gérés par la base. Aucune interprétation de conformité n’est ajoutée par le formulaire.
+</div>

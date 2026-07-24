@@ -1,0 +1,358 @@
+table vw_TripSummary
+	lineageTag: 4067b937-809f-46b6-a7fb-d02f5f4027c5
+
+	column TripID
+		dataType: int64
+		formatString: 0
+		lineageTag: a5009936-80ef-48fc-88a6-f1dfea0f9b99
+		summarizeBy: count
+		sourceColumn: TripID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TripDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 60958e0e-ea18-435c-a42f-00f3bec2738c
+		summarizeBy: none
+		sourceColumn: TripDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Status
+		dataType: string
+		lineageTag: f6963b97-8d3f-4ce0-8a80-c96db1a075b1
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckID
+		dataType: int64
+		formatString: 0
+		lineageTag: 2cded792-9187-412b-8bc4-05c7b6cdfdb3
+		summarizeBy: count
+		sourceColumn: TruckID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckCode
+		dataType: string
+		lineageTag: 84b6003d-4d6d-49ac-aba1-3a3538cd8c2e
+		summarizeBy: none
+		sourceColumn: TruckCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column TruckModel
+		dataType: string
+		lineageTag: 0e4f0dab-f936-4aed-b766-6b6ec8a1a69f
+		summarizeBy: none
+		sourceColumn: TruckModel
+
+		annotation SummarizationSetBy = Automatic
+
+	column RatedPayloadTonnes
+		dataType: double
+		lineageTag: 44285906-ef21-4507-ae55-6fff03e1309c
+		summarizeBy: sum
+		sourceColumn: RatedPayloadTonnes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DriverID
+		dataType: int64
+		formatString: 0
+		lineageTag: e4e269ec-d1f3-447f-a0e0-32858709b295
+		summarizeBy: count
+		sourceColumn: DriverID
+
+		annotation SummarizationSetBy = Automatic
+
+	column DriverCode
+		dataType: string
+		lineageTag: e4032731-4bd9-4a73-89f4-769a55cb9375
+		summarizeBy: none
+		sourceColumn: DriverCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column FullName
+		dataType: string
+		lineageTag: 79434d54-fecc-4a93-a1f2-9c1f839503c1
+		summarizeBy: none
+		sourceColumn: FullName
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftID
+		dataType: int64
+		formatString: 0
+		lineageTag: d93d4a2f-5a31-475e-b87c-93f673986a06
+		summarizeBy: count
+		sourceColumn: ShiftID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftCode
+		dataType: string
+		lineageTag: f5aecb25-574a-42f9-b56c-e26064b4f0d7
+		summarizeBy: none
+		sourceColumn: ShiftCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShiftName
+		dataType: string
+		lineageTag: 4273f6dd-68ef-43f3-aad0-10d89f7ecf43
+		summarizeBy: none
+		sourceColumn: ShiftName
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointID
+		dataType: int64
+		formatString: 0
+		lineageTag: 286f43be-7d06-47e5-b654-7feb8a8f6f43
+		summarizeBy: count
+		sourceColumn: LoadingPointID
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointCode
+		dataType: string
+		lineageTag: 9fba5a27-8d53-4bef-8939-d9c00bed59d0
+		summarizeBy: none
+		sourceColumn: LoadingPointCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingPointName
+		dataType: string
+		lineageTag: e3a68cb1-01e4-418e-8a51-d1ffee693a89
+		summarizeBy: none
+		sourceColumn: LoadingPointName
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationID
+		dataType: int64
+		formatString: 0
+		lineageTag: 13cfa3d2-df2c-4116-96ef-03095cc68bee
+		summarizeBy: count
+		sourceColumn: DestinationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationCode
+		dataType: string
+		lineageTag: a0fd2b7f-6da4-4e81-bebf-1e621f2bf72f
+		summarizeBy: none
+		sourceColumn: DestinationCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column DestinationName
+		dataType: string
+		lineageTag: b5ecde04-7086-43bb-9f02-cbd9108fea85
+		summarizeBy: none
+		sourceColumn: DestinationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column StartTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 299098cd-d912-4f20-af34-3b953022a282
+		summarizeBy: none
+		sourceColumn: StartTime
+
+		variation Variation
+			isDefault
+			relationship: 96257057-701b-425b-b752-5f371cfd3ad3
+			defaultHierarchy: LocalDateTable_6c0b4708-51d3-4d5e-9804-104759c48e90.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+	column EndTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 6856472a-281a-483b-95d9-9fdaec8780c7
+		summarizeBy: none
+		sourceColumn: EndTime
+
+		variation Variation
+			isDefault
+			relationship: 2e41530f-38b9-46ba-8768-5f2688be3e46
+			defaultHierarchy: LocalDateTable_bcc59c89-0b29-47e1-89f6-d9d3e5ea4a43.'Hiérarchie de dates'
+
+		annotation SummarizationSetBy = Automatic
+
+	column TripDurationMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: 2d5b4eca-358e-46bb-91e8-9d909909e56b
+		summarizeBy: sum
+		sourceColumn: TripDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column Tonnage
+		dataType: double
+		lineageTag: dd443de9-0f23-4c39-8d91-4163042e4d94
+		summarizeBy: sum
+		sourceColumn: Tonnage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PayloadUtilizationPercent
+		dataType: double
+		lineageTag: 69612409-831e-4f02-9f39-97dad923f600
+		summarizeBy: sum
+		sourceColumn: PayloadUtilizationPercent
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column StopCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 6880f7eb-f2a1-47ac-99df-19b792b4358b
+		summarizeBy: sum
+		sourceColumn: StopCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalStopDurationMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: ebbcfb5b-2bc6-4132-a111-5a64b215cdb4
+		summarizeBy: sum
+		sourceColumn: TotalStopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column AverageStopDurationMinutes
+		dataType: double
+		lineageTag: a04315ad-caeb-40ed-ae4e-ad1598fe7e3c
+		summarizeBy: sum
+		sourceColumn: AverageStopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MaximumStopDurationMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: 92ed401d-9970-44f3-9aef-706cbaab6690
+		summarizeBy: sum
+		sourceColumn: MaximumStopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column HasStops
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: dd88513b-b8df-419f-9046-884a2fb90f30
+		summarizeBy: none
+		sourceColumn: HasStops
+
+		annotation SummarizationSetBy = Automatic
+
+	column QualityResultCount
+		dataType: int64
+		formatString: 0
+		lineageTag: b2fb63e3-16f6-459f-a61f-1a2ae08784ca
+		summarizeBy: sum
+		sourceColumn: QualityResultCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column AverageP2O5
+		dataType: double
+		lineageTag: a39cb683-9201-4dd0-bf59-1746943d9291
+		summarizeBy: sum
+		sourceColumn: AverageP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MinimumP2O5
+		dataType: double
+		lineageTag: 4333bbc5-e67b-4c16-9b4f-166175d158b0
+		summarizeBy: sum
+		sourceColumn: MinimumP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MaximumP2O5
+		dataType: double
+		lineageTag: ff2db8d6-aa85-44fd-a88d-b6793eeb18fb
+		summarizeBy: sum
+		sourceColumn: MaximumP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LatestP2O5
+		dataType: double
+		lineageTag: c4f909dc-3e4a-4e99-8c2f-0264033f7e80
+		summarizeBy: sum
+		sourceColumn: LatestP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column HasQualityResult
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 172134b2-92a7-4e38-95ac-d4b0b6666051
+		summarizeBy: none
+		sourceColumn: HasQualityResult
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsCompleted
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: e8b6ba05-2700-4eb9-8afb-a7e98d644d3a
+		summarizeBy: none
+		sourceColumn: IsCompleted
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsIncomplete
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 8d73b7cc-1f0d-4ca9-9bdf-7caffb186c20
+		summarizeBy: none
+		sourceColumn: IsIncomplete
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_TripSummary = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("localhost", "OCP_Mining_Prototype"),
+				    dbo_vw_TripSummary = Source{[Schema="dbo",Item="vw_TripSummary"]}[Data]
+				in
+				    dbo_vw_TripSummary
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,31 @@
+@model OcpProduction.Web.ViewModels.ReferenceData.ReferenceCatalogViewModel
+
+@{
+    ViewData["Title"] = "Référentiels";
+}
+
+<div class="page-header">
+    <h1>Référentiels</h1>
+    <p class="text-muted mb-0">Gestion contrôlée des référentiels compatibles avec la base SQL Server gelée.</p>
+</div>
+
+<div class="row g-3">
+    @foreach (var item in Model.Items)
+    {
+        <div class="col-md-6 col-xl-3">
+            <section class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h5">@item.Title</h2>
+                    <p class="text-muted">@item.Description</p>
+                    <dl class="row small mb-3">
+                        <dt class="col-6">Total</dt>
+                        <dd class="col-6 text-end">@item.TotalCount</dd>
+                        <dt class="col-6">Actifs</dt>
+                        <dd class="col-6 text-end">@item.ActiveCount</dd>
+                    </dl>
+                    <a class="btn btn-outline-primary w-100" asp-action="@item.ControllerAction">Ouvrir</a>
+                </div>
+            </section>
+        </div>
+    }
+</div>

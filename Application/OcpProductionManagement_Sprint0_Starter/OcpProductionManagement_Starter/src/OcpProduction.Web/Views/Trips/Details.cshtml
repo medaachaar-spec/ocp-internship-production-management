@@ -1,0 +1,215 @@
+@model OcpProduction.Web.ViewModels.Trips.TripDetailsViewModel
+@using System.Globalization
+@using OcpProduction.Web.ViewModels.Trips
+@{
+    ViewData["Title"] = $"Détail du voyage #{Model.Trip.TripId}";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues">Voyages</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Voyage #@Model.Trip.TripId</li>
+    </ol>
+</nav>
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Détail du voyage #@Model.Trip.TripId</h1>
+        <p class="text-muted mb-0">Consultation en lecture seule des informations enregistrées.</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="badge fs-6 @TripPresentation.GetStatusBadgeClass(Model.Trip.Status)">
+            @TripPresentation.GetStatusLabel(Model.Trip.Status)
+        </span>
+        @if (Model.CanEdit)
+        {
+            <a asp-action="Edit"
+               asp-all-route-data="@Model.EditRouteValues"
+               class="btn btn-primary">Modifier</a>
+        }
+        @if (Model.CanClose)
+        {
+            <a asp-controller="TripWorkflow"
+               asp-action="Close"
+               asp-all-route-data="@Model.CloseRouteValues"
+               class="btn btn-outline-success">Clôturer</a>
+        }
+        @if (Model.CanValidateCurrentTrip)
+        {
+            <form asp-controller="Validation"
+                  asp-action="Validate"
+                  asp-route-id="@Model.Trip.TripId"
+                  method="post"
+                  asp-antiforgery="true"
+                  class="d-inline">
+                <button type="submit" class="btn btn-success">Valider le voyage</button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-general-title">
+            <div class="card-body">
+                <h2 id="trip-general-title" class="h5 mb-3">Informations générales</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Identifiant</dt>
+                        <dd>#@Model.Trip.TripId</dd>
+                    </div>
+                    <div>
+                        <dt>Date opérationnelle</dt>
+                        <dd>@Model.Trip.TripDate.ToString("dd/MM/yyyy", frenchCulture)</dd>
+                    </div>
+                    <div>
+                        <dt>Statut</dt>
+                        <dd>@TripPresentation.GetStatusLabel(Model.Trip.Status)</dd>
+                    </div>
+                    <div>
+                        <dt>Créé le</dt>
+                        <dd>@Model.Trip.CreatedAt.ToString("dd/MM/yyyy HH:mm", frenchCulture)</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-assignment-title">
+            <div class="card-body">
+                <h2 id="trip-assignment-title" class="h5 mb-3">Affectation</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Camion</dt>
+                        <dd>@Model.Trip.TruckCode</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.Trip.RegistrationNumber))
+                        {
+                            <small class="text-muted">@Model.Trip.RegistrationNumber</small>
+                        }
+                    </div>
+                    <div>
+                        <dt>Conducteur</dt>
+                        <dd>@Model.Trip.DriverCode - @Model.Trip.DriverDisplayName</dd>
+                    </div>
+                    <div>
+                        <dt>Poste</dt>
+                        <dd>@Model.Trip.WorkShiftName</dd>
+                        <small class="text-muted">@Model.Trip.WorkShiftCode</small>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12">
+        <section class="card border-0 shadow-sm" aria-labelledby="trip-route-title">
+            <div class="card-body">
+                <h2 id="trip-route-title" class="h5 mb-3">Trajet</h2>
+                <dl class="trip-details-grid trip-details-grid-wide mb-0">
+                    <div>
+                        <dt>Point de chargement</dt>
+                        <dd>@Model.Trip.LoadingPointName</dd>
+                        <small class="text-muted">@Model.Trip.LoadingPointCode@(string.IsNullOrWhiteSpace(Model.Trip.LoadingZoneName) ? null : $" - {Model.Trip.LoadingZoneName}")</small>
+                    </div>
+                    <div>
+                        <dt>Destination</dt>
+                        <dd>@Model.Trip.DestinationName</dd>
+                        <small class="text-muted">@Model.Trip.DestinationCode@(string.IsNullOrWhiteSpace(Model.Trip.DestinationType) ? null : $" - {Model.Trip.DestinationType}")</small>
+                    </div>
+                    <div>
+                        <dt>Début</dt>
+                        <dd>@Model.Trip.StartDateTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</dd>
+                    </div>
+                    <div>
+                        <dt>Fin</dt>
+                        <dd>@(Model.Trip.EndDateTime?.ToString("dd/MM/yyyy HH:mm", frenchCulture) ?? "—")</dd>
+                    </div>
+                    <div>
+                        <dt>Durée</dt>
+                        <dd>@TripPresentation.FormatDuration(Model.Trip.DurationMinutes)</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-production-title">
+            <div class="card-body">
+                <h2 id="trip-production-title" class="h5 mb-3">Production</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Tonnage</dt>
+                        <dd>@(Model.Trip.Tonnage?.ToString("N2", frenchCulture) ?? "—") t</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-related-title">
+            <div class="card-body">
+                <h2 id="trip-related-title" class="h5 mb-3">Données associées</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Arrêts liés</dt>
+                        <dd>@Model.Trip.StopCount</dd>
+                    </div>
+                    <div>
+                        <dt>Durée totale des arrêts</dt>
+                        <dd>@TripPresentation.FormatDuration(checked((int?)Model.Trip.TotalStopDurationMinutes))</dd>
+                    </div>
+                    <div>
+                        <dt>Résultats qualité liés</dt>
+                        <dd>@Model.Trip.QualityResultCount</dd>
+                    </div>
+                    <div>
+                        <dt>Dernier P2O5</dt>
+                        <dd>@(Model.Trip.LatestP2O5?.ToString("N3", frenchCulture) ?? "—")</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12">
+        <section class="card border-0 shadow-sm" aria-labelledby="trip-comments-title">
+            <div class="card-body">
+                <h2 id="trip-comments-title" class="h5 mb-3">Observations</h2>
+                <p class="trip-observation mb-0">@(string.IsNullOrWhiteSpace(Model.Trip.Comments) ? "Aucune observation enregistrée." : Model.Trip.Comments)</p>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="mt-4 d-flex flex-wrap gap-2">
+    @if (Model.CanEdit)
+    {
+        <a asp-action="Edit"
+           asp-all-route-data="@Model.EditRouteValues"
+           class="btn btn-primary">Modifier</a>
+    }
+    @if (Model.CanClose)
+    {
+        <a asp-controller="TripWorkflow"
+           asp-action="Close"
+           asp-all-route-data="@Model.CloseRouteValues"
+           class="btn btn-outline-success">Clôturer</a>
+    }
+    @if (Model.FromValidation)
+    {
+        <a asp-controller="Validation"
+           asp-action="Index"
+           class="btn btn-outline-secondary">Retour au centre de validation</a>
+    }
+    else
+    {
+        <a asp-action="Index"
+           asp-all-route-data="@Model.ReturnRouteValues"
+           class="btn btn-outline-secondary">Retour à la liste</a>
+    }
+</div>

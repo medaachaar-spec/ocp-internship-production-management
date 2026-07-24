@@ -1,0 +1,114 @@
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var canViewReporting = (await AuthorizationService.AuthorizeAsync(
+        User,
+        PolicyNames.CanViewReporting)).Succeeded;
+    var canViewDashboard = (await AuthorizationService.AuthorizeAsync(
+        User,
+        PolicyNames.CanViewDashboard)).Succeeded;
+}
+<div class="sidebar-brand">
+    <div class="brand-mark">PM</div>
+    <div>
+        <div class="fw-bold">OCP Production</div>
+        <small>Phosboucraa</small>
+    </div>
+</div>
+<nav class="nav flex-column sidebar-nav">
+    <a class="nav-link @(currentController == "Home" ? "active" : null)"
+       asp-controller="Home"
+       asp-action="Index"
+       aria-current="@(currentController == "Home" ? "page" : null)">Accueil</a>
+
+    @if (User.IsInRole(AppRoles.AgentProduction) || User.IsInRole(AppRoles.Superviseur))
+    {
+        <div class="nav-section">Opérations</div>
+        <a class="nav-link @(currentController == "Trips" ? "active" : null)"
+           asp-controller="Trips"
+           asp-action="Index"
+           aria-current="@(currentController == "Trips" ? "page" : null)">Voyages</a>
+        <a class="nav-link @(currentController == "Stops" ? "active" : null)"
+           asp-controller="Stops"
+           asp-action="Index"
+           aria-current="@(currentController == "Stops" ? "page" : null)">Arrêts</a>
+    }
+
+    @if (User.IsInRole(AppRoles.AgentProduction) ||
+        User.IsInRole(AppRoles.Superviseur) ||
+        User.IsInRole(AppRoles.ResponsableProduction) ||
+        User.IsInRole(AppRoles.Administrateur))
+    {
+        <div class="nav-section">Parc</div>
+        <a class="nav-link @(currentController == "Trucks" ? "active" : null)"
+           asp-controller="Trucks"
+           asp-action="Index"
+           aria-current="@(currentController == "Trucks" ? "page" : null)">Camions</a>
+        <a class="nav-link @(currentController == "Drivers" ? "active" : null)"
+           asp-controller="Drivers"
+           asp-action="Index"
+           aria-current="@(currentController == "Drivers" ? "page" : null)">Conducteurs</a>
+    }
+
+    @if (User.IsInRole(AppRoles.AgentQualite) || User.IsInRole(AppRoles.Superviseur))
+    {
+        <div class="nav-section">Qualité</div>
+        <a class="nav-link @(currentController == "Quality" ? "active" : null)"
+           asp-controller="Quality"
+           asp-action="Index"
+           aria-current="@(currentController == "Quality" ? "page" : null)">Résultats qualité</a>
+    }
+
+    @if (User.IsInRole(AppRoles.Superviseur))
+    {
+        <div class="nav-section">Supervision</div>
+        <a class="nav-link @(currentController is "Validation" or "StopValidation" ? "active" : null)"
+           asp-controller="Validation"
+           asp-action="Index"
+           aria-current="@(currentController is "Validation" or "StopValidation" ? "page" : null)">Centre de validation</a>
+    }
+
+    @if (canViewDashboard || canViewReporting)
+    {
+        <div class="nav-section">Pilotage</div>
+    }
+
+    @if (canViewDashboard)
+    {
+        <a class="nav-link @(currentController == "Dashboard" ? "active" : null)"
+           asp-controller="Dashboard"
+           asp-action="Index"
+           aria-current="@(currentController == "Dashboard" ? "page" : null)">Tableau de bord</a>
+    }
+
+    @if (canViewReporting)
+    {
+        <a class="nav-link @(currentController == "Performance" && currentAction is "Trucks" or "TruckDetails" ? "active" : null)"
+           asp-controller="Performance"
+           asp-action="Trucks"
+           aria-current="@(currentController == "Performance" && currentAction is "Trucks" or "TruckDetails" ? "page" : null)">Performance camions</a>
+        <a class="nav-link @(currentController == "Performance" && currentAction is "Drivers" or "DriverDetails" ? "active" : null)"
+           asp-controller="Performance"
+           asp-action="Drivers"
+           aria-current="@(currentController == "Performance" && currentAction is "Drivers" or "DriverDetails" ? "page" : null)">Performance conducteurs</a>
+    }
+
+    @if (User.IsInRole(AppRoles.Administrateur))
+    {
+        <div class="nav-section">Administration</div>
+        <a class="nav-link disabled" href="#" aria-disabled="true">Utilisateurs</a>
+        <a class="nav-link @(currentController == "ReferenceData" ? "active" : null)"
+           asp-controller="ReferenceData"
+           asp-action="Index"
+           aria-current="@(currentController == "ReferenceData" ? "page" : null)">Référentiels</a>
+        <a class="nav-link disabled" href="#" aria-disabled="true">Paramètres</a>
+    }
+
+    <div class="nav-section">Technique</div>
+    <a class="nav-link @(currentController == "Diagnostics" ? "active" : null)"
+       asp-controller="Diagnostics"
+       asp-action="Index"
+       aria-current="@(currentController == "Diagnostics" ? "page" : null)">Diagnostic technique</a>
+</nav>

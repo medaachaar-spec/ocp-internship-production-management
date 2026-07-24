@@ -1,0 +1,37 @@
+@model OcpProduction.Web.ViewModels.Trips.TripFormViewModel<OcpProduction.Web.ViewModels.Trips.TripCreateInputModel>
+@using OcpProduction.Web.ViewModels.Trips
+@{
+    ViewData["Title"] = "Nouveau voyage";
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues">Voyages</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Nouveau voyage</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <h1>Nouveau voyage</h1>
+    <p class="text-muted mb-0">Enregistrez les informations opérationnelles du voyage.</p>
+</div>
+
+<div class="card border-0 shadow-sm trip-form-card">
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post" asp-antiforgery="true" data-submit-once>
+            @await Html.PartialAsync("_TripForm", (ITripFormViewModel)Model)
+
+            <div class="d-flex flex-wrap gap-2 mt-4 pt-2">
+                <button type="submit" class="btn btn-primary" data-submit-button>Créer le voyage</button>
+                <a asp-action="Index"
+                   asp-all-route-data="@Model.ReturnRouteValues"
+                   class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_TripFormScripts" />
+}

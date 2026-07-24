@@ -1,0 +1,21 @@
+# Sprint 0 checklist
+
+- [x] .NET SDK installed
+- [x] SQL Server running
+- [x] Repository and solution structure verified; final UI verification completed manually by the user.
+- [x] `dotnet restore` succeeds
+- [x] `dotnet build` succeeds
+- [x] User Secret `ConnectionStrings:OcpDatabase` configured
+- [x] Application opens on localhost
+- [x] Demo user can log in
+- [x] Sidebar changes by role
+- [x] Diagnostic page says SQL Server connected
+- [x] `scripts/verify-database.sql` confirms expected objects
+- [x] Database-First scaffolding succeeds
+- [x] No `Migrations` folder exists
+- [x] `dotnet test` succeeds
+- [x] Demo authentication replacement is planned after user-table inspection
+- [x] Dashboard reflects the connected SQL Server and completed Database-First scaffolding
+- [x] Database-First model integrates 9 tables and 12 views
+- [x] Final restore, format, build, tests, package audit, and runtime smoke test succeed
+- [x] No migration, database write, schema change, or Sprint 1 implementation was introduced

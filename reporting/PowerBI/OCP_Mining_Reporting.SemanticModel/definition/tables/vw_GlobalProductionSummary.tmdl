@@ -1,0 +1,147 @@
+table vw_GlobalProductionSummary
+	lineageTag: 67c18b71-2502-46de-a208-b2ea587518c5
+
+	column TotalTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: 9f868bda-08b9-4b64-9260-ecf127a2ba4f
+		summarizeBy: sum
+		sourceColumn: TotalTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompletedTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: a2e80e67-4710-483b-8e4c-29f801584680
+		summarizeBy: sum
+		sourceColumn: CompletedTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column IncompleteTrips
+		dataType: int64
+		formatString: 0
+		lineageTag: 7fdb122f-dc1a-4fb2-9ee6-c2655f756390
+		summarizeBy: sum
+		sourceColumn: IncompleteTrips
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalTonnage
+		dataType: double
+		lineageTag: 7cf2edf8-eb29-441c-9a7f-25abfb5d46ea
+		summarizeBy: sum
+		sourceColumn: TotalTonnage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AverageTripDurationMinutes
+		dataType: double
+		lineageTag: 16d504b3-4bae-44c5-9726-a2e2a8ee8cc1
+		summarizeBy: sum
+		sourceColumn: AverageTripDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LongTripCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 7a1e9d26-cca0-4c45-a471-f97dfb868a3f
+		summarizeBy: sum
+		sourceColumn: LongTripCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column LongTripRate
+		dataType: double
+		lineageTag: 481456cc-726b-4c21-a51c-852f0c95af07
+		summarizeBy: sum
+		sourceColumn: LongTripRate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TotalStops
+		dataType: int64
+		formatString: 0
+		lineageTag: a7921608-2255-4c3c-977a-20e8934ac43d
+		summarizeBy: sum
+		sourceColumn: TotalStops
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalDowntimeMinutes
+		dataType: int64
+		formatString: 0
+		lineageTag: ef2e58f4-ec97-427e-88c4-86ac95d13bd5
+		summarizeBy: sum
+		sourceColumn: TotalDowntimeMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+	column AverageStopDurationMinutes
+		dataType: double
+		lineageTag: 36d240e3-a680-48f0-871b-20eb06ff743d
+		summarizeBy: sum
+		sourceColumn: AverageStopDurationMinutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column NumberOfAnalyses
+		dataType: int64
+		formatString: 0
+		lineageTag: 8231ec04-25e7-4ebb-8574-65e98ba7012b
+		summarizeBy: sum
+		sourceColumn: NumberOfAnalyses
+
+		annotation SummarizationSetBy = Automatic
+
+	column AverageP2O5
+		dataType: double
+		lineageTag: 44bfdb90-02ed-48a8-beb8-99c1904791dc
+		summarizeBy: sum
+		sourceColumn: AverageP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MinimumP2O5
+		dataType: double
+		lineageTag: c6c5027e-608e-450e-bdaf-df10684c351a
+		summarizeBy: sum
+		sourceColumn: MinimumP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MaximumP2O5
+		dataType: double
+		lineageTag: 66df96e4-7a1c-434a-b7fc-728c0473728c
+		summarizeBy: sum
+		sourceColumn: MaximumP2O5
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_GlobalProductionSummary = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("localhost", "OCP_Mining_Prototype"),
+				    dbo_vw_GlobalProductionSummary = Source{[Schema="dbo",Item="vw_GlobalProductionSummary"]}[Data]
+				in
+				    dbo_vw_GlobalProductionSummary
+
+	annotation PBI_ResultType = Table
+

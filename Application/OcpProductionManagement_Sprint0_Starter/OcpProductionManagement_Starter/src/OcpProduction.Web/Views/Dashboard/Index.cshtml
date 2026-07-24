@@ -1,0 +1,422 @@
+@model OcpProduction.Web.ViewModels.Dashboard.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Tableau de bord de production";
+
+    var statusTripTotal = Model.Kpis.Charts.TripsByStatus.Sum(point => point.TripCount);
+    var p2o5MeasurementTotal = Model.Kpis.Charts.P2O5Trend.Sum(point => point.MeasurementCount);
+    var p2o5PeriodAverage = p2o5MeasurementTotal > 0
+        ? Model.Kpis.Charts.P2O5Trend.Sum(
+            point => point.AverageP2O5 * point.MeasurementCount) / p2o5MeasurementTotal
+        : (decimal?)null;
+}
+
+<div class="dashboard-page">
+    <header class="dashboard-header">
+        <div>
+            <p class="dashboard-eyebrow mb-1">Pilotage opérationnel</p>
+            <h1 class="h3 mb-1">Tableau de bord de production</h1>
+            <p class="text-muted mb-0">@Model.PeriodLabel</p>
+        </div>
+    </header>
+
+    <form method="get"
+          class="card dashboard-filter-card mb-4"
+          aria-label="Filtre de période du tableau de bord">
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            }
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="StartDate">Date de début</label>
+                    <input class="form-control"
+                           id="StartDate"
+                           name="StartDate"
+                           type="date"
+                           value="@Model.Criteria.StartDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="EndDate">Date de fin</label>
+                    <input class="form-control"
+                           id="EndDate"
+                           name="EndDate"
+                           type="date"
+                           value="@Model.Criteria.EndDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-4 d-flex flex-wrap gap-2 dashboard-filter-actions">
+                    <button type="submit" class="btn btn-primary">Appliquer</button>
+                    <a class="btn btn-outline-secondary"
+                       asp-controller="Dashboard"
+                       asp-action="Index">Réinitialiser</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.HasLoadError)
+    {
+        <div class="alert alert-danger" role="alert">
+            Les données du tableau de bord ne peuvent pas être chargées actuellement.
+        </div>
+    }
+    else if (ViewData.ModelState.IsValid && !Model.HasAnyData)
+    {
+        <div class="alert alert-info" role="status">
+            Aucune donnée n’est disponible pour la période sélectionnée.
+        </div>
+    }
+
+    @if (!Model.HasLoadError)
+    {
+        <section class="mb-4" aria-labelledby="dashboard-kpi-heading">
+            <h2 id="dashboard-kpi-heading" class="visually-hidden">Indicateurs clés</h2>
+            <div class="row g-3">
+                <div class="col-sm-12 col-md-6 col-xl-4">
+                    <article class="metric-card dashboard-kpi-card">
+                        <div class="metric-label">Nombre de voyages</div>
+                        <div class="metric-value">@Model.Kpis.TripCount.ToString("N0")</div>
+                    </article>
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-4">
+                    <article class="metric-card dashboard-kpi-card">
+                        <div class="metric-label">Tonnage total</div>
+                        <div class="metric-value">@Model.Kpis.TotalTonnage.ToString("N2") t</div>
+                    </article>
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-4">
+                    <article class="metric-card dashboard-kpi-card">
+                        <div class="metric-label">Nombre d'arrêts</div>
+                        <div class="metric-value">@Model.Kpis.StopCount.ToString("N0")</div>
+                    </article>
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-4">
+                    <article class="metric-card dashboard-kpi-card">
+                        <div class="metric-label">Durée totale des arrêts</div>
+                        <div class="metric-value">@Model.Kpis.TotalStopDurationHours.ToString("N2") h</div>
+                    </article>
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-4">
+                    <article class="metric-card dashboard-kpi-card">
+                        <div class="metric-label">Nombre d'analyses qualité</div>
+                        <div class="metric-value">@Model.Kpis.QualityAnalysisCount.ToString("N0")</div>
+                    </article>
+                </div>
+                <div class="col-sm-12 col-md-6 col-xl-4">
+                    <article class="metric-card dashboard-kpi-card">
+                        <div class="metric-label">Voyages en attente de validation</div>
+                        <div class="metric-value">@Model.Kpis.PendingValidationTripCount.ToString("N0")</div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    }
+
+    @if (!Model.HasLoadError && ViewData.ModelState.IsValid)
+    {
+        <section aria-labelledby="dashboard-chart-heading">
+            <div class="dashboard-section-heading">
+                <div>
+                    <h2 id="dashboard-chart-heading" class="h4 mb-1">Activité de la période</h2>
+                    <p class="text-muted mb-0">Données descriptives issues des vues de reporting détaillées.</p>
+                </div>
+            </div>
+
+            <div class="row g-3 dashboard-chart-grid">
+                <div class="col-12 col-xl-8">
+                    <article class="dashboard-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Voyages et tonnage par jour</h3>
+                            <p class="text-muted small mb-0">Voyages distincts et tonnage des voyages complétés.</p>
+                        </header>
+                        @if (Model.HasDailyTripsAndTonnage)
+                        {
+                            <div class="dashboard-chart-visual dashboard-chart-visual-wide" hidden>
+                                <canvas id="daily-trips-chart"
+                                        data-dashboard-chart="dailyTrips"
+                                        role="img"
+                                        aria-label="Graphique des voyages et du tonnage complété par jour"></canvas>
+                            </div>
+                            <details class="dashboard-chart-fallback" open data-chart-fallback="dailyTrips">
+                                <summary>Voir les données du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Voyages et tonnage complété par jour</caption>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Date</th>
+                                                <th scope="col" class="text-end">Voyages</th>
+                                                <th scope="col" class="text-end">Tonnage complété (t)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var point in Model.Kpis.Charts.DailyTripsAndTonnage)
+                                            {
+                                                <tr>
+                                                    <th scope="row">@point.Date.ToString("dd/MM/yyyy")</th>
+                                                    <td class="text-end">@point.TripCount.ToString("N0")</td>
+                                                    <td class="text-end">@point.CompletedTonnage.ToString("N2")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="dashboard-chart-empty mb-0" role="status">
+                                Aucune donnée de voyage pour la période sélectionnée.
+                            </p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12 col-xl-4">
+                    <article class="dashboard-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Répartition des voyages par statut</h3>
+                            <p class="text-muted small mb-0">Valeurs exactes des statuts enregistrés.</p>
+                        </header>
+                        @if (Model.HasTripsByStatus)
+                        {
+                            <div class="dashboard-status-layout">
+                                <div class="dashboard-chart-visual dashboard-chart-visual-status" hidden>
+                                    <canvas id="trip-status-chart"
+                                            data-dashboard-chart="tripStatus"
+                                            role="img"
+                                            aria-label="Graphique en anneau du nombre de voyages par statut enregistré"></canvas>
+                                </div>
+                                <ul class="dashboard-status-legend"
+                                    aria-label="Légende des voyages par statut avec effectifs et pourcentages">
+                                    @{
+                                        var statusIndex = 0;
+                                    }
+                                    @foreach (var point in Model.Kpis.Charts.TripsByStatus)
+                                    {
+                                        var statusPercentage = statusTripTotal > 0
+                                            ? point.TripCount * 100m / statusTripTotal
+                                            : 0m;
+                                        <li>
+                                            <span class="dashboard-status-swatch dashboard-status-swatch-@(statusIndex % 6)"
+                                                  aria-hidden="true"></span>
+                                            <span class="dashboard-status-name">@point.Status</span>
+                                            <span class="dashboard-status-value">
+                                                @point.TripCount.ToString("N0")
+                                                <span aria-hidden="true">·</span>
+                                                @statusPercentage.ToString("N2") %
+                                            </span>
+                                        </li>
+                                        statusIndex++;
+                                    }
+                                </ul>
+                            </div>
+                            <details class="dashboard-chart-fallback" open data-chart-fallback="tripStatus">
+                                <summary>Voir les données du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Voyages par statut enregistré</caption>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Statut</th>
+                                                <th scope="col" class="text-end">Voyages</th>
+                                                <th scope="col" class="text-end">Part</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var point in Model.Kpis.Charts.TripsByStatus)
+                                            {
+                                                var statusPercentage = statusTripTotal > 0
+                                                    ? point.TripCount * 100m / statusTripTotal
+                                                    : 0m;
+                                                <tr>
+                                                    <th scope="row">@point.Status</th>
+                                                    <td class="text-end">@point.TripCount.ToString("N0")</td>
+                                                    <td class="text-end">@statusPercentage.ToString("N2") %</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="dashboard-chart-empty mb-0" role="status">
+                                Aucun statut de voyage pour la période sélectionnée.
+                            </p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12">
+                    <article class="dashboard-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Durée des arrêts par motif</h3>
+                            <p class="text-muted small mb-0">Durées descriptives, incluant les arrêts liés et non liés.</p>
+                        </header>
+                        @if (Model.HasStopDurationByReason)
+                        {
+                            <div class="dashboard-chart-visual dashboard-chart-visual-reasons" hidden>
+                                <canvas id="stop-reason-chart"
+                                        data-dashboard-chart="stopReason"
+                                        role="img"
+                                        aria-label="Graphique de la durée totale des arrêts par motif"></canvas>
+                            </div>
+                            <details class="dashboard-chart-fallback" open data-chart-fallback="stopReason">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Durée totale des arrêts par motif</caption>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Motif</th>
+                                                <th scope="col" class="text-end">Arrêts</th>
+                                                <th scope="col" class="text-end">Durée (h)</th>
+                                                <th scope="col" class="text-end">Durée (min)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var point in Model.Kpis.Charts.StopDurationByReason)
+                                            {
+                                                <tr>
+                                                    <th scope="row">@point.StopReasonName</th>
+                                                    <td class="text-end">@point.StopCount.ToString("N0")</td>
+                                                    <td class="text-end">@point.DurationHours.ToString("N2")</td>
+                                                    <td class="text-end">@point.DurationMinutes.ToString("N0")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="dashboard-chart-empty mb-0" role="status">
+                                Aucune durée d’arrêt pour la période sélectionnée.
+                            </p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12 col-xl-6">
+                    <article class="dashboard-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Nombre de voyages par camion</h3>
+                            <p class="text-muted small mb-0">Activité observée, exprimée en voyages distincts.</p>
+                        </header>
+                        @if (Model.HasTruckActivity)
+                        {
+                            <div class="dashboard-chart-visual dashboard-chart-visual-trucks" hidden>
+                                <canvas id="truck-activity-chart"
+                                        data-dashboard-chart="truckActivity"
+                                        role="img"
+                                        aria-label="Graphique du nombre de voyages par camion"></canvas>
+                            </div>
+                            <details class="dashboard-chart-fallback" open data-chart-fallback="truckActivity">
+                                <summary>Voir les données du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Nombre de voyages par camion</caption>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Camion</th>
+                                                <th scope="col" class="text-end">Voyages</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var point in Model.Kpis.Charts.TruckActivity)
+                                            {
+                                                <tr>
+                                                    <th scope="row">@point.TruckCode</th>
+                                                    <td class="text-end">@point.TripCount.ToString("N0")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="dashboard-chart-empty mb-0" role="status">
+                                Aucune activité camion pour la période sélectionnée.
+                            </p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12 col-xl-6">
+                    <article class="dashboard-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Évolution du P2O5</h3>
+                            <p class="text-muted small mb-0">Moyenne quotidienne des mesures P2O5 non nulles.</p>
+                        </header>
+                        @if (p2o5PeriodAverage.HasValue)
+                        {
+                            <p class="dashboard-chart-summary" role="note">
+                                Moyenne de la période :
+                                <strong>@p2o5PeriodAverage.Value.ToString("N3") %</strong>
+                            </p>
+                        }
+                        @if (Model.HasP2O5Trend)
+                        {
+                            <div class="dashboard-chart-visual" hidden>
+                                <canvas id="p2o5-trend-chart"
+                                        data-dashboard-chart="p2o5Trend"
+                                        role="img"
+                                        aria-label="Graphique de l’évolution quotidienne du P2O5 moyen"></canvas>
+                            </div>
+                            <details class="dashboard-chart-fallback" open data-chart-fallback="p2o5Trend">
+                                <summary>Voir les données du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Moyenne quotidienne du P2O5</caption>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Date</th>
+                                                <th scope="col" class="text-end">P2O5 moyen (%)</th>
+                                                <th scope="col" class="text-end">Mesures</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var point in Model.Kpis.Charts.P2O5Trend)
+                                            {
+                                                <tr>
+                                                    <th scope="row">@point.Date.ToString("dd/MM/yyyy")</th>
+                                                    <td class="text-end">@point.AverageP2O5.ToString("N3")</td>
+                                                    <td class="text-end">@point.MeasurementCount.ToString("N0")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="dashboard-chart-empty mb-0" role="status">
+                                Aucune donnée P2O5 pour la période sélectionnée.
+                            </p>
+                        }
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        @if (Model.HasAnyChartData)
+        {
+            <script id="dashboard-chart-data" type="application/json">@Html.Raw(Model.ChartDataJson)</script>
+        }
+    }
+</div>
+
+@section Scripts {
+    @if (!Model.HasLoadError && ViewData.ModelState.IsValid && Model.HasAnyChartData)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+        <script src="~/js/dashboard.js" asp-append-version="true"></script>
+    }
+}

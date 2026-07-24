@@ -1,0 +1,156 @@
+@model OcpProduction.Web.ViewModels.Performance.DriverPerformanceIndexViewModel
+@using OcpProduction.Application.Performance.Models
+@using OcpProduction.Web.ViewModels.Performance
+
+@{
+    ViewData["Title"] = "Performance conducteurs";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Performance conducteurs</h1>
+        <p class="text-muted mb-0">Indicateurs consolidés tous historiques depuis la vue SQL Server validée.</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Trucks">Performance camions</a>
+</div>
+
+<form method="get" class="filter-panel mb-4" aria-label="Filtres performance conducteurs">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label" for="Search">Recherche</label>
+            <input class="form-control" id="Search" name="Search" value="@Model.Criteria.Search" placeholder="Code ou nom" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="Status">Statut</label>
+            <select class="form-select" id="Status" name="Status">
+                <option value="">Tous les statuts</option>
+                @foreach (var status in Model.FilterOptions.DriverStatuses)
+                {
+                    <option value="@status" selected="@(status == Model.Criteria.Status)">
+                        @PerformancePresentation.GetDriverStatusLabel(status)
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="Sort">Tri</label>
+            <select class="form-select" id="Sort" name="Sort">
+                <option value="@DriverPerformanceSort.TotalTripsDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.TotalTripsDesc)">Voyages décroissants</option>
+                <option value="@DriverPerformanceSort.TotalTonnageDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.TotalTonnageDesc)">Tonnage décroissant</option>
+                <option value="@DriverPerformanceSort.StopDurationDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.StopDurationDesc)">Durée arrêts décroissante</option>
+                <option value="@DriverPerformanceSort.CompletionRateDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.CompletionRateDesc)">Taux de clôture décroissant</option>
+                <option value="@DriverPerformanceSort.CodeAsc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.CodeAsc)">Code croissant</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="PageSize">Lignes</label>
+            <select class="form-select" id="PageSize" name="PageSize">
+                @foreach (var size in new[] { 10, 20, 50 })
+                {
+                    <option value="@size" selected="@(Model.Criteria.PageSize == size)">@size</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+            <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Drivers">Réinitialiser</a>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table align-middle fleet-table">
+        <thead>
+            <tr>
+                <th>Conducteur</th>
+                <th>Statut</th>
+                <th class="text-end">Voyages</th>
+                <th class="text-end">Complétés</th>
+                <th class="text-end">Tonnage</th>
+                <th class="text-end">Durée arrêts</th>
+                <th class="text-end">P2O5 moyen</th>
+                <th>Dernier voyage</th>
+                <th class="text-end">Détail</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Results.Items.Count == 0)
+            {
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-4">Aucune performance conducteur ne correspond aux filtres.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.Results.Items)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@item.DriverCode</div>
+                            <div class="text-muted small">@item.DriverFullName</div>
+                        </td>
+                        <td>@PerformancePresentation.GetDriverStatusLabel(item.DriverStatus)</td>
+                        <td class="text-end">@PerformancePresentation.FormatNumber(item.TotalTrips)</td>
+                        <td class="text-end">@PerformancePresentation.FormatNumber(item.CompletedTrips)</td>
+                        <td class="text-end">@PerformancePresentation.FormatDecimal(item.TotalTonnage, " t")</td>
+                        <td class="text-end">@PerformancePresentation.FormatMinutes(item.TotalLinkedStopDurationMinutes)</td>
+                        <td class="text-end">@PerformancePresentation.FormatDecimal(item.AverageP2O5, " %")</td>
+                        <td>@PerformancePresentation.FormatDate(item.LastTripDate)</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary"
+                               asp-controller="Performance"
+                               asp-action="DriverDetails"
+                               asp-route-id="@item.DriverId"
+                               asp-route-Search="@Model.Criteria.Search"
+                               asp-route-Status="@Model.Criteria.Status"
+                               asp-route-Sort="@Model.Criteria.Sort"
+                               asp-route-Page="@Model.Results.Page"
+                               asp-route-PageSize="@Model.Criteria.PageSize">Voir</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
+    <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+    <nav aria-label="Pagination des performances conducteurs">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
+                @if (Model.Results.HasPreviousPage)
+                {
+                    <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
+                }
+                else
+                {
+                    <span class="page-link" aria-disabled="true">Précédent</span>
+                }
+            </li>
+            @foreach (var pageNumber in Model.VisiblePages)
+            {
+                <li class="page-item @(pageNumber == Model.Results.Page ? "active" : null)">
+                    @if (pageNumber == Model.Results.Page)
+                    {
+                        <span class="page-link" aria-current="page">@pageNumber</span>
+                    }
+                    else
+                    {
+                        <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(pageNumber)">@pageNumber</a>
+                    }
+                </li>
+            }
+            <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
+                @if (Model.Results.HasNextPage)
+                {
+                    <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
+                }
+                else
+                {
+                    <span class="page-link" aria-disabled="true">Suivant</span>
+                }
+            </li>
+        </ul>
+    </nav>
+</div>

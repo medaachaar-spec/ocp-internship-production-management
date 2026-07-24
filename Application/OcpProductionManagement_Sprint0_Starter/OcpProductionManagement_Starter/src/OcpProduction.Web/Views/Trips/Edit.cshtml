@@ -1,0 +1,84 @@
+@model OcpProduction.Web.ViewModels.Trips.TripFormViewModel<OcpProduction.Web.ViewModels.Trips.TripEditInputModel>
+@using OcpProduction.Web.ViewModels.Trips
+@{
+    ViewData["Title"] = $"Modifier le voyage #{Model.Input.TripId}";
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues">Voyages</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-all-route-data="@Model.DetailsRouteValues(Model.Input.TripId)">Voyage #@Model.Input.TripId</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+    </ol>
+</nav>
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Modifier le voyage #@Model.Input.TripId</h1>
+        <p class="text-muted mb-0">Mettez à jour les informations autorisées du voyage.</p>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.CurrentStatus))
+    {
+        <span class="badge fs-6 @TripPresentation.GetStatusBadgeClass(Model.CurrentStatus)">
+            @TripPresentation.GetStatusLabel(Model.CurrentStatus)
+        </span>
+    }
+</div>
+
+<div class="card border-0 shadow-sm trip-form-card">
+    <div class="card-body p-4">
+        <form asp-action="Edit"
+              asp-route-id="@Model.Input.TripId"
+              method="post"
+              asp-antiforgery="true"
+              data-submit-once>
+            <input asp-for="Input.TripId" type="hidden" />
+
+            <div class="alert alert-light border d-flex flex-wrap justify-content-between gap-2" role="status">
+                <span><strong>Identifiant :</strong> #@Model.Input.TripId</span>
+                <span class="text-muted">L’identifiant et le statut ne sont pas modifiables ici.</span>
+            </div>
+
+            @await Html.PartialAsync("_TripForm", (ITripFormViewModel)Model)
+
+            <fieldset class="mt-4 pt-2 border-top">
+                <legend class="h5 mb-3">Informations de fin facultatives</legend>
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <label asp-for="Input.EndTime" class="form-label">Date et heure de fin</label>
+                        <input asp-for="Input.EndTime"
+                               asp-format="{0:yyyy-MM-ddTHH:mm}"
+                               type="datetime-local"
+                               class="form-control" />
+                        <span asp-validation-for="Input.EndTime" class="text-danger small"></span>
+                    </div>
+                    <div class="col-lg-6">
+                        <label asp-for="Input.Tonnage" class="form-label">Tonnage</label>
+                        <div class="input-group">
+                            <input asp-for="Input.Tonnage"
+                                   type="number"
+                                   class="form-control"
+                                   min="0.01"
+                                   max="99999999.99"
+                                   step="0.01" />
+                            <span class="input-group-text">t</span>
+                        </div>
+                        <span asp-validation-for="Input.Tonnage" class="text-danger small"></span>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="d-flex flex-wrap gap-2 mt-4 pt-2">
+                <button type="submit" class="btn btn-primary" data-submit-button>Enregistrer les modifications</button>
+                <a asp-action="Details"
+                   asp-all-route-data="@Model.DetailsRouteValues(Model.Input.TripId)"
+                   class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_TripFormScripts" />
+}

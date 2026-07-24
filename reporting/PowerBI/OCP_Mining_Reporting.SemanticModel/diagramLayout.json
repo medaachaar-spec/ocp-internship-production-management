@@ -1,0 +1,164 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 219.37479502916426,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 68.320331411457573,
+            "y": -50
+          },
+          "nodeIndex": "vw_DriverPerformance",
+          "nodeLineageTag": "d0823700-97aa-4d17-b622-a6e59ac6bea6",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1346.4517181060871,
+            "y": 309.81299837016604
+          },
+          "nodeIndex": "vw_ExecutiveDashboard",
+          "nodeLineageTag": "b964629b-597b-475f-b047-488dd5c02e56",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1062.4517181060871,
+            "y": 309.81299837016604
+          },
+          "nodeIndex": "vw_GlobalProductionSummary",
+          "nodeLineageTag": "67c18b71-2502-46de-a208-b2ea587518c5",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 307.18970011951706
+          },
+          "nodeIndex": "vw_QualityAnalysis",
+          "nodeLineageTag": "bbad3141-96f3-4417-a47c-e96e549c7ff5",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 612.93268204091237,
+            "y": 312.39993807628434
+          },
+          "nodeIndex": "vw_StopAnalysis",
+          "nodeLineageTag": "75bead44-2617-45b9-aeaf-98385e0e393f",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 355.64600585557071,
+            "y": -11.881605881953647
+          },
+          "nodeIndex": "vw_StopsByReason",
+          "nodeLineageTag": "121d450f-c684-4847-b31e-c38f673823f4",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1580.4517181060871,
+            "y": 373.81299837016604
+          },
+          "nodeIndex": "vw_TripsDailySummary",
+          "nodeLineageTag": "a6b80136-1058-4600-a59c-1f36972426b5",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 778.45171810608713,
+            "y": -39.977754866733449
+          },
+          "nodeIndex": "vw_TripSummary",
+          "nodeLineageTag": "4067b937-809f-46b6-a7fb-d02f5f4027c5",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 426.73959825359981,
+            "y": 669.625996740332
+          },
+          "nodeIndex": "vw_TruckPerformance",
+          "nodeLineageTag": "e4f4003d-230d-4a89-8d03-34b3b417705f",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1232.7160468284276,
+            "y": 721.9029533271264
+          },
+          "nodeIndex": "Calendrier",
+          "nodeLineageTag": "9ef01ea6-8098-4fd8-8212-aafbdcbe1ca0",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1814.4517181060871,
+            "y": 409.812998370166
+          },
+          "nodeIndex": "Mesures",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Toutes les tables",
+      "zoomValue": 20.3125,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "Toutes les tables",
+  "defaultDiagram": "Toutes les tables"
+}

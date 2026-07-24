@@ -1,0 +1,62 @@
+# .NET and ASP.NET Core build output
+**/bin/
+**/obj/
+**/artifacts/
+**/TestResults/
+**/coverage/
+**/coverage*/
+*.coverage
+*.coveragexml
+
+# Visual Studio and user-specific project state
+**/.vs/
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+
+# JetBrains IDEs and local VS Code state
+**/.idea/
+**/.vscode/
+*.DotSettings.user
+
+# Logs, diagnostics, crash output, and temporary files
+**/logs/
+**/*.log
+**/*.dmp
+**/*.tmp
+**/*.temp
+**/tmp/
+**/temp/
+
+# Local configuration and secrets
+**/appsettings.Local.json
+**/.env
+**/.env.*
+!**/.env.example
+**/secrets.json
+**/*.pfx
+**/*.p12
+**/*.pem
+**/*.key
+
+# SQL Server local data and backups
+**/*.bak
+**/*.mdf
+**/*.ldf
+**/LocalOnly/
+
+# Power BI temporary and lock files
+**/*.pbix.tmp
+**/~$*
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+**/.pbi/editorSettings.json
+
+# Local data-correction restoration scripts
+**/backups/data-corrections/restore_TruckStop_153.sql
+
+# Operating-system metadata
+**/Thumbs.db
+**/.DS_Store
+**/Desktop.ini

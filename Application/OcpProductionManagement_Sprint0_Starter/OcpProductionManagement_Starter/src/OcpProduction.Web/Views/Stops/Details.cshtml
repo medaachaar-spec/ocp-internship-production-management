@@ -1,0 +1,233 @@
+@model OcpProduction.Web.ViewModels.Stops.StopDetailsViewModel
+@using System.Globalization
+@using OcpProduction.Web.ViewModels.Stops
+@{
+    ViewData["Title"] = $"Détail de l’arrêt #{Model.Stop.StopId}";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        @if (Model.FromValidation)
+        {
+            <li class="breadcrumb-item"><a asp-controller="StopValidation" asp-action="Index">Arrêts à valider</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues">Arrêts</a></li>
+        }
+        <li class="breadcrumb-item active" aria-current="page">Arrêt #@Model.Stop.StopId</li>
+    </ol>
+</nav>
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Détail de l’arrêt #@Model.Stop.StopId</h1>
+        <p class="text-muted mb-0">Consultation en lecture seule des informations enregistrées.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2" aria-label="État de l’arrêt">
+        <span class="badge fs-6 @StopPresentation.GetStateBadgeClass(Model.Stop.State)">
+            @StopPresentation.GetStateLabel(Model.Stop.State)
+        </span>
+        <span class="badge fs-6 @StopPresentation.GetValidationStatusBadgeClass(Model.Stop.ValidationStatus)">
+            @StopPresentation.GetValidationStatusLabel(Model.Stop.ValidationStatus)
+        </span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-general-title">
+            <div class="card-body">
+                <h2 id="stop-general-title" class="h5 mb-3">Informations générales</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Identifiant</dt>
+                        <dd>#@Model.Stop.StopId</dd>
+                    </div>
+                    <div>
+                        <dt>État opérationnel</dt>
+                        <dd>@StopPresentation.GetStateLabel(Model.Stop.State)</dd>
+                    </div>
+                    <div>
+                        <dt>Validation</dt>
+                        <dd>@StopPresentation.GetValidationStatusLabel(Model.Stop.ValidationStatus)</dd>
+                    </div>
+                    <div>
+                        <dt>Créé le</dt>
+                        <dd>@Model.Stop.CreatedAt.ToString("dd/MM/yyyy HH:mm", frenchCulture)</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-assignment-title">
+            <div class="card-body">
+                <h2 id="stop-assignment-title" class="h5 mb-3">Voyage et camion</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Camion</dt>
+                        <dd>@Model.Stop.TruckCode</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.Stop.TruckModel) ||
+                             !string.IsNullOrWhiteSpace(Model.Stop.TruckRegistrationNumber))
+                        {
+                            <small class="text-muted">
+                                @Model.Stop.TruckModel@(string.IsNullOrWhiteSpace(Model.Stop.TruckRegistrationNumber) ? null : $" - {Model.Stop.TruckRegistrationNumber}")
+                            </small>
+                        }
+                    </div>
+                    <div>
+                        <dt>Voyage associé</dt>
+                        @if (Model.Stop.TripId is { } tripId && Model.CanViewRelatedTrip)
+                        {
+                            <dd><a asp-controller="Trips" asp-action="Details" asp-route-id="@tripId">Voyage #@tripId</a></dd>
+                        }
+                        else
+                        {
+                            <dd>@(Model.Stop.TripId is null ? "Aucun voyage associé" : $"Voyage #{Model.Stop.TripId}")</dd>
+                        }
+                    </div>
+                    <div>
+                        <dt>Conducteur</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.Stop.DriverCode) ? "—" : $"{Model.Stop.DriverCode} - {Model.Stop.DriverName}")</dd>
+                    </div>
+                    <div>
+                        <dt>Poste</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.Stop.WorkShiftName) ? "—" : Model.Stop.WorkShiftName)</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.Stop.WorkShiftCode))
+                        {
+                            <small class="text-muted">@Model.Stop.WorkShiftCode</small>
+                        }
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-reason-title">
+            <div class="card-body">
+                <h2 id="stop-reason-title" class="h5 mb-3">Motif de l’arrêt</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Motif</dt>
+                        <dd>@Model.Stop.StopReasonName</dd>
+                        <small class="text-muted">@Model.Stop.StopReasonCode</small>
+                    </div>
+                    <div>
+                        <dt>Catégorie</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.Stop.StopReasonCategory) ? "—" : Model.Stop.StopReasonCategory)</dd>
+                    </div>
+                    <div>
+                        <dt>Planification</dt>
+                        <dd>@(Model.Stop.IsPlanned ? "Planifié" : "Non planifié")</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-6">
+        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-period-title">
+            <div class="card-body">
+                <h2 id="stop-period-title" class="h5 mb-3">Période</h2>
+                <dl class="trip-details-grid mb-0">
+                    <div>
+                        <dt>Début</dt>
+                        <dd>@Model.Stop.StartTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</dd>
+                    </div>
+                    <div>
+                        <dt>Fin</dt>
+                        <dd>@(Model.Stop.EndTime?.ToString("dd/MM/yyyy HH:mm", frenchCulture) ?? "En cours")</dd>
+                    </div>
+                    <div>
+                        <dt>Durée</dt>
+                        <dd>@StopPresentation.FormatDuration(Model.Stop.DurationMinutes)</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    @if (Model.Stop.TripId.HasValue &&
+         (!string.IsNullOrWhiteSpace(Model.Stop.LoadingPointName) ||
+          !string.IsNullOrWhiteSpace(Model.Stop.DestinationName)))
+    {
+        <div class="col-12">
+            <section class="card border-0 shadow-sm" aria-labelledby="stop-context-title">
+                <div class="card-body">
+                    <h2 id="stop-context-title" class="h5 mb-3">Contexte opérationnel</h2>
+                    <dl class="trip-details-grid mb-0">
+                        <div>
+                            <dt>Point de chargement</dt>
+                            <dd>@(Model.Stop.LoadingPointName ?? "—")</dd>
+                            @if (!string.IsNullOrWhiteSpace(Model.Stop.LoadingPointCode))
+                            {
+                                <small class="text-muted">@Model.Stop.LoadingPointCode</small>
+                            }
+                        </div>
+                        <div>
+                            <dt>Destination</dt>
+                            <dd>@(Model.Stop.DestinationName ?? "—")</dd>
+                            @if (!string.IsNullOrWhiteSpace(Model.Stop.DestinationCode))
+                            {
+                                <small class="text-muted">@Model.Stop.DestinationCode</small>
+                            }
+                        </div>
+                    </dl>
+                </div>
+            </section>
+        </div>
+    }
+
+    <div class="col-12">
+        <section class="card border-0 shadow-sm" aria-labelledby="stop-observation-title">
+            <div class="card-body">
+                <h2 id="stop-observation-title" class="h5 mb-3">Observation</h2>
+                <p class="trip-observation mb-0">@StopPresentation.FormatObservation(Model.Stop.Observation)</p>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="mt-4 d-flex flex-wrap gap-2">
+    @if (Model.CanEdit)
+    {
+        <a asp-action="Edit"
+           asp-all-route-data="@Model.EditRouteValues"
+           class="btn btn-primary">Modifier l’arrêt</a>
+    }
+    @if (Model.CanClose)
+    {
+        <a asp-controller="StopWorkflow"
+           asp-action="Close"
+           asp-all-route-data="@Model.CloseRouteValues"
+           class="btn btn-outline-success">Clôturer</a>
+    }
+    @if (Model.CanValidateCurrentStop)
+    {
+        <form asp-controller="StopValidation"
+              asp-action="Validate"
+              asp-route-id="@Model.Stop.StopId"
+              method="post"
+              asp-antiforgery="true"
+              class="d-inline">
+            <button type="submit" class="btn btn-success">Valider l’arrêt</button>
+        </form>
+    }
+    @if (Model.FromValidation)
+    {
+        <a asp-controller="StopValidation"
+           asp-action="Index"
+           class="btn btn-outline-secondary">Retour aux arrêts à valider</a>
+    }
+    else
+    {
+        <a asp-action="Index"
+           asp-all-route-data="@Model.ReturnRouteValues"
+           class="btn btn-outline-secondary">Retour à la liste</a>
+    }
+</div>

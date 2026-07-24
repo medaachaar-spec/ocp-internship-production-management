@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
+  "name": "cb84e8751c4242b17969",
+  "position": {
+    "x": 490,
+    "y": 380,
+    "z": 3000,
+    "height": 300,
+    "width": 300,
+    "tabOrder": 4000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Mesures"
+                    }
+                  },
+                  "Property": "Nombre de voyages"
+                }
+              },
+              "queryRef": "Mesures.Nombre de voyages",
+              "nativeQueryRef": "Nombre de voyages"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

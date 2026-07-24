@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "OCP_Mining_Reporting"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "18c1765a-cec1-462a-9c77-1a7b7a4ebcc4"
+  }
+}

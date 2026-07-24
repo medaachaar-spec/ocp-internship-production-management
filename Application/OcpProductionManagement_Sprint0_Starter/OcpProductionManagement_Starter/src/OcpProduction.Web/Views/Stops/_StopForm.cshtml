@@ -1,0 +1,116 @@
+@model OcpProduction.Web.ViewModels.Stops.IStopFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<input asp-for="ReturnCriteria.Search" type="hidden" />
+<input asp-for="ReturnCriteria.DateFrom" type="hidden" />
+<input asp-for="ReturnCriteria.DateTo" type="hidden" />
+<input asp-for="ReturnCriteria.TruckId" type="hidden" />
+<input asp-for="ReturnCriteria.StopReasonId" type="hidden" />
+<input asp-for="ReturnCriteria.State" type="hidden" />
+<input asp-for="ReturnCriteria.ValidationStatus" type="hidden" />
+<input asp-for="ReturnCriteria.TripId" type="hidden" />
+<input asp-for="ReturnCriteria.Page" type="hidden" />
+<input asp-for="ReturnCriteria.PageSize" type="hidden" />
+
+<fieldset>
+    <legend class="h5 mb-3">Contexte opérationnel</legend>
+    <p class="text-muted small mb-4"><span aria-hidden="true">*</span> Champs obligatoires</p>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <label asp-for="Input.TruckId" class="form-label">
+                Camion <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <select asp-for="Input.TruckId" class="form-select" required>
+                <option value="">Sélectionnez un camion actif</option>
+                @foreach (var option in Model.Options.Trucks)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.TruckId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6">
+            <label asp-for="Input.TripId" class="form-label">Voyage associé</label>
+            <input asp-for="Input.TripId"
+                   type="number"
+                   min="1"
+                   class="form-control"
+                   placeholder="Identifiant du voyage (facultatif)" />
+            <div class="form-text">Si renseigné, le camion et les affectations doivent correspondre au voyage.</div>
+            <span asp-validation-for="Input.TripId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6">
+            <label asp-for="Input.DriverId" class="form-label">Conducteur</label>
+            <select asp-for="Input.DriverId" class="form-select">
+                <option value="">Aucun conducteur</option>
+                @foreach (var option in Model.Options.Drivers)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.DriverId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6">
+            <label asp-for="Input.WorkShiftId" class="form-label">Poste</label>
+            <select asp-for="Input.WorkShiftId" class="form-select">
+                <option value="">Aucun poste</option>
+                @foreach (var option in Model.Options.WorkShifts)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.WorkShiftId" class="text-danger small"></span>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset class="mt-4 pt-2 border-top">
+    <legend class="h5 mb-3">Début et motif de l’arrêt</legend>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <label asp-for="Input.StartTime" class="form-label">
+                Date et heure de début <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <input asp-for="Input.StartTime"
+                   asp-format="{0:yyyy-MM-ddTHH:mm}"
+                   type="datetime-local"
+                   class="form-control"
+                   required />
+            <span asp-validation-for="Input.StartTime" class="text-danger small"></span>
+        </div>
+
+        <div class="col-lg-6">
+            <label asp-for="Input.StopReasonId" class="form-label">
+                Motif d’arrêt <span class="trip-required" aria-hidden="true">*</span>
+            </label>
+            <select asp-for="Input.StopReasonId" class="form-select" required>
+                <option value="">Sélectionnez un motif actif</option>
+                @foreach (var option in Model.Options.StopReasons)
+                {
+                    <option value="@option.Value">@option.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.StopReasonId" class="text-danger small"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Input.Comments" class="form-label">Observation</label>
+            <textarea asp-for="Input.Comments"
+                      class="form-control"
+                      rows="4"
+                      maxlength="500"
+                      placeholder="Décrivez le contexte de l’arrêt si nécessaire."></textarea>
+            <div class="form-text">500 caractères maximum.</div>
+            <span asp-validation-for="Input.Comments" class="text-danger small"></span>
+        </div>
+    </div>
+</fieldset>
+
+<div class="alert alert-info mt-4 mb-0" role="status">
+    Le nouvel arrêt sera enregistré comme ouvert et en attente. Sa clôture sera traitée dans une étape ultérieure.
+</div>

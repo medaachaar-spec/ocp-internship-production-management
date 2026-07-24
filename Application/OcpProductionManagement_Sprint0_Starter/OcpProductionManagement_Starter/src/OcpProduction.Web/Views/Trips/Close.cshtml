@@ -1,0 +1,104 @@
+@model OcpProduction.Web.ViewModels.Trips.TripCloseViewModel
+@using System.Globalization
+@using OcpProduction.Web.ViewModels.Trips
+@{
+    ViewData["Title"] = $"Clôturer le voyage #{Model.Trip.TripId}";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Trips" asp-action="Index" asp-all-route-data="@TripNavigation.ForList(Model.ReturnCriteria)">Voyages</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Clôturer #@Model.Trip.TripId</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <h1>Clôturer le voyage #@Model.Trip.TripId</h1>
+    <p class="text-muted mb-0">Complétez les informations finales avant de transmettre le voyage au superviseur.</p>
+</div>
+
+<div class="card border-0 shadow-sm trip-form-card">
+    <div class="card-body p-4">
+        <section aria-labelledby="trip-close-summary-title" class="mb-4">
+            <h2 id="trip-close-summary-title" class="h5 mb-3">Récapitulatif</h2>
+            <dl class="trip-details-grid trip-details-grid-wide mb-0">
+                <div><dt>Voyage</dt><dd>#@Model.Trip.TripId</dd></div>
+                <div><dt>Début</dt><dd>@Model.Trip.StartTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</dd></div>
+                <div><dt>Camion</dt><dd>@Model.Trip.TruckCode</dd></div>
+                <div><dt>Conducteur</dt><dd>@Model.Trip.DriverCode - @Model.Trip.DriverDisplayName</dd></div>
+                <div><dt>Poste</dt><dd>@Model.Trip.WorkShiftName</dd></div>
+                <div><dt>Trajet</dt><dd>@Model.Trip.LoadingPointName → @Model.Trip.DestinationName</dd></div>
+                <div>
+                    <dt>Statut</dt>
+                    <dd><span class="badge @TripPresentation.GetStatusBadgeClass(Model.Trip.Status)">@TripPresentation.GetStatusLabel(Model.Trip.Status)</span></dd>
+                </div>
+            </dl>
+        </section>
+
+        <div class="alert alert-warning" role="alert">
+            Après la clôture, le voyage sera transmis au superviseur et ne pourra plus être modifié par l’agent.
+        </div>
+
+        <form asp-controller="TripWorkflow"
+              asp-action="Close"
+              asp-route-id="@Model.Trip.TripId"
+              method="post"
+              asp-antiforgery="true"
+              data-submit-once>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <input asp-for="Input.TripId" type="hidden" />
+            <input asp-for="ReturnCriteria.Search" type="hidden" />
+            <input asp-for="ReturnCriteria.DateFrom" type="hidden" />
+            <input asp-for="ReturnCriteria.DateTo" type="hidden" />
+            <input asp-for="ReturnCriteria.TruckId" type="hidden" />
+            <input asp-for="ReturnCriteria.DriverId" type="hidden" />
+            <input asp-for="ReturnCriteria.WorkShiftId" type="hidden" />
+            <input asp-for="ReturnCriteria.Status" type="hidden" />
+            <input asp-for="ReturnCriteria.Page" type="hidden" />
+            <input asp-for="ReturnCriteria.PageSize" type="hidden" />
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.EndTime" class="form-label">
+                        Date et heure de fin <span class="trip-required" aria-hidden="true">*</span>
+                    </label>
+                    <input asp-for="Input.EndTime"
+                           asp-format="{0:yyyy-MM-ddTHH:mm}"
+                           type="datetime-local"
+                           class="form-control"
+                           required />
+                    <span asp-validation-for="Input.EndTime" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.Tonnage" class="form-label">
+                        Tonnage <span class="trip-required" aria-hidden="true">*</span>
+                    </label>
+                    <div class="input-group">
+                        <input asp-for="Input.Tonnage"
+                               type="text"
+                               inputmode="decimal"
+                               class="form-control"
+                               placeholder="0,00"
+                               required />
+                        <span class="input-group-text">t</span>
+                    </div>
+                    <span asp-validation-for="Input.Tonnage" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-success">Clôturer et transmettre</button>
+                <a asp-controller="Trips"
+                   asp-action="Details"
+                   asp-all-route-data="@Model.DetailsRouteValues"
+                   class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="~/Views/Trips/_TripFormScripts.cshtml" />
+}

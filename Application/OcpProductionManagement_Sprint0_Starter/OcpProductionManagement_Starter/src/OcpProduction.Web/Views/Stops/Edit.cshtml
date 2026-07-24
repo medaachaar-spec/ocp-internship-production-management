@@ -1,0 +1,65 @@
+@model OcpProduction.Web.ViewModels.Stops.StopFormViewModel<OcpProduction.Web.ViewModels.Stops.StopEditInputModel>
+@using OcpProduction.Web.ViewModels.Stops
+@{
+    ViewData["Title"] = Model.PageTitle;
+}
+
+<nav aria-label="Fil d’Ariane" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues">Arrêts</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-all-route-data="@Model.DetailsRouteValues(Model.Input.StopId)">Arrêt #@Model.Input.StopId</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+    </ol>
+</nav>
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h1>@Model.PageTitle</h1>
+        <p class="text-muted mb-0">Corrigez les informations autorisées tant que l’arrêt est encore ouvert.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2" aria-label="État actuel">
+        @if (!string.IsNullOrWhiteSpace(Model.CurrentState))
+        {
+            <span class="badge fs-6 @StopPresentation.GetStateBadgeClass(Model.CurrentState)">
+                @StopPresentation.GetStateLabel(Model.CurrentState)
+            </span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.CurrentValidationStatus))
+        {
+            <span class="badge fs-6 @StopPresentation.GetValidationStatusBadgeClass(Model.CurrentValidationStatus)">
+                @StopPresentation.GetValidationStatusLabel(Model.CurrentValidationStatus)
+            </span>
+        }
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm trip-form-card">
+    <div class="card-body p-4">
+        <form asp-action="Edit"
+              asp-route-id="@Model.Input.StopId"
+              method="post"
+              asp-antiforgery="true"
+              data-submit-once>
+            <input asp-for="Input.StopId" type="hidden" />
+
+            <div class="alert alert-light border" role="status">
+                <strong>Identifiant :</strong> #@Model.Input.StopId
+                <span class="text-muted ms-2">L’identifiant, la fin et le statut ne sont pas modifiables ici.</span>
+            </div>
+
+            @await Html.PartialAsync("_StopForm", (IStopFormViewModel)Model)
+
+            <div class="d-flex flex-wrap gap-2 mt-4 pt-2">
+                <button type="submit" class="btn btn-primary" data-submit-button>@Model.SubmitLabel</button>
+                <a asp-action="Details"
+                   asp-all-route-data="@Model.DetailsRouteValues(Model.Input.StopId)"
+                   class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_StopFormScripts" />
+}
