@@ -1,3 +1,4 @@
+using System.Text.Json;
 using OcpProduction.Application.Performance.Dtos;
 using OcpProduction.Application.Performance.Models;
 using OcpProduction.Application.Trips.Models;
@@ -6,10 +7,24 @@ namespace OcpProduction.Web.ViewModels.Performance;
 
 public sealed class TruckPerformanceIndexViewModel
 {
+    private static readonly JsonSerializerOptions ChartJsonOptions =
+        new(JsonSerializerDefaults.Web);
+
     public TruckPerformanceSearchCriteria Criteria { get; init; } = new();
-    public PagedResult<TruckPerformanceListItemDto> Results { get; init; } =
-        PagedResult<TruckPerformanceListItemDto>.Create([], 1, 20, 0);
+    public TruckPerformanceReportDto Report { get; init; } = new();
     public PerformanceFilterOptions FilterOptions { get; init; } = new();
+    public bool HasLoadError { get; init; }
+
+    public PagedResult<TruckPerformanceListItemDto> Results => Report.TableRows;
+
+    public bool HasAnyChartData =>
+        Report.Charts.TripsByTruck.Count > 0 ||
+        Report.Charts.TonnageByTruck.Count > 0 ||
+        Report.Charts.StopsByTruck.Count > 0 ||
+        Report.Charts.P2O5ByTruck.Count > 0;
+
+    public string ChartDataJson =>
+        JsonSerializer.Serialize(Report.Charts, ChartJsonOptions);
 
     public IEnumerable<int> VisiblePages
     {

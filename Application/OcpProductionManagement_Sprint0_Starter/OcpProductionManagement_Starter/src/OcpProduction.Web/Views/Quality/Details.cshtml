@@ -4,6 +4,7 @@
     ViewData["Title"] = $"Détail de l’analyse #{Model.Result.QualityResultId}";
 }
 
+<div class="detail-page">
 <nav aria-label="Fil d’Ariane" class="mb-3">
     <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
@@ -12,13 +13,14 @@
     </ol>
 </nav>
 
-<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
-    <div>
+<header class="detail-header">
+    <div class="detail-header__identity">
+        <p class="detail-header__eyebrow">Analyse qualité</p>
         <h1>Détail de l’analyse #@Model.Result.QualityResultId</h1>
         <p class="text-muted mb-0">Consultation en lecture seule de la mesure et de son contexte enregistré.</p>
     </div>
-    <div class="d-flex flex-wrap align-items-center gap-2">
-        <span class="badge fs-6 @QualityPresentation.GetStatusBadgeClass(Model.Result.Status)">
+    <div class="detail-header__actions">
+        <span class="badge status-badge @QualityPresentation.GetStatusBadgeClass(Model.Result.Status)">
             @QualityPresentation.GetStatusLabel(Model.Result.Status)
         </span>
         @if (Model.CanEdit)
@@ -26,14 +28,14 @@
             <a asp-action="Edit" asp-all-route-data="@Model.EditRouteValues" class="btn btn-primary">Modifier</a>
         }
     </div>
-</div>
+</header>
 
 <div class="row g-4">
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-general-title">
-            <div class="card-body">
-                <h2 id="quality-general-title" class="h5 mb-3">Informations générales</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="quality-general-title">
+            <div class="detail-section-card__body">
+                <h2 id="quality-general-title" class="detail-section-heading">Informations générales</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Identifiant</dt>
                         <dd>#@Model.Result.QualityResultId</dd>
@@ -56,11 +58,11 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-measure-title">
-            <div class="card-body">
-                <h2 id="quality-measure-title" class="h5 mb-3">Mesure qualité</h2>
-                <p class="display-6 mb-3">@QualityPresentation.FormatMeasurement(Model.Result.QualityValue, Model.Result.QualityUnit)</p>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="quality-measure-title">
+            <div class="detail-section-card__body">
+                <h2 id="quality-measure-title" class="detail-section-heading">Mesure qualité</h2>
+                <p class="detail-key-value">@QualityPresentation.FormatMeasurement(Model.Result.QualityValue, Model.Result.QualityUnit)</p>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Unité enregistrée</dt>
                         <dd>@QualityPresentation.OrFallback(Model.Result.QualityUnit)</dd>
@@ -70,15 +72,15 @@
                         <dd>@QualityPresentation.FormatMeasurement(Model.Result.TargetValue, Model.Result.QualityUnit)</dd>
                     </div>
                 </dl>
-                <p class="text-muted small mt-3 mb-0">Les valeurs sont affichées sans interprétation de conformité.</p>
+                <p class="detail-note">Les valeurs sont affichées sans interprétation de conformité.</p>
             </div>
         </section>
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-trip-title">
-            <div class="card-body">
-                <h2 id="quality-trip-title" class="h5 mb-3">Voyage associé</h2>
+        <section class="detail-section-card" aria-labelledby="quality-trip-title">
+            <div class="detail-section-card__body">
+                <h2 id="quality-trip-title" class="detail-section-heading">Voyage associé</h2>
                 @if (Model.Result.TripId is { } tripId)
                 {
                     <p class="mb-2">Voyage #@tripId</p>
@@ -100,10 +102,10 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="quality-context-title">
-            <div class="card-body">
-                <h2 id="quality-context-title" class="h5 mb-3">Contexte opérationnel</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="quality-context-title">
+            <div class="detail-section-card__body">
+                <h2 id="quality-context-title" class="detail-section-heading">Contexte opérationnel</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Camion</dt>
                         <dd>@QualityPresentation.OrFallback(Model.Result.TruckCode)</dd>
@@ -146,19 +148,16 @@
     </div>
 
     <div class="col-12">
-        <section class="card border-0 shadow-sm" aria-labelledby="quality-comments-title">
-            <div class="card-body">
-                <h2 id="quality-comments-title" class="h5 mb-3">Observation</h2>
-                <p class="trip-observation mb-0">@(string.IsNullOrWhiteSpace(Model.Result.Comments) ? "Aucune observation enregistrée." : Model.Result.Comments)</p>
+        <section class="detail-section-card" aria-labelledby="quality-comments-title">
+            <div class="detail-section-card__body">
+                <h2 id="quality-comments-title" class="detail-section-heading">Observation</h2>
+                <p class="detail-note trip-observation">@(string.IsNullOrWhiteSpace(Model.Result.Comments) ? "Aucune observation enregistrée." : Model.Result.Comments)</p>
             </div>
         </section>
     </div>
 </div>
 
-<div class="mt-4">
-    @if (Model.CanEdit)
-    {
-        <a asp-action="Edit" asp-all-route-data="@Model.EditRouteValues" class="btn btn-primary">Modifier</a>
-    }
+<div class="detail-footer-actions">
     <a asp-action="Index" asp-all-route-data="@Model.ReturnRouteValues" class="btn btn-outline-secondary">Retour à la liste</a>
+</div>
 </div>

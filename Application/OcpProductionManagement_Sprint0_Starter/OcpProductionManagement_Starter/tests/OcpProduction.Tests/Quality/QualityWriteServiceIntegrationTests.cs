@@ -19,7 +19,7 @@ public sealed class QualityWriteServiceIntegrationTests
     {
         await using var context = CreateContext();
         var before = await CaptureSnapshotAsync(context);
-        var marker = $"CODEX-QUALITY-ROLLBACK-{Guid.NewGuid():N}";
+        var marker = $"OCP-QUALITY-ROLLBACK-{Guid.NewGuid():N}";
         long? createdId = null;
 
         await using var transaction = await context.Database.BeginTransactionAsync();

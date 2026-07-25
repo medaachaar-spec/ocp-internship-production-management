@@ -6,57 +6,137 @@
     var performance = Model.Performance;
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div>
-        <h1 class="h3 mb-1">@performance.DriverFullName</h1>
-        <p class="text-muted mb-0">@performance.DriverCode · @PerformancePresentation.GetDriverStatusLabel(performance.DriverStatus)</p>
+<div class="performance-page performance-detail-page">
+    <header class="performance-detail-header">
+        <div class="performance-detail-identity">
+            <p class="performance-eyebrow">Performance conducteur</p>
+            <h1>@performance.DriverFullName</h1>
+            <p class="performance-detail-subtitle">@performance.DriverCode</p>
+            <span class="performance-detail-status">
+                @PerformancePresentation.GetDriverStatusLabel(performance.DriverStatus)
+            </span>
+        </div>
+        <a class="btn btn-outline-secondary"
+           asp-controller="Performance"
+           asp-action="Drivers"
+           asp-route-Search="@Model.ReturnCriteria.Search"
+           asp-route-Status="@Model.ReturnCriteria.Status"
+           asp-route-Sort="@Model.ReturnCriteria.Sort"
+           asp-route-Page="@Model.ReturnCriteria.Page"
+           asp-route-PageSize="@Model.ReturnCriteria.PageSize">Retour aux performances conducteurs</a>
+    </header>
+
+    <p class="performance-detail-note" role="note">
+        Indicateurs consolidés à partir de l’historique disponible.
+    </p>
+
+    <section aria-labelledby="driver-detail-summary-heading">
+        <h2 id="driver-detail-summary-heading" class="visually-hidden">Synthèse du conducteur</h2>
+        <div class="performance-detail-metric-grid">
+            <article class="performance-detail-metric performance-detail-metric--green">
+                <span class="performance-detail-metric__label">Voyages</span>
+                <strong class="performance-detail-metric__value">@PerformancePresentation.FormatNumber(performance.TotalTrips)</strong>
+            </article>
+            <article class="performance-detail-metric performance-detail-metric--blue">
+                <span class="performance-detail-metric__label">Tonnage</span>
+                <strong class="performance-detail-metric__value">@PerformancePresentation.FormatDecimal(performance.TotalTonnage, " t")</strong>
+            </article>
+            <article class="performance-detail-metric performance-detail-metric--deep-green">
+                <span class="performance-detail-metric__label">Taux complété</span>
+                <strong class="performance-detail-metric__value">@PerformancePresentation.FormatPercent(performance.CompletionRatePercent)</strong>
+            </article>
+            <article class="performance-detail-metric performance-detail-metric--beige">
+                <span class="performance-detail-metric__label">Arrêts associés</span>
+                <strong class="performance-detail-metric__value">@PerformancePresentation.FormatNumber(performance.TotalLinkedStopCount)</strong>
+            </article>
+        </div>
+    </section>
+
+    <div class="row g-3 performance-detail-sections">
+        <div class="col-lg-6">
+            <section class="performance-detail-card performance-detail-card--production" aria-labelledby="driver-transport-heading">
+                <div class="performance-detail-card__body">
+                    <h2 id="driver-transport-heading">Activité de transport</h2>
+                    <dl class="performance-detail-facts">
+                        <div>
+                            <dt>Voyages complétés</dt>
+                            <dd>@PerformancePresentation.FormatNumber(performance.CompletedTrips)</dd>
+                        </div>
+                        <div>
+                            <dt>Voyages non complétés</dt>
+                            <dd>@PerformancePresentation.FormatNumber(performance.IncompleteTrips)</dd>
+                        </div>
+                        <div>
+                            <dt>Charge moyenne</dt>
+                            <dd>@PerformancePresentation.FormatDecimal(performance.AveragePayloadTonnes, " t")</dd>
+                        </div>
+                        <div>
+                            <dt>Utilisation moyenne</dt>
+                            <dd>@PerformancePresentation.FormatPercent(performance.AveragePayloadUtilizationPercent)</dd>
+                        </div>
+                        <div>
+                            <dt>Durée moyenne voyage</dt>
+                            <dd>@PerformancePresentation.FormatMinutes(performance.AverageTripDurationMinutes)</dd>
+                        </div>
+                    </dl>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-lg-6">
+            <section class="performance-detail-card performance-detail-card--stops" aria-labelledby="driver-stops-quality-heading">
+                <div class="performance-detail-card__body">
+                    <h2 id="driver-stops-quality-heading">Arrêts et qualité associés</h2>
+                    <dl class="performance-detail-facts">
+                        <div>
+                            <dt>Voyages avec arrêts associés</dt>
+                            <dd>@PerformancePresentation.FormatNumber(performance.TripsWithStops)</dd>
+                        </div>
+                        <div>
+                            <dt>Durée totale des arrêts associés</dt>
+                            <dd>@PerformancePresentation.FormatMinutes(performance.TotalLinkedStopDurationMinutes)</dd>
+                        </div>
+                        <div>
+                            <dt>Durée moyenne d’un arrêt associé</dt>
+                            <dd>@PerformancePresentation.FormatMinutes(performance.AverageLinkedStopDurationMinutes)</dd>
+                        </div>
+                        <div>
+                            <dt>Analyses associées</dt>
+                            <dd>@PerformancePresentation.FormatNumber(performance.QualityResultCount)</dd>
+                        </div>
+                        <div>
+                            <dt>P2O5 moyen associé aux voyages</dt>
+                            <dd>@PerformancePresentation.FormatDecimal(performance.AverageP2O5, " %")</dd>
+                        </div>
+                        <div>
+                            <dt>P2O5 min. / max. associé aux voyages</dt>
+                            <dd>@PerformancePresentation.FormatDecimal(performance.MinimumP2O5, " %") / @PerformancePresentation.FormatDecimal(performance.MaximumP2O5, " %")</dd>
+                        </div>
+                    </dl>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12">
+            <section class="performance-detail-card performance-detail-card--period" aria-labelledby="driver-period-heading">
+                <div class="performance-detail-card__body">
+                    <h2 id="driver-period-heading">Période analysée</h2>
+                    <dl class="performance-detail-facts performance-detail-facts--period">
+                        <div>
+                            <dt>Première date de voyage</dt>
+                            <dd>@PerformancePresentation.FormatDate(performance.FirstTripDate)</dd>
+                        </div>
+                        <div>
+                            <dt>Dernière date de voyage</dt>
+                            <dd>@PerformancePresentation.FormatDate(performance.LastTripDate)</dd>
+                        </div>
+                    </dl>
+                </div>
+            </section>
+        </div>
     </div>
-    <a class="btn btn-outline-secondary"
-       asp-controller="Performance"
-       asp-action="Drivers"
-       asp-route-Search="@Model.ReturnCriteria.Search"
-       asp-route-Status="@Model.ReturnCriteria.Status"
-       asp-route-Sort="@Model.ReturnCriteria.Sort"
-       asp-route-Page="@Model.ReturnCriteria.Page"
-       asp-route-PageSize="@Model.ReturnCriteria.PageSize">Retour</a>
 </div>
 
-<div class="alert alert-info" role="note">
-    Ces indicateurs proviennent de <code>vw_DriverPerformance</code> et couvrent tout l'historique disponible.
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-3"><div class="metric-card"><span>Voyages</span><strong>@PerformancePresentation.FormatNumber(performance.TotalTrips)</strong></div></div>
-    <div class="col-md-3"><div class="metric-card"><span>Tonnage</span><strong>@PerformancePresentation.FormatDecimal(performance.TotalTonnage, " t")</strong></div></div>
-    <div class="col-md-3"><div class="metric-card"><span>Taux complété</span><strong>@PerformancePresentation.FormatPercent(performance.CompletionRatePercent)</strong></div></div>
-    <div class="col-md-3"><div class="metric-card"><span>Arrêts liés</span><strong>@PerformancePresentation.FormatNumber(performance.TotalLinkedStopCount)</strong></div></div>
-</div>
-
-<div class="row g-4">
-    <div class="col-lg-6">
-        <section class="content-panel">
-            <h2 class="h5">Production</h2>
-            <dl class="row mb-0">
-                <dt class="col-sm-6">Voyages complétés</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.CompletedTrips)</dd>
-                <dt class="col-sm-6">Voyages non complétés</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.IncompleteTrips)</dd>
-                <dt class="col-sm-6">Charge moyenne</dt><dd class="col-sm-6">@PerformancePresentation.FormatDecimal(performance.AveragePayloadTonnes, " t")</dd>
-                <dt class="col-sm-6">Utilisation moyenne</dt><dd class="col-sm-6">@PerformancePresentation.FormatPercent(performance.AveragePayloadUtilizationPercent)</dd>
-                <dt class="col-sm-6">Durée moyenne voyage</dt><dd class="col-sm-6">@PerformancePresentation.FormatMinutes(performance.AverageTripDurationMinutes)</dd>
-                <dt class="col-sm-6">Période voyages</dt><dd class="col-sm-6">@PerformancePresentation.FormatDate(performance.FirstTripDate) - @PerformancePresentation.FormatDate(performance.LastTripDate)</dd>
-            </dl>
-        </section>
-    </div>
-    <div class="col-lg-6">
-        <section class="content-panel">
-            <h2 class="h5">Arrêts et qualité</h2>
-            <dl class="row mb-0">
-                <dt class="col-sm-6">Voyages avec arrêts</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.TripsWithStops)</dd>
-                <dt class="col-sm-6">Durée totale arrêts</dt><dd class="col-sm-6">@PerformancePresentation.FormatMinutes(performance.TotalLinkedStopDurationMinutes)</dd>
-                <dt class="col-sm-6">Durée moyenne arrêt</dt><dd class="col-sm-6">@PerformancePresentation.FormatMinutes(performance.AverageLinkedStopDurationMinutes)</dd>
-                <dt class="col-sm-6">Résultats qualité</dt><dd class="col-sm-6">@PerformancePresentation.FormatNumber(performance.QualityResultCount)</dd>
-                <dt class="col-sm-6">P2O5 moyen</dt><dd class="col-sm-6">@PerformancePresentation.FormatDecimal(performance.AverageP2O5, " %")</dd>
-                <dt class="col-sm-6">P2O5 min / max</dt><dd class="col-sm-6">@PerformancePresentation.FormatDecimal(performance.MinimumP2O5, " %") / @PerformancePresentation.FormatDecimal(performance.MaximumP2O5, " %")</dd>
-            </dl>
-        </section>
-    </div>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/performance.css" asp-append-version="true" />
+}

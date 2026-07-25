@@ -6,12 +6,20 @@ namespace OcpProduction.Application.Performance.Services;
 
 public interface IPerformanceReadService
 {
+    Task<TruckPerformanceReportDto> GetTruckReportAsync(
+        TruckPerformanceSearchCriteria criteria,
+        CancellationToken cancellationToken = default);
+
     Task<PagedResult<TruckPerformanceListItemDto>> SearchTrucksAsync(
         TruckPerformanceSearchCriteria criteria,
         CancellationToken cancellationToken = default);
 
     Task<TruckPerformanceDetailsDto?> GetTruckAsync(
         int truckId,
+        CancellationToken cancellationToken = default);
+
+    Task<DriverPerformanceReportDto> GetDriverReportAsync(
+        DriverPerformanceSearchCriteria criteria,
         CancellationToken cancellationToken = default);
 
     Task<PagedResult<DriverPerformanceListItemDto>> SearchDriversAsync(

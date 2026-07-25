@@ -4,153 +4,368 @@
 
 @{
     ViewData["Title"] = "Performance camions";
+    var summary = Model.Report.Summary;
+    var charts = Model.Report.Charts;
+    var totalStopHours = summary.TotalStopDurationMinutes / 60m;
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div>
-        <h1 class="h3 mb-1">Performance camions</h1>
-        <p class="text-muted mb-0">Indicateurs consolidés tous historiques depuis la vue SQL Server validée.</p>
-    </div>
-    <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Drivers">Performance conducteurs</a>
+<div class="performance-page">
+    <header class="performance-header">
+        <div>
+            <p class="performance-eyebrow">Analyse descriptive</p>
+            <h1 class="h3 mb-1">Performance camions</h1>
+            <p class="text-muted mb-0">Analyse descriptive de l’activité, du tonnage et des arrêts par camion.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Drivers">Performance conducteurs</a>
+    </header>
+
+    <form method="get" class="card performance-filter-card" aria-label="Filtres performance camions">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="Search">Recherche</label>
+                    <input class="form-control" id="Search" name="Search" value="@Model.Criteria.Search" placeholder="Code ou modèle" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="Status">Statut</label>
+                    <select class="form-select" id="Status" name="Status">
+                        <option value="">Tous les statuts</option>
+                        @foreach (var status in Model.FilterOptions.TruckStatuses)
+                        {
+                            <option value="@status" selected="@(status == Model.Criteria.Status)">
+                                @PerformancePresentation.GetTruckStatusLabel(status)
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="Sort">Tri du tableau</label>
+                    <select class="form-select" id="Sort" name="Sort">
+                        <option value="@TruckPerformanceSort.TotalTripsDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.TotalTripsDesc)">Voyages décroissants</option>
+                        <option value="@TruckPerformanceSort.TotalTonnageDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.TotalTonnageDesc)">Tonnage décroissant</option>
+                        <option value="@TruckPerformanceSort.DowntimeDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.DowntimeDesc)">Arrêts décroissants</option>
+                        <option value="@TruckPerformanceSort.CompletionRateDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.CompletionRateDesc)">Taux de clôture décroissant</option>
+                        <option value="@TruckPerformanceSort.CodeAsc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.CodeAsc)">Code croissant</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="PageSize">Lignes</label>
+                    <select class="form-select" id="PageSize" name="PageSize">
+                        @foreach (var size in new[] { 10, 20, 50 })
+                        {
+                            <option value="@size" selected="@(Model.Criteria.PageSize == size)">@size</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                    <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Trucks">Réinitialiser</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.HasLoadError)
+    {
+        <div class="alert alert-danger performance-load-error" role="alert">
+            Les données de performance des camions ne peuvent pas être chargées actuellement.
+        </div>
+    }
+    else
+    {
+        <section class="performance-section" aria-labelledby="truck-summary-heading">
+            <div class="performance-section-heading">
+                <div>
+                    <h2 id="truck-summary-heading" class="h4 mb-1">Synthèse filtrée</h2>
+                    <p class="text-muted mb-0">Calculée sur tous les camions correspondant aux filtres, indépendamment de la page du tableau.</p>
+                </div>
+            </div>
+            <div class="performance-summary-grid">
+                <article class="performance-summary-card">
+                    <p>Camions affichés</p>
+                    <strong>@PerformancePresentation.FormatNumber(summary.DisplayedTruckCount)</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Voyages</p>
+                    <strong>@PerformancePresentation.FormatNumber(summary.TripCount)</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Tonnage transporté</p>
+                    <strong>@PerformancePresentation.FormatDecimal(summary.CompletedTonnage, " t")</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Arrêts</p>
+                    <strong>@PerformancePresentation.FormatNumber(summary.StopCount)</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Durée totale des arrêts</p>
+                    <strong>@PerformancePresentation.FormatDecimal(totalStopHours, " h")</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="performance-section" aria-labelledby="truck-chart-heading">
+            <div class="performance-section-heading">
+                <div>
+                    <h2 id="truck-chart-heading" class="h4 mb-1">Comparaisons par camion</h2>
+                    <p class="text-muted mb-0">Les graphiques sont classés par valeur décroissante pour la lecture; le tri choisi ci-dessus s’applique au tableau.</p>
+                </div>
+            </div>
+            <div class="row g-3 performance-chart-grid">
+                <div class="col-12 col-xl-6">
+                    <article class="performance-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Nombre de voyages par camion</h3>
+                            <p class="text-muted small mb-0">Activité enregistrée pour les camions correspondant aux filtres.</p>
+                        </header>
+                        @if (charts.TripsByTruck.Count > 0)
+                        {
+                            <div class="performance-chart-visual performance-chart-visual-trucks @(charts.TripsByTruck.Count <= 5 ? "performance-chart-visual-compact" : null)" hidden>
+                                <canvas id="truck-trips-chart" role="img" aria-label="Graphique du nombre de voyages par camion"></canvas>
+                            </div>
+                            <details class="performance-chart-fallback" open data-chart-fallback="truckTrips">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Nombre de voyages par camion</caption>
+                                        <thead><tr><th scope="col">Camion</th><th scope="col" class="text-end">Voyages</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var point in charts.TripsByTruck)
+                                        {
+                                            <tr><th scope="row">@point.Category</th><td class="text-end">@PerformancePresentation.FormatNumber(point.Value)</td></tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="performance-chart-empty mb-0" role="status">Aucune donnée de voyage pour les filtres sélectionnés.</p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12 col-xl-6">
+                    <article class="performance-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Tonnage transporté par camion</h3>
+                            <p class="text-muted small mb-0">Tonnage des voyages terminés, en tonnes.</p>
+                        </header>
+                        @if (charts.TonnageByTruck.Count > 0)
+                        {
+                            <div class="performance-chart-visual performance-chart-visual-trucks @(charts.TonnageByTruck.Count <= 5 ? "performance-chart-visual-compact" : null)" hidden>
+                                <canvas id="truck-tonnage-chart" role="img" aria-label="Graphique du tonnage transporté par camion en tonnes"></canvas>
+                            </div>
+                            <details class="performance-chart-fallback" open data-chart-fallback="truckTonnage">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Tonnage transporté par camion</caption>
+                                        <thead><tr><th scope="col">Camion</th><th scope="col" class="text-end">Tonnage transporté (t)</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var point in charts.TonnageByTruck)
+                                        {
+                                            <tr><th scope="row">@point.Category</th><td class="text-end">@PerformancePresentation.FormatDecimal(point.Value)</td></tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="performance-chart-empty mb-0" role="status">Aucune donnée de tonnage pour les filtres sélectionnés.</p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12 col-xl-6">
+                    <article class="performance-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Nombre d’arrêts par camion</h3>
+                            <p class="text-muted small mb-0">Tous les arrêts associés au camion, liés ou non à un voyage.</p>
+                        </header>
+                        @if (charts.StopsByTruck.Count > 0)
+                        {
+                            <div class="performance-chart-visual performance-chart-visual-trucks @(charts.StopsByTruck.Count <= 5 ? "performance-chart-visual-compact" : null)" hidden>
+                                <canvas id="truck-stops-chart" role="img" aria-label="Graphique du nombre d’arrêts par camion"></canvas>
+                            </div>
+                            <details class="performance-chart-fallback" open data-chart-fallback="truckStops">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Nombre d’arrêts par camion</caption>
+                                        <thead><tr><th scope="col">Camion</th><th scope="col" class="text-end">Arrêts</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var point in charts.StopsByTruck)
+                                        {
+                                            <tr><th scope="row">@point.Category</th><td class="text-end">@PerformancePresentation.FormatNumber(point.Value)</td></tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="performance-chart-empty mb-0" role="status">Aucune donnée d’arrêt pour les filtres sélectionnés.</p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12 col-xl-6">
+                    <article class="performance-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">P2O5 moyen observé par camion</h3>
+                            <p class="text-muted small mb-0">Moyenne observée des analyses P2O5 liées aux voyages du camion; les valeurs nulles sont omises.</p>
+                        </header>
+                        @if (charts.P2O5ByTruck.Count > 0)
+                        {
+                            <div class="performance-chart-visual performance-chart-visual-trucks @(charts.P2O5ByTruck.Count <= 5 ? "performance-chart-visual-compact" : null)" hidden>
+                                <canvas id="truck-p2o5-chart" role="img" aria-label="Graphique du P2O5 moyen observé par camion en pourcentage"></canvas>
+                            </div>
+                            <details class="performance-chart-fallback" open data-chart-fallback="truckP2O5">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">P2O5 moyen observé par camion</caption>
+                                        <thead><tr><th scope="col">Camion</th><th scope="col" class="text-end">P2O5 moyen observé (%)</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var point in charts.P2O5ByTruck)
+                                        {
+                                            <tr><th scope="row">@point.Category</th><td class="text-end">@PerformancePresentation.FormatP2O5(point.Value)</td></tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="performance-chart-empty mb-0" role="status">Aucune valeur P2O5 liée n’est disponible pour les filtres sélectionnés.</p>
+                        }
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="performance-section" aria-labelledby="truck-detail-heading">
+            <div class="performance-section-heading">
+                <div>
+                    <h2 id="truck-detail-heading" class="h4 mb-1">Détail par camion</h2>
+                    <p class="text-muted mb-0">Valeurs agrégées exactes; le tableau reste paginé selon la sélection de lignes.</p>
+                </div>
+            </div>
+            <div class="performance-table-region table-responsive">
+                <table class="table align-middle fleet-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Camion</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="text-end">Voyages</th>
+                            <th scope="col" class="text-end">Terminés</th>
+                            <th scope="col" class="text-end">Tonnage transporté</th>
+                            <th scope="col" class="text-end">Arrêts</th>
+                            <th scope="col" class="text-end">P2O5 moyen observé</th>
+                            <th scope="col">Dernier voyage</th>
+                            <th scope="col" class="text-end">Détail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Results.Items.Count == 0)
+                        {
+                            <tr><td colspan="9" class="text-center text-muted py-4">Aucune performance camion ne correspond aux filtres.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Results.Items)
+                            {
+                                <tr>
+                                    <td><div class="fw-semibold">@item.TruckCode</div><div class="text-muted small">@PerformancePresentation.OrDash(item.TruckModel)</div></td>
+                                    <td>@PerformancePresentation.GetTruckStatusLabel(item.TruckStatus)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatNumber(item.TotalTrips)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatNumber(item.CompletedTrips)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatDecimal(item.CompletedTonnage, " t")</td>
+                                    <td class="text-end">@PerformancePresentation.FormatNumber(item.TotalStopCount)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatP2O5(item.AverageP2O5)</td>
+                                    <td>@PerformancePresentation.FormatDate(item.LastTripDate)</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           asp-controller="Performance"
+                                           asp-action="TruckDetails"
+                                           asp-route-id="@item.TruckId"
+                                           asp-route-Search="@Model.Criteria.Search"
+                                           asp-route-Status="@Model.Criteria.Status"
+                                           asp-route-Sort="@Model.Criteria.Sort"
+                                           asp-route-Page="@Model.Results.Page"
+                                           asp-route-PageSize="@Model.Criteria.PageSize">Voir</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
+                <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+                <nav aria-label="Pagination des performances camions">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
+                            @if (Model.Results.HasPreviousPage)
+                            {
+                                <a class="page-link" asp-action="Trucks" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Précédent</span>
+                            }
+                        </li>
+                        @foreach (var pageNumber in Model.VisiblePages)
+                        {
+                            <li class="page-item @(pageNumber == Model.Results.Page ? "active" : null)">
+                                @if (pageNumber == Model.Results.Page)
+                                {
+                                    <span class="page-link" aria-current="page">@pageNumber</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" asp-action="Trucks" asp-all-route-data="@Model.RouteValuesFor(pageNumber)">@pageNumber</a>
+                                }
+                            </li>
+                        }
+                        <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
+                            @if (Model.Results.HasNextPage)
+                            {
+                                <a class="page-link" asp-action="Trucks" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Suivant</span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+
+        @if (Model.HasAnyChartData)
+        {
+            <script id="truck-performance-chart-data" type="application/json">@Html.Raw(Model.ChartDataJson)</script>
+        }
+    }
 </div>
 
-<form method="get" class="filter-panel mb-4" aria-label="Filtres performance camions">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label" for="Search">Recherche</label>
-            <input class="form-control" id="Search" name="Search" value="@Model.Criteria.Search" placeholder="Code ou modèle" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label" for="Status">Statut</label>
-            <select class="form-select" id="Status" name="Status">
-                <option value="">Tous les statuts</option>
-                @foreach (var status in Model.FilterOptions.TruckStatuses)
-                {
-                    <option value="@status" selected="@(status == Model.Criteria.Status)">
-                        @PerformancePresentation.GetTruckStatusLabel(status)
-                    </option>
-                }
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label" for="Sort">Tri</label>
-            <select class="form-select" id="Sort" name="Sort">
-                <option value="@TruckPerformanceSort.TotalTripsDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.TotalTripsDesc)">Voyages décroissants</option>
-                <option value="@TruckPerformanceSort.TotalTonnageDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.TotalTonnageDesc)">Tonnage décroissant</option>
-                <option value="@TruckPerformanceSort.DowntimeDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.DowntimeDesc)">Arrêts décroissants</option>
-                <option value="@TruckPerformanceSort.CompletionRateDesc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.CompletionRateDesc)">Taux de clôture décroissant</option>
-                <option value="@TruckPerformanceSort.CodeAsc" selected="@(Model.Criteria.Sort == TruckPerformanceSort.CodeAsc)">Code croissant</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label" for="PageSize">Lignes</label>
-            <select class="form-select" id="PageSize" name="PageSize">
-                @foreach (var size in new[] { 10, 20, 50 })
-                {
-                    <option value="@size" selected="@(Model.Criteria.PageSize == size)">@size</option>
-                }
-            </select>
-        </div>
-        <div class="col-12 d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Trucks">Réinitialiser</a>
-        </div>
-    </div>
-</form>
+@section Styles {
+    <link rel="stylesheet" href="~/css/performance.css" asp-append-version="true" />
+}
 
-<div class="table-responsive">
-    <table class="table align-middle fleet-table">
-        <thead>
-            <tr>
-                <th>Camion</th>
-                <th>Statut</th>
-                <th class="text-end">Voyages</th>
-                <th class="text-end">Complétés</th>
-                <th class="text-end">Tonnage</th>
-                <th class="text-end">Arrêts</th>
-                <th class="text-end">P2O5 moyen</th>
-                <th>Dernier voyage</th>
-                <th class="text-end">Détail</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Results.Items.Count == 0)
-            {
-                <tr>
-                    <td colspan="9" class="text-center text-muted py-4">Aucune performance camion ne correspond aux filtres.</td>
-                </tr>
-            }
-            else
-            {
-                @foreach (var item in Model.Results.Items)
-                {
-                    <tr>
-                        <td>
-                            <div class="fw-semibold">@item.TruckCode</div>
-                            <div class="text-muted small">@PerformancePresentation.OrDash(item.TruckModel)</div>
-                        </td>
-                        <td>@PerformancePresentation.GetTruckStatusLabel(item.TruckStatus)</td>
-                        <td class="text-end">@PerformancePresentation.FormatNumber(item.TotalTrips)</td>
-                        <td class="text-end">@PerformancePresentation.FormatNumber(item.CompletedTrips)</td>
-                        <td class="text-end">@PerformancePresentation.FormatDecimal(item.TotalTonnage, " t")</td>
-                        <td class="text-end">@PerformancePresentation.FormatNumber(item.TotalStopCount)</td>
-                        <td class="text-end">@PerformancePresentation.FormatDecimal(item.AverageP2O5, " %")</td>
-                        <td>@PerformancePresentation.FormatDate(item.LastTripDate)</td>
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-outline-primary"
-                               asp-controller="Performance"
-                               asp-action="TruckDetails"
-                               asp-route-id="@item.TruckId"
-                               asp-route-Search="@Model.Criteria.Search"
-                               asp-route-Status="@Model.Criteria.Status"
-                               asp-route-Sort="@Model.Criteria.Sort"
-                               asp-route-Page="@Model.Results.Page"
-                               asp-route-PageSize="@Model.Criteria.PageSize">Voir</a>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
-</div>
-
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
-    <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
-    <nav aria-label="Pagination des performances camions">
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
-                @if (Model.Results.HasPreviousPage)
-                {
-                    <a class="page-link" asp-action="Trucks" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
-                }
-                else
-                {
-                    <span class="page-link" aria-disabled="true">Précédent</span>
-                }
-            </li>
-            @foreach (var pageNumber in Model.VisiblePages)
-            {
-                <li class="page-item @(pageNumber == Model.Results.Page ? "active" : null)">
-                    @if (pageNumber == Model.Results.Page)
-                    {
-                        <span class="page-link" aria-current="page">@pageNumber</span>
-                    }
-                    else
-                    {
-                        <a class="page-link" asp-action="Trucks" asp-all-route-data="@Model.RouteValuesFor(pageNumber)">@pageNumber</a>
-                    }
-                </li>
-            }
-            <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
-                @if (Model.Results.HasNextPage)
-                {
-                    <a class="page-link" asp-action="Trucks" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
-                }
-                else
-                {
-                    <span class="page-link" aria-disabled="true">Suivant</span>
-                }
-            </li>
-        </ul>
-    </nav>
-</div>
+@section Scripts {
+    @if (!Model.HasLoadError && Model.HasAnyChartData)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+        <script src="~/js/chart-theme.js" asp-append-version="true"></script>
+        <script src="~/js/truck-performance.js" asp-append-version="true"></script>
+    }
+}

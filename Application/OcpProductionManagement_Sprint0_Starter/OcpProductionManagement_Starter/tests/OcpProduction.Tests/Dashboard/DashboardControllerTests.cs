@@ -7,6 +7,7 @@ using OcpProduction.Application.Dashboard.Models;
 using OcpProduction.Application.Dashboard.Services;
 using OcpProduction.Application.Security;
 using OcpProduction.Web.Controllers;
+using OcpProduction.Web.ModelBinding;
 using OcpProduction.Web.ViewModels.Dashboard;
 using Xunit;
 
@@ -30,6 +31,13 @@ public sealed class DashboardControllerTests
         Assert.NotNull(action.GetCustomAttribute<HttpGetAttribute>());
         Assert.Null(action.GetCustomAttribute<HttpPostAttribute>());
         Assert.Null(action.GetCustomAttribute<ValidateAntiForgeryTokenAttribute>());
+
+        var criteriaParameter = Assert.Single(
+            action.GetParameters(),
+            parameter => parameter.ParameterType == typeof(DashboardDateCriteria));
+        var binder = Assert.Single(
+            criteriaParameter.GetCustomAttributes<ModelBinderAttribute>());
+        Assert.Equal(typeof(DashboardDateCriteriaModelBinder), binder.BinderType);
     }
 
     [Fact]

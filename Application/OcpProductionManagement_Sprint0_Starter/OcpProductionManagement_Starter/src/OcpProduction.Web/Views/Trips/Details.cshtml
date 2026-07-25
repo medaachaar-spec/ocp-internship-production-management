@@ -6,6 +6,7 @@
     var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
 }
 
+<div class="detail-page">
 <nav aria-label="Fil d’Ariane" class="mb-3">
     <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
@@ -14,13 +15,14 @@
     </ol>
 </nav>
 
-<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
-    <div>
+<header class="detail-header">
+    <div class="detail-header__identity">
+        <p class="detail-header__eyebrow">Voyage opérationnel</p>
         <h1>Détail du voyage #@Model.Trip.TripId</h1>
         <p class="text-muted mb-0">Consultation en lecture seule des informations enregistrées.</p>
     </div>
-    <div class="d-flex flex-wrap align-items-center gap-2">
-        <span class="badge fs-6 @TripPresentation.GetStatusBadgeClass(Model.Trip.Status)">
+    <div class="detail-header__actions">
+        <span class="badge status-badge @TripPresentation.GetStatusBadgeClass(Model.Trip.Status)">
             @TripPresentation.GetStatusLabel(Model.Trip.Status)
         </span>
         @if (Model.CanEdit)
@@ -48,14 +50,14 @@
             </form>
         }
     </div>
-</div>
+</header>
 
 <div class="row g-4">
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-general-title">
-            <div class="card-body">
-                <h2 id="trip-general-title" class="h5 mb-3">Informations générales</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="trip-general-title">
+            <div class="detail-section-card__body">
+                <h2 id="trip-general-title" class="detail-section-heading">Informations générales</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Identifiant</dt>
                         <dd>#@Model.Trip.TripId</dd>
@@ -78,10 +80,10 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-assignment-title">
-            <div class="card-body">
-                <h2 id="trip-assignment-title" class="h5 mb-3">Affectation</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="trip-assignment-title">
+            <div class="detail-section-card__body">
+                <h2 id="trip-assignment-title" class="detail-section-heading">Affectation</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Camion</dt>
                         <dd>@Model.Trip.TruckCode</dd>
@@ -105,10 +107,10 @@
     </div>
 
     <div class="col-12">
-        <section class="card border-0 shadow-sm" aria-labelledby="trip-route-title">
-            <div class="card-body">
-                <h2 id="trip-route-title" class="h5 mb-3">Trajet</h2>
-                <dl class="trip-details-grid trip-details-grid-wide mb-0">
+        <section class="detail-section-card" aria-labelledby="trip-route-title">
+            <div class="detail-section-card__body">
+                <h2 id="trip-route-title" class="detail-section-heading">Trajet</h2>
+                <dl class="trip-details-grid detail-definition-grid trip-details-grid-wide mb-0">
                     <div>
                         <dt>Point de chargement</dt>
                         <dd>@Model.Trip.LoadingPointName</dd>
@@ -137,10 +139,10 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-production-title">
-            <div class="card-body">
-                <h2 id="trip-production-title" class="h5 mb-3">Production</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="trip-production-title">
+            <div class="detail-section-card__body">
+                <h2 id="trip-production-title" class="detail-section-heading">Production</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Tonnage</dt>
                         <dd>@(Model.Trip.Tonnage?.ToString("N2", frenchCulture) ?? "—") t</dd>
@@ -151,10 +153,10 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="trip-related-title">
-            <div class="card-body">
-                <h2 id="trip-related-title" class="h5 mb-3">Données associées</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="trip-related-title">
+            <div class="detail-section-card__body">
+                <h2 id="trip-related-title" class="detail-section-heading">Données associées</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Arrêts liés</dt>
                         <dd>@Model.Trip.StopCount</dd>
@@ -177,29 +179,16 @@
     </div>
 
     <div class="col-12">
-        <section class="card border-0 shadow-sm" aria-labelledby="trip-comments-title">
-            <div class="card-body">
-                <h2 id="trip-comments-title" class="h5 mb-3">Observations</h2>
-                <p class="trip-observation mb-0">@(string.IsNullOrWhiteSpace(Model.Trip.Comments) ? "Aucune observation enregistrée." : Model.Trip.Comments)</p>
+        <section class="detail-section-card" aria-labelledby="trip-comments-title">
+            <div class="detail-section-card__body">
+                <h2 id="trip-comments-title" class="detail-section-heading">Observations</h2>
+                <p class="detail-note trip-observation">@(string.IsNullOrWhiteSpace(Model.Trip.Comments) ? "Aucune observation enregistrée." : Model.Trip.Comments)</p>
             </div>
         </section>
     </div>
 </div>
 
-<div class="mt-4 d-flex flex-wrap gap-2">
-    @if (Model.CanEdit)
-    {
-        <a asp-action="Edit"
-           asp-all-route-data="@Model.EditRouteValues"
-           class="btn btn-primary">Modifier</a>
-    }
-    @if (Model.CanClose)
-    {
-        <a asp-controller="TripWorkflow"
-           asp-action="Close"
-           asp-all-route-data="@Model.CloseRouteValues"
-           class="btn btn-outline-success">Clôturer</a>
-    }
+<div class="detail-footer-actions">
     @if (Model.FromValidation)
     {
         <a asp-controller="Validation"
@@ -212,4 +201,5 @@
            asp-all-route-data="@Model.ReturnRouteValues"
            class="btn btn-outline-secondary">Retour à la liste</a>
     }
+</div>
 </div>

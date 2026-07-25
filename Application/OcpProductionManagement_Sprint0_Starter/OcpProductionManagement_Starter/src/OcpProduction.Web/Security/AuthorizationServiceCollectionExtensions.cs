@@ -30,5 +30,7 @@ public static class AuthorizationServiceCollectionExtensions
             policy.RequireRole(AppRoles.Superviseur, AppRoles.ResponsableProduction));
         options.AddPolicy(PolicyNames.CanAdminister, policy =>
             policy.RequireRole(AppRoles.Administrateur));
+        options.AddPolicy(PolicyNames.CanViewTechnicalDiagnostics, policy =>
+            policy.RequireRole(AppRoles.Administrateur));
     }
 }

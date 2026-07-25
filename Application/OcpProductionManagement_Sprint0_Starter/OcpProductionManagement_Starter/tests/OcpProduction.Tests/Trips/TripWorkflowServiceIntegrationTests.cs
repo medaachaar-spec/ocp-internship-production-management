@@ -25,7 +25,7 @@ public sealed class TripWorkflowServiceIntegrationTests
             NullLogger<TripWorkflowService>.Instance);
         var options = await writeService.GetFormOptionsAsync();
         var before = await GetFingerprintAsync(context);
-        var marker = $"CODEx-Sprint1-Part3-{Guid.NewGuid():N}";
+        var marker = $"OCP-TRIP-WORKFLOW-ROLLBACK-{Guid.NewGuid():N}";
         long createdTripId = 0;
 
         await using (var transaction = await context.Database.BeginTransactionAsync())

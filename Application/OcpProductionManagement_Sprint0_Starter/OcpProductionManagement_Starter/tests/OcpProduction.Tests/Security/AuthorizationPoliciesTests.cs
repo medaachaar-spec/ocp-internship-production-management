@@ -22,7 +22,8 @@ public sealed class AuthorizationPoliciesTests
                 [PolicyNames.CanViewDashboard] =
                     [AppRoles.Superviseur, AppRoles.ResponsableProduction, AppRoles.Administrateur],
                 [PolicyNames.CanViewReporting] = [AppRoles.Superviseur, AppRoles.ResponsableProduction],
-                [PolicyNames.CanAdminister] = [AppRoles.Administrateur]
+                [PolicyNames.CanAdminister] = [AppRoles.Administrateur],
+                [PolicyNames.CanViewTechnicalDiagnostics] = [AppRoles.Administrateur]
             };
 
         Assert.Equal(nameof(PolicyNames.CanViewDashboard), PolicyNames.CanViewDashboard);

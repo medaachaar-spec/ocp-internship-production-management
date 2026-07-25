@@ -6,6 +6,7 @@
     var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
 }
 
+<div class="detail-page">
 <nav aria-label="Fil d’Ariane" class="mb-3">
     <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Accueil</a></li>
@@ -21,27 +22,51 @@
     </ol>
 </nav>
 
-<div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
-    <div>
+<header class="detail-header">
+    <div class="detail-header__identity">
+        <p class="detail-header__eyebrow">Arrêt opérationnel</p>
         <h1>Détail de l’arrêt #@Model.Stop.StopId</h1>
         <p class="text-muted mb-0">Consultation en lecture seule des informations enregistrées.</p>
     </div>
-    <div class="d-flex flex-wrap gap-2" aria-label="État de l’arrêt">
-        <span class="badge fs-6 @StopPresentation.GetStateBadgeClass(Model.Stop.State)">
+    <div class="detail-header__actions" aria-label="État et actions de l’arrêt">
+        <span class="badge status-badge @StopPresentation.GetStateBadgeClass(Model.Stop.State)">
             @StopPresentation.GetStateLabel(Model.Stop.State)
         </span>
-        <span class="badge fs-6 @StopPresentation.GetValidationStatusBadgeClass(Model.Stop.ValidationStatus)">
+        <span class="badge status-badge @StopPresentation.GetValidationStatusBadgeClass(Model.Stop.ValidationStatus)">
             @StopPresentation.GetValidationStatusLabel(Model.Stop.ValidationStatus)
         </span>
+        @if (Model.CanEdit)
+        {
+            <a asp-action="Edit"
+               asp-all-route-data="@Model.EditRouteValues"
+               class="btn btn-primary">Modifier l’arrêt</a>
+        }
+        @if (Model.CanClose)
+        {
+            <a asp-controller="StopWorkflow"
+               asp-action="Close"
+               asp-all-route-data="@Model.CloseRouteValues"
+               class="btn btn-outline-success">Clôturer</a>
+        }
+        @if (Model.CanValidateCurrentStop)
+        {
+            <form asp-controller="StopValidation"
+                  asp-action="Validate"
+                  asp-route-id="@Model.Stop.StopId"
+                  method="post"
+                  asp-antiforgery="true">
+                <button type="submit" class="btn btn-success">Valider l’arrêt</button>
+            </form>
+        }
     </div>
-</div>
+</header>
 
 <div class="row g-4">
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-general-title">
-            <div class="card-body">
-                <h2 id="stop-general-title" class="h5 mb-3">Informations générales</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="stop-general-title">
+            <div class="detail-section-card__body">
+                <h2 id="stop-general-title" class="detail-section-heading">Informations générales</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Identifiant</dt>
                         <dd>#@Model.Stop.StopId</dd>
@@ -64,10 +89,10 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-assignment-title">
-            <div class="card-body">
-                <h2 id="stop-assignment-title" class="h5 mb-3">Voyage et camion</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="stop-assignment-title">
+            <div class="detail-section-card__body">
+                <h2 id="stop-assignment-title" class="detail-section-heading">Voyage et camion</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Camion</dt>
                         <dd>@Model.Stop.TruckCode</dd>
@@ -108,10 +133,10 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-reason-title">
-            <div class="card-body">
-                <h2 id="stop-reason-title" class="h5 mb-3">Motif de l’arrêt</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="stop-reason-title">
+            <div class="detail-section-card__body">
+                <h2 id="stop-reason-title" class="detail-section-heading">Motif de l’arrêt</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Motif</dt>
                         <dd>@Model.Stop.StopReasonName</dd>
@@ -131,10 +156,10 @@
     </div>
 
     <div class="col-xl-6">
-        <section class="card border-0 shadow-sm h-100" aria-labelledby="stop-period-title">
-            <div class="card-body">
-                <h2 id="stop-period-title" class="h5 mb-3">Période</h2>
-                <dl class="trip-details-grid mb-0">
+        <section class="detail-section-card" aria-labelledby="stop-period-title">
+            <div class="detail-section-card__body">
+                <h2 id="stop-period-title" class="detail-section-heading">Période</h2>
+                <dl class="trip-details-grid detail-definition-grid mb-0">
                     <div>
                         <dt>Début</dt>
                         <dd>@Model.Stop.StartTime.ToString("dd/MM/yyyy HH:mm", frenchCulture)</dd>
@@ -157,10 +182,10 @@
           !string.IsNullOrWhiteSpace(Model.Stop.DestinationName)))
     {
         <div class="col-12">
-            <section class="card border-0 shadow-sm" aria-labelledby="stop-context-title">
-                <div class="card-body">
-                    <h2 id="stop-context-title" class="h5 mb-3">Contexte opérationnel</h2>
-                    <dl class="trip-details-grid mb-0">
+            <section class="detail-section-card" aria-labelledby="stop-context-title">
+                <div class="detail-section-card__body">
+                    <h2 id="stop-context-title" class="detail-section-heading">Contexte opérationnel</h2>
+                    <dl class="trip-details-grid detail-definition-grid mb-0">
                         <div>
                             <dt>Point de chargement</dt>
                             <dd>@(Model.Stop.LoadingPointName ?? "—")</dd>
@@ -184,40 +209,16 @@
     }
 
     <div class="col-12">
-        <section class="card border-0 shadow-sm" aria-labelledby="stop-observation-title">
-            <div class="card-body">
-                <h2 id="stop-observation-title" class="h5 mb-3">Observation</h2>
-                <p class="trip-observation mb-0">@StopPresentation.FormatObservation(Model.Stop.Observation)</p>
+        <section class="detail-section-card" aria-labelledby="stop-observation-title">
+            <div class="detail-section-card__body">
+                <h2 id="stop-observation-title" class="detail-section-heading">Observation</h2>
+                <p class="detail-note trip-observation">@StopPresentation.FormatObservation(Model.Stop.Observation)</p>
             </div>
         </section>
     </div>
 </div>
 
-<div class="mt-4 d-flex flex-wrap gap-2">
-    @if (Model.CanEdit)
-    {
-        <a asp-action="Edit"
-           asp-all-route-data="@Model.EditRouteValues"
-           class="btn btn-primary">Modifier l’arrêt</a>
-    }
-    @if (Model.CanClose)
-    {
-        <a asp-controller="StopWorkflow"
-           asp-action="Close"
-           asp-all-route-data="@Model.CloseRouteValues"
-           class="btn btn-outline-success">Clôturer</a>
-    }
-    @if (Model.CanValidateCurrentStop)
-    {
-        <form asp-controller="StopValidation"
-              asp-action="Validate"
-              asp-route-id="@Model.Stop.StopId"
-              method="post"
-              asp-antiforgery="true"
-              class="d-inline">
-            <button type="submit" class="btn btn-success">Valider l’arrêt</button>
-        </form>
-    }
+<div class="detail-footer-actions">
     @if (Model.FromValidation)
     {
         <a asp-controller="StopValidation"
@@ -230,4 +231,5 @@
            asp-all-route-data="@Model.ReturnRouteValues"
            class="btn btn-outline-secondary">Retour à la liste</a>
     }
+</div>
 </div>

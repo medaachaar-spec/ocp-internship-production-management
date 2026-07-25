@@ -135,7 +135,7 @@ public sealed class StopWriteServiceIntegrationTests
         var service = CreateService(context);
         var options = await service.GetFormOptionsAsync();
         var before = await GetDatabaseFingerprintAsync(context);
-        var marker = $"CODEX-Sprint2-Part2-{Guid.NewGuid():N}";
+        var marker = $"OCP-STOP-WRITE-ROLLBACK-{Guid.NewGuid():N}";
         long createdStopId = 0;
 
         await using (var transaction = await context.Database.BeginTransactionAsync())

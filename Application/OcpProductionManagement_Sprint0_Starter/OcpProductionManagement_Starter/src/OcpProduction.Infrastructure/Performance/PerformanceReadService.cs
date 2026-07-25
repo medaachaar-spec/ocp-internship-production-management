@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OcpProduction.Application.Performance.Dtos;
 using OcpProduction.Application.Performance.Models;
 using OcpProduction.Application.Performance.Services;
+using OcpProduction.Application.Trips;
 using OcpProduction.Application.Trips.Models;
 using OcpProduction.Infrastructure.Data;
 using OcpProduction.Infrastructure.Generated;
@@ -10,19 +11,16 @@ namespace OcpProduction.Infrastructure.Performance;
 
 public sealed class PerformanceReadService(OcpProductionDbContext context) : IPerformanceReadService
 {
-    public async Task<PagedResult<TruckPerformanceListItemDto>> SearchTrucksAsync(
+    public async Task<TruckPerformanceReportDto> GetTruckReportAsync(
         TruckPerformanceSearchCriteria criteria,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(criteria);
         var normalized = criteria.Normalize();
-        var query = ApplyTruckFilters(context.vw_TruckPerformances.AsNoTracking(), normalized);
-        var totalItems = await query.LongCountAsync(cancellationToken);
-        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)normalized.PageSize);
-        var page = Math.Clamp(normalized.Page, 1, Math.Max(totalPages, 1));
-        var items = await ApplyTruckSort(query, normalized.Sort)
-            .Skip((page - 1) * normalized.PageSize)
-            .Take(normalized.PageSize)
+        var query = ApplyTruckFilters(
+            context.vw_TruckPerformances.AsNoTracking(),
+            normalized);
+        var filteredItems = await query
             .Select(performance => new TruckPerformanceListItemDto
             {
                 TruckId = performance.TruckID,
@@ -33,6 +31,12 @@ public sealed class PerformanceReadService(OcpProductionDbContext context) : IPe
                 CompletedTrips = performance.CompletedTrips ?? 0,
                 CompletionRatePercent = performance.CompletionRatePercent,
                 TotalTonnage = performance.TotalTonnage,
+                CompletedTonnage = context.vw_TripSummaries
+                    .AsNoTracking()
+                    .Where(trip =>
+                        trip.TruckID == performance.TruckID &&
+                        trip.Status == TripStatuses.Completed)
+                    .Sum(trip => trip.Tonnage ?? 0m),
                 AveragePayloadUtilizationPercent = performance.AveragePayloadUtilizationPercent,
                 TotalStopCount = performance.TotalStopCount,
                 TotalDowntimeMinutes = performance.TotalDowntimeMinutes,
@@ -41,7 +45,17 @@ public sealed class PerformanceReadService(OcpProductionDbContext context) : IPe
             })
             .ToListAsync(cancellationToken);
 
-        return PagedResult<TruckPerformanceListItemDto>.Create(items, page, normalized.PageSize, totalItems);
+        return PerformanceReportBuilder.BuildTruckReport(
+            filteredItems,
+            normalized);
+    }
+
+    public async Task<PagedResult<TruckPerformanceListItemDto>> SearchTrucksAsync(
+        TruckPerformanceSearchCriteria criteria,
+        CancellationToken cancellationToken = default)
+    {
+        var report = await GetTruckReportAsync(criteria, cancellationToken);
+        return report.TableRows;
     }
 
     public Task<TruckPerformanceDetailsDto?> GetTruckAsync(
@@ -95,15 +109,20 @@ public sealed class PerformanceReadService(OcpProductionDbContext context) : IPe
         DriverPerformanceSearchCriteria criteria,
         CancellationToken cancellationToken = default)
     {
+        var report = await GetDriverReportAsync(criteria, cancellationToken);
+        return report.TableRows;
+    }
+
+    public async Task<DriverPerformanceReportDto> GetDriverReportAsync(
+        DriverPerformanceSearchCriteria criteria,
+        CancellationToken cancellationToken = default)
+    {
         ArgumentNullException.ThrowIfNull(criteria);
         var normalized = criteria.Normalize();
-        var query = ApplyDriverFilters(context.vw_DriverPerformances.AsNoTracking(), normalized);
-        var totalItems = await query.LongCountAsync(cancellationToken);
-        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)normalized.PageSize);
-        var page = Math.Clamp(normalized.Page, 1, Math.Max(totalPages, 1));
-        var items = await ApplyDriverSort(query, normalized.Sort)
-            .Skip((page - 1) * normalized.PageSize)
-            .Take(normalized.PageSize)
+        var query = ApplyDriverFilters(
+            context.vw_DriverPerformances.AsNoTracking(),
+            normalized);
+        var filteredItems = await query
             .Select(performance => new DriverPerformanceListItemDto
             {
                 DriverId = performance.DriverID,
@@ -114,6 +133,12 @@ public sealed class PerformanceReadService(OcpProductionDbContext context) : IPe
                 CompletedTrips = performance.CompletedTrips ?? 0,
                 CompletionRatePercent = performance.CompletionRatePercent,
                 TotalTonnage = performance.TotalTonnage,
+                CompletedTonnage = context.vw_TripSummaries
+                    .AsNoTracking()
+                    .Where(trip =>
+                        trip.DriverID == performance.DriverID &&
+                        trip.Status == TripStatuses.Completed)
+                    .Sum(trip => trip.Tonnage ?? 0m),
                 AverageTripDurationMinutes = performance.AverageTripDurationMinutes,
                 TotalLinkedStopCount = performance.TotalLinkedStopCount,
                 TotalLinkedStopDurationMinutes = performance.TotalLinkedStopDurationMinutes,
@@ -122,7 +147,9 @@ public sealed class PerformanceReadService(OcpProductionDbContext context) : IPe
             })
             .ToListAsync(cancellationToken);
 
-        return PagedResult<DriverPerformanceListItemDto>.Create(items, page, normalized.PageSize, totalItems);
+        return PerformanceReportBuilder.BuildDriverReport(
+            filteredItems,
+            normalized);
     }
 
     public Task<DriverPerformanceDetailsDto?> GetDriverAsync(
@@ -210,20 +237,6 @@ public sealed class PerformanceReadService(OcpProductionDbContext context) : IPe
         return query;
     }
 
-    private static IOrderedQueryable<vw_TruckPerformance> ApplyTruckSort(
-        IQueryable<vw_TruckPerformance> query,
-        string sort)
-    {
-        return sort switch
-        {
-            TruckPerformanceSort.TotalTonnageDesc => query.OrderByDescending(performance => performance.TotalTonnage ?? 0).ThenBy(performance => performance.TruckCode),
-            TruckPerformanceSort.DowntimeDesc => query.OrderByDescending(performance => performance.TotalDowntimeMinutes ?? 0).ThenBy(performance => performance.TruckCode),
-            TruckPerformanceSort.CompletionRateDesc => query.OrderByDescending(performance => performance.CompletionRatePercent ?? 0).ThenBy(performance => performance.TruckCode),
-            TruckPerformanceSort.CodeAsc => query.OrderBy(performance => performance.TruckCode),
-            _ => query.OrderByDescending(performance => performance.TotalTrips ?? 0).ThenBy(performance => performance.TruckCode)
-        };
-    }
-
     private static IQueryable<vw_DriverPerformance> ApplyDriverFilters(
         IQueryable<vw_DriverPerformance> query,
         DriverPerformanceSearchCriteria criteria)
@@ -242,20 +255,6 @@ public sealed class PerformanceReadService(OcpProductionDbContext context) : IPe
         }
 
         return query;
-    }
-
-    private static IOrderedQueryable<vw_DriverPerformance> ApplyDriverSort(
-        IQueryable<vw_DriverPerformance> query,
-        string sort)
-    {
-        return sort switch
-        {
-            DriverPerformanceSort.TotalTonnageDesc => query.OrderByDescending(performance => performance.TotalTonnage ?? 0).ThenBy(performance => performance.DriverCode),
-            DriverPerformanceSort.StopDurationDesc => query.OrderByDescending(performance => performance.TotalLinkedStopDurationMinutes ?? 0).ThenBy(performance => performance.DriverCode),
-            DriverPerformanceSort.CompletionRateDesc => query.OrderByDescending(performance => performance.CompletionRatePercent ?? 0).ThenBy(performance => performance.DriverCode),
-            DriverPerformanceSort.CodeAsc => query.OrderBy(performance => performance.DriverCode),
-            _ => query.OrderByDescending(performance => performance.TotalTrips ?? 0).ThenBy(performance => performance.DriverCode)
-        };
     }
 
     private static string EscapeLikePattern(string value) => value

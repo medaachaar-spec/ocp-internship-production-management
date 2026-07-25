@@ -9,15 +9,35 @@
     var canViewDashboard = (await AuthorizationService.AuthorizeAsync(
         User,
         PolicyNames.CanViewDashboard)).Succeeded;
+    var canAdminister = (await AuthorizationService.AuthorizeAsync(
+        User,
+        PolicyNames.CanAdminister)).Succeeded;
+    var canViewTechnicalDiagnostics = (await AuthorizationService.AuthorizeAsync(
+        User,
+        PolicyNames.CanViewTechnicalDiagnostics)).Succeeded;
 }
 <div class="sidebar-brand">
-    <div class="brand-mark">PM</div>
+    <span class="sidebar-brand-logo-wrap">
+        <img
+            src="~/images/branding/OCP_logo.webp"
+            alt="Logo OCP"
+            class="sidebar-brand-logo" />
+    </span>
     <div>
         <div class="fw-bold">OCP Production</div>
         <small>Phosboucraa</small>
     </div>
+    <button type="button"
+            class="btn sidebar-menu-toggle"
+            aria-controls="sidebar-navigation"
+            aria-expanded="false"
+            data-sidebar-toggle>
+        Menu
+    </button>
 </div>
-<nav class="nav flex-column sidebar-nav">
+<nav id="sidebar-navigation"
+     class="nav flex-column sidebar-nav"
+     aria-label="Navigation principale">
     <a class="nav-link @(currentController == "Home" ? "active" : null)"
        asp-controller="Home"
        asp-action="Index"
@@ -95,20 +115,61 @@
            aria-current="@(currentController == "Performance" && currentAction is "Drivers" or "DriverDetails" ? "page" : null)">Performance conducteurs</a>
     }
 
-    @if (User.IsInRole(AppRoles.Administrateur))
+    @if (canAdminister)
     {
         <div class="nav-section">Administration</div>
-        <a class="nav-link disabled" href="#" aria-disabled="true">Utilisateurs</a>
         <a class="nav-link @(currentController == "ReferenceData" ? "active" : null)"
            asp-controller="ReferenceData"
            asp-action="Index"
            aria-current="@(currentController == "ReferenceData" ? "page" : null)">Référentiels</a>
-        <a class="nav-link disabled" href="#" aria-disabled="true">Paramètres</a>
     }
 
-    <div class="nav-section">Technique</div>
-    <a class="nav-link @(currentController == "Diagnostics" ? "active" : null)"
-       asp-controller="Diagnostics"
-       asp-action="Index"
-       aria-current="@(currentController == "Diagnostics" ? "page" : null)">Diagnostic technique</a>
+    @if (canViewTechnicalDiagnostics)
+    {
+        <div class="nav-section">Technique</div>
+        <a class="nav-link @(currentController == "Diagnostics" ? "active" : null)"
+           asp-controller="Diagnostics"
+           asp-action="Index"
+           aria-current="@(currentController == "Diagnostics" ? "page" : null)">Diagnostic technique</a>
+    }
 </nav>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const navigation = document.querySelector("#sidebar-navigation");
+        const menuToggle = document.querySelector("[data-sidebar-toggle]");
+        const activeLink = navigation?.querySelector(".nav-link.active");
+
+        if (!(navigation instanceof HTMLElement)) {
+            return;
+        }
+
+        const scrollActiveLinkIntoView = () => {
+            if (!(activeLink instanceof HTMLElement) || navigation.offsetParent === null) {
+                return;
+            }
+
+            const navigationBounds = navigation.getBoundingClientRect();
+            const activeLinkBounds = activeLink.getBoundingClientRect();
+            const activeItemMargin = 4;
+
+            if (activeLinkBounds.top < navigationBounds.top) {
+                navigation.scrollTop -= navigationBounds.top - activeLinkBounds.top + activeItemMargin;
+            } else if (activeLinkBounds.bottom > navigationBounds.bottom) {
+                navigation.scrollTop += activeLinkBounds.bottom - navigationBounds.bottom + activeItemMargin;
+            }
+        };
+
+        if (menuToggle instanceof HTMLButtonElement) {
+            menuToggle.addEventListener("click", () => {
+                const isOpen = navigation.classList.toggle("is-open");
+                menuToggle.setAttribute("aria-expanded", String(isOpen));
+
+                if (isOpen) {
+                    requestAnimationFrame(scrollActiveLinkIntoView);
+                }
+            });
+        }
+
+        scrollActiveLinkIntoView();
+    });
+</script>

@@ -9,7 +9,9 @@ namespace OcpProduction.Web.Controllers;
 
 [Authorize(Policy = PolicyNames.CanViewReporting)]
 [Route("Performance")]
-public sealed class PerformanceController(IPerformanceReadService performanceReadService) : Controller
+public sealed class PerformanceController(
+    IPerformanceReadService performanceReadService,
+    ILogger<PerformanceController> logger) : Controller
 {
     [HttpGet("Trucks")]
     public async Task<IActionResult> Trucks(
@@ -17,15 +19,37 @@ public sealed class PerformanceController(IPerformanceReadService performanceRea
         CancellationToken cancellationToken)
     {
         var normalized = criteria.Normalize();
-        var results = await performanceReadService.SearchTrucksAsync(normalized, cancellationToken);
-        var filters = await performanceReadService.GetFilterOptionsAsync(cancellationToken);
-
-        return View(new TruckPerformanceIndexViewModel
+        try
         {
-            Criteria = normalized.WithPage(results.Page),
-            Results = results,
-            FilterOptions = filters
-        });
+            var report = await performanceReadService.GetTruckReportAsync(
+                normalized,
+                cancellationToken);
+            var filters = await performanceReadService.GetFilterOptionsAsync(
+                cancellationToken);
+
+            return View(new TruckPerformanceIndexViewModel
+            {
+                Criteria = normalized.WithPage(report.TableRows.Page),
+                Report = report,
+                FilterOptions = filters
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                exception,
+                "Truck performance reporting data could not be loaded.");
+
+            return View(new TruckPerformanceIndexViewModel
+            {
+                Criteria = normalized,
+                HasLoadError = true
+            });
+        }
     }
 
     [HttpGet("Trucks/{id:int}")]
@@ -58,15 +82,37 @@ public sealed class PerformanceController(IPerformanceReadService performanceRea
         CancellationToken cancellationToken)
     {
         var normalized = criteria.Normalize();
-        var results = await performanceReadService.SearchDriversAsync(normalized, cancellationToken);
-        var filters = await performanceReadService.GetFilterOptionsAsync(cancellationToken);
-
-        return View(new DriverPerformanceIndexViewModel
+        try
         {
-            Criteria = normalized.WithPage(results.Page),
-            Results = results,
-            FilterOptions = filters
-        });
+            var report = await performanceReadService.GetDriverReportAsync(
+                normalized,
+                cancellationToken);
+            var filters = await performanceReadService.GetFilterOptionsAsync(
+                cancellationToken);
+
+            return View(new DriverPerformanceIndexViewModel
+            {
+                Criteria = normalized.WithPage(report.TableRows.Page),
+                Report = report,
+                FilterOptions = filters
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                exception,
+                "Driver performance reporting data could not be loaded.");
+
+            return View(new DriverPerformanceIndexViewModel
+            {
+                Criteria = normalized,
+                HasLoadError = true
+            });
+        }
     }
 
     [HttpGet("Drivers/{id:int}")]

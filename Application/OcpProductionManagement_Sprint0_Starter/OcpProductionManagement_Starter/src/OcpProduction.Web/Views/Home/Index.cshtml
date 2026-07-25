@@ -1,75 +1,277 @@
 @model OcpProduction.Web.ViewModels.HomeDashboardViewModel
+@using System.Globalization
+@using OcpProduction.Web.ViewModels.Quality
+@using OcpProduction.Web.ViewModels.Stops
+@using OcpProduction.Web.ViewModels.Trips
 @{
     ViewData["Title"] = "Accueil";
-    var role = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Utilisateur";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
 }
-<div class="page-header d-flex justify-content-between align-items-start">
-    <div>
-        <h1>Tableau de bord</h1>
-        <p class="text-muted">Bienvenue @User.Identity?.Name - rôle : @role</p>
-    </div>
-    <span class="badge text-bg-success">Sprint 0</span>
-</div>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="metric-card">
-            <div class="metric-label">Application</div>
-            <div class="metric-value">Opérationnelle</div>
-            <div class="metric-help">MVC, cookie et rôles chargés</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="metric-card">
-            <div class="metric-label">Base SQL Server</div>
-            <div class="metric-value">Connectée</div>
-            <div class="metric-help">Connexion opérationnelle à OCP_Mining_Prototype</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="metric-card">
-            <div class="metric-label">Prochaine livraison</div>
-            <div class="metric-value">Voyages</div>
-            <div class="metric-help">Liste, filtres et détail</div>
-        </div>
-    </div>
-</div>
+<div class="home-page">
+    <header class="home-header home-welcome-panel">
+        <p class="home-eyebrow">Espace opérationnel</p>
+        <h1>Accueil</h1>
+        <p class="home-subtitle">Gestion de la production minière — Phosboucraa</p>
+        <p class="home-welcome mb-0">
+            Bienvenue. Votre espace correspond au rôle : @Model.RoleDisplayName.
+        </p>
+    </header>
 
-@if (Model.PendingValidationCount is { } pendingValidationCount &&
-     Model.PendingStopValidationCount is { } pendingStopValidationCount)
-{
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <h2 class="h5 mb-3">Centre de validation</h2>
-            <div class="row g-3">
-                <div class="col-md-6 d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <p class="text-muted mb-0">
-                        <strong>@pendingValidationCount</strong>
-                        @(pendingValidationCount == 1 ? "voyage attend" : "voyages attendent") la validation.
-                    </p>
-                    <a asp-controller="Validation" asp-action="Index" class="btn btn-outline-primary btn-sm">Voyages à valider</a>
-                </div>
-                <div class="col-md-6 d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <p class="text-muted mb-0">
-                        <strong>@pendingStopValidationCount</strong>
-                        @(pendingStopValidationCount == 1 ? "arrêt attend" : "arrêts attendent") la validation.
-                    </p>
-                    <a asp-controller="StopValidation" asp-action="Index" class="btn btn-outline-primary btn-sm">Arrêts à valider</a>
-                </div>
+    <section class="home-section" aria-labelledby="home-actions-heading">
+        <div class="home-section-heading">
+            <div>
+                <h2 id="home-actions-heading">Accès rapides</h2>
+                <p>Accédez aux fonctions disponibles pour votre rôle.</p>
             </div>
         </div>
-    </div>
-}
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-        <h2 class="h5">État du Sprint 0</h2>
-        <ul class="mb-0">
-            <li>Authentification par cookie configurée.</li>
-            <li>Cinq rôles et six politiques d’autorisation configurés.</li>
-            <li>Menu dynamique adapté au rôle connecté.</li>
-            <li>Connexion SQL Server opérationnelle.</li>
-            <li>Scaffolding Database-First terminé : 9 tables et 12 vues intégrées.</li>
-        </ul>
-    </div>
+        <div class="home-action-grid">
+            @if (Model.CanManageTrips)
+            {
+                <a asp-controller="Trips" asp-action="Create" class="home-action-card home-action-card--green">
+                    <span class="home-action-title">Nouveau voyage</span>
+                    <span class="home-action-description">Enregistrer une nouvelle opération de transport.</span>
+                    <span class="home-action-link" aria-hidden="true">Ouvrir →</span>
+                </a>
+            }
+            @if (Model.CanManageStops)
+            {
+                <a asp-controller="Stops" asp-action="Create" class="home-action-card home-action-card--beige">
+                    <span class="home-action-title">Déclarer un arrêt</span>
+                    <span class="home-action-description">Consigner un arrêt associé aux opérations.</span>
+                    <span class="home-action-link" aria-hidden="true">Ouvrir →</span>
+                </a>
+            }
+            @if (Model.CanManageQuality)
+            {
+                <a asp-controller="Quality" asp-action="Index" class="home-action-card home-action-card--blue">
+                    <span class="home-action-title">Résultats qualité</span>
+                    <span class="home-action-description">Consulter et gérer les analyses enregistrées.</span>
+                    <span class="home-action-link" aria-hidden="true">Ouvrir →</span>
+                </a>
+            }
+            @if (Model.CanValidate)
+            {
+                <a asp-controller="Validation" asp-action="Index" class="home-action-card home-action-card--beige">
+                    <span class="home-action-title">Centre de validation</span>
+                    <span class="home-action-description">Traiter les voyages et arrêts en attente.</span>
+                    <span class="home-action-link" aria-hidden="true">Ouvrir →</span>
+                </a>
+            }
+            @if (Model.CanViewDashboard)
+            {
+                <a asp-controller="Dashboard" asp-action="Index" class="home-action-card home-action-card--deep-green">
+                    <span class="home-action-title">Tableau de bord</span>
+                    <span class="home-action-description">Consulter les indicateurs consolidés de production.</span>
+                    <span class="home-action-link" aria-hidden="true">Ouvrir →</span>
+                </a>
+            }
+            @if (Model.CanAdminister)
+            {
+                <a asp-controller="ReferenceData" asp-action="Index" class="home-action-card home-action-card--blue">
+                    <span class="home-action-title">Gestion des référentiels</span>
+                    <span class="home-action-description">Administrer les données de référence autorisées.</span>
+                    <span class="home-action-link" aria-hidden="true">Ouvrir →</span>
+                </a>
+            }
+            @if (Model.CanViewTechnicalDiagnostics)
+            {
+                <a asp-controller="Diagnostics" asp-action="Index" class="home-action-card home-action-card--neutral">
+                    <span class="home-action-title">Diagnostic technique</span>
+                    <span class="home-action-description">Vérifier la disponibilité des services applicatifs.</span>
+                    <span class="home-action-link" aria-hidden="true">Ouvrir →</span>
+                </a>
+            }
+        </div>
+    </section>
+
+    @if (Model.HasOperationalSummary)
+    {
+        <section class="home-section" aria-labelledby="home-summary-heading">
+            <div class="home-section-heading">
+                <div>
+                    <h2 id="home-summary-heading">Synthèse opérationnelle</h2>
+                    <p>Valeurs issues des données actuellement enregistrées.</p>
+                </div>
+            </div>
+
+            <div class="home-metric-grid">
+                @if (Model.TripsTodayCount is { } tripsTodayCount)
+                {
+                    <article class="home-metric-card home-metric-card--green">
+                        <p class="home-metric-label">Voyages du jour</p>
+                        <p class="home-metric-value">@tripsTodayCount.ToString("N0", frenchCulture)</p>
+                        <p class="home-metric-context">Date d’opération du jour</p>
+                    </article>
+                }
+                @if (Model.OpenStopsCount is { } openStopsCount)
+                {
+                    <article class="home-metric-card home-metric-card--beige">
+                        <p class="home-metric-label">Arrêts ouverts</p>
+                        <p class="home-metric-value">@openStopsCount.ToString("N0", frenchCulture)</p>
+                        <p class="home-metric-context">Arrêts sans heure de fin</p>
+                    </article>
+                }
+                @if (Model.QualityAnalysesTodayCount is { } qualityAnalysesTodayCount)
+                {
+                    <article class="home-metric-card home-metric-card--blue">
+                        <p class="home-metric-label">Analyses qualité du jour</p>
+                        <p class="home-metric-value">@qualityAnalysesTodayCount.ToString("N0", frenchCulture)</p>
+                        <p class="home-metric-context">Date d’analyse du jour</p>
+                    </article>
+                }
+                @if (Model.PendingValidationCount is { } pendingValidationCount)
+                {
+                    <article class="home-metric-card home-metric-card--deep-green">
+                        <p class="home-metric-label">Voyages en attente de validation</p>
+                        <p class="home-metric-value">@pendingValidationCount.ToString("N0", frenchCulture)</p>
+                        <p class="home-metric-context">Statut enregistré : à valider</p>
+                    </article>
+                }
+                @if (Model.PendingStopValidationCount is { } pendingStopValidationCount)
+                {
+                    <article class="home-metric-card home-metric-card--beige">
+                        <p class="home-metric-label">Arrêts en attente de validation</p>
+                        <p class="home-metric-value">@pendingStopValidationCount.ToString("N0", frenchCulture)</p>
+                        <p class="home-metric-context">Statut de validation en attente</p>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.HasRecentActivity)
+    {
+        <section class="home-section" aria-labelledby="home-activity-heading">
+            <div class="home-section-heading">
+                <div>
+                    <h2 id="home-activity-heading">Activité récente</h2>
+                    <p>Les cinq enregistrements les plus récents pour chaque vue disponible.</p>
+                </div>
+            </div>
+
+            <div class="home-activity-grid">
+                @if (Model.CanManageTrips)
+                {
+                    <article class="home-activity-card home-activity-card--green" aria-labelledby="home-trips-heading">
+                        <header>
+                            <div>
+                                <h3 id="home-trips-heading">Voyages du jour</h3>
+                                <p>Classés par heure de départ.</p>
+                            </div>
+                            <a asp-controller="Trips" asp-action="Index">Tout voir</a>
+                        </header>
+                        @if (Model.RecentTrips.Count == 0)
+                        {
+                            <p class="home-empty-state">Aucun voyage n’est enregistré pour aujourd’hui.</p>
+                        }
+                        else
+                        {
+                            <ul class="home-activity-list">
+                                @foreach (var trip in Model.RecentTrips)
+                                {
+                                    <li>
+                                        <div>
+                                            <a asp-controller="Trips"
+                                               asp-action="Details"
+                                               asp-route-id="@trip.TripId"
+                                               class="home-record-link">Voyage #@trip.TripId</a>
+                                            <span>@trip.TruckCode · @trip.LoadingPointName vers @trip.DestinationName</span>
+                                        </div>
+                                        <div class="home-record-meta">
+                                            <time datetime="@trip.StartDateTime.ToString("O", CultureInfo.InvariantCulture)">
+                                                @trip.StartDateTime.ToString("HH:mm", frenchCulture)
+                                            </time>
+                                            <span>@TripPresentation.GetStatusLabel(trip.Status)</span>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </article>
+                }
+
+                @if (Model.CanManageStops)
+                {
+                    <article class="home-activity-card home-activity-card--beige" aria-labelledby="home-stops-heading">
+                        <header>
+                            <div>
+                                <h3 id="home-stops-heading">Arrêts ouverts récents</h3>
+                                <p>Classés par heure de début.</p>
+                            </div>
+                            <a asp-controller="Stops" asp-action="Index">Tout voir</a>
+                        </header>
+                        @if (Model.RecentOpenStops.Count == 0)
+                        {
+                            <p class="home-empty-state">Aucun arrêt ouvert n’est enregistré.</p>
+                        }
+                        else
+                        {
+                            <ul class="home-activity-list">
+                                @foreach (var stop in Model.RecentOpenStops)
+                                {
+                                    <li>
+                                        <div>
+                                            <a asp-controller="Stops"
+                                               asp-action="Details"
+                                               asp-route-id="@stop.StopId"
+                                               class="home-record-link">Arrêt #@stop.StopId</a>
+                                            <span>@stop.TruckCode · @stop.StopReasonName</span>
+                                        </div>
+                                        <div class="home-record-meta">
+                                            <time datetime="@stop.StartTime.ToString("O", CultureInfo.InvariantCulture)">
+                                                @stop.StartTime.ToString("dd/MM HH:mm", frenchCulture)
+                                            </time>
+                                            <span>@StopPresentation.GetValidationStatusLabel(stop.ValidationStatus)</span>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </article>
+                }
+
+                @if (Model.CanManageQuality)
+                {
+                    <article class="home-activity-card home-activity-card--blue" aria-labelledby="home-quality-heading">
+                        <header>
+                            <div>
+                                <h3 id="home-quality-heading">Analyses qualité du jour</h3>
+                                <p>Classées par date d’analyse.</p>
+                            </div>
+                            <a asp-controller="Quality" asp-action="Index">Tout voir</a>
+                        </header>
+                        @if (Model.RecentQualityAnalyses.Count == 0)
+                        {
+                            <p class="home-empty-state">Aucune analyse qualité n’est enregistrée pour aujourd’hui.</p>
+                        }
+                        else
+                        {
+                            <ul class="home-activity-list">
+                                @foreach (var analysis in Model.RecentQualityAnalyses)
+                                {
+                                    <li>
+                                        <div>
+                                            <a asp-controller="Quality"
+                                               asp-action="Details"
+                                               asp-route-id="@analysis.QualityResultId"
+                                               class="home-record-link">Analyse #@analysis.QualityResultId</a>
+                                            <span>@QualityPresentation.OrFallback(analysis.TruckCode) · @QualityPresentation.FormatMeasurement(analysis.P2O5Value, analysis.QualityUnit)</span>
+                                        </div>
+                                        <div class="home-record-meta">
+                                            <time datetime="@analysis.AnalysisDate.ToString("O", CultureInfo.InvariantCulture)">
+                                                @analysis.AnalysisDate.ToString("HH:mm", frenchCulture)
+                                            </time>
+                                            <span>@QualityPresentation.GetStatusLabel(analysis.Status)</span>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </article>
+                }
+            </div>
+        </section>
+    }
 </div>

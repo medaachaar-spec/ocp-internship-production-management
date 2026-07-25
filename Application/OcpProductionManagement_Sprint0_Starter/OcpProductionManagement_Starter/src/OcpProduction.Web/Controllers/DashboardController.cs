@@ -4,6 +4,7 @@ using OcpProduction.Application.Dashboard.Dtos;
 using OcpProduction.Application.Dashboard.Models;
 using OcpProduction.Application.Dashboard.Services;
 using OcpProduction.Application.Security;
+using OcpProduction.Web.ModelBinding;
 using OcpProduction.Web.ViewModels.Dashboard;
 
 namespace OcpProduction.Web.Controllers;
@@ -16,7 +17,8 @@ public sealed class DashboardController(
 {
     [HttpGet("")]
     public async Task<IActionResult> Index(
-        [FromQuery] DashboardDateCriteria criteria,
+        [FromQuery, ModelBinder(BinderType = typeof(DashboardDateCriteriaModelBinder))]
+        DashboardDateCriteria criteria,
         CancellationToken cancellationToken)
     {
         if (criteria.HasInvalidRange)

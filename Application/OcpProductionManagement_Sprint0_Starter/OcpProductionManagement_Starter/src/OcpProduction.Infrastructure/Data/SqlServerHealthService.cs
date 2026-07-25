@@ -25,17 +25,21 @@ public sealed class SqlServerHealthService : IDatabaseHealthService
         {
             return new DatabaseHealthResult(
                 false,
-                "La chaîne ConnectionStrings:OcpDatabase n'est pas configurée.");
+                "La base de données n’est pas accessible. Consultez la configuration du service.");
         }
 
         try
         {
-            await using var connection = new SqlConnection(connectionString);
+            var connectionOptions = new SqlConnectionStringBuilder(connectionString)
+            {
+                ConnectTimeout = 5
+            };
+            await using var connection = new SqlConnection(connectionOptions.ConnectionString);
             await connection.OpenAsync(cancellationToken);
 
             return new DatabaseHealthResult(
                 true,
-                "Connexion SQL Server réussie.",
+                "SQL Server accessible. Base de données accessible.",
                 connection.DataSource,
                 connection.Database);
         }
@@ -47,7 +51,7 @@ public sealed class SqlServerHealthService : IDatabaseHealthService
 
             return new DatabaseHealthResult(
                 false,
-                "Connexion SQL Server impossible. Consultez les journaux techniques.");
+                "SQL Server ou base de données inaccessible. Consultez les journaux techniques.");
         }
         catch (Exception ex)
         {
@@ -57,7 +61,7 @@ public sealed class SqlServerHealthService : IDatabaseHealthService
 
             return new DatabaseHealthResult(
                 false,
-                "Connexion SQL Server impossible. Consultez les journaux techniques.");
+                "SQL Server ou base de données inaccessible. Consultez les journaux techniques.");
         }
     }
 }

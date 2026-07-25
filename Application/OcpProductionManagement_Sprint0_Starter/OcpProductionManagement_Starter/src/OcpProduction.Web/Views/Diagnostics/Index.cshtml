@@ -1,45 +1,81 @@
 @model OcpProduction.Web.ViewModels.Diagnostics.DiagnosticsViewModel
+@using System.Globalization
 @{
     ViewData["Title"] = "Diagnostic technique";
+    var frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
 }
-<div class="page-header">
-    <h1>Diagnostic technique</h1>
-    <p class="text-muted">Vérification du Sprint 0 sans modifier la base SQL Server.</p>
-</div>
 
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h5 mb-0">Connexion SQL Server</h2>
-            @if (Model.DatabaseConnected)
-            {
-                <span class="badge text-bg-success">Connectée</span>
-            }
-            else
-            {
-                <span class="badge text-bg-danger">Non connectée</span>
-            }
+<div class="diagnostics-page">
+    <header class="diagnostics-header">
+        <div>
+            <p class="diagnostics-eyebrow">Administration système</p>
+            <h1>Diagnostic technique</h1>
+            <p class="diagnostics-subtitle">
+                État des services nécessaires au fonctionnement de l’application
+            </p>
         </div>
-        <p>@Model.DatabaseMessage</p>
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Serveur</dt>
-            <dd class="col-sm-9">@(Model.Server ?? "-")</dd>
-            <dt class="col-sm-3">Base</dt>
-            <dd class="col-sm-9">@(Model.Database ?? "-")</dd>
-        </dl>
-    </div>
-</div>
+        <a asp-action="Index" class="btn btn-outline-primary">Actualiser le diagnostic</a>
+    </header>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-        <h2 class="h5">Contexte applicatif</h2>
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Environnement</dt>
-            <dd class="col-sm-9">@Model.EnvironmentName</dd>
-            <dt class="col-sm-3">Utilisateur</dt>
-            <dd class="col-sm-9">@Model.CurrentUser</dd>
-            <dt class="col-sm-3">Rôle</dt>
-            <dd class="col-sm-9">@Model.CurrentRole</dd>
+    <p class="diagnostics-check-time">
+        Dernière vérification :
+        <time datetime="@Model.LastCheckedAt.ToString("O", CultureInfo.InvariantCulture)">
+            @Model.LastCheckedAt.ToString("dd/MM/yyyy HH:mm:ss", frenchCulture)
+        </time>
+    </p>
+
+    <section class="diagnostics-grid" aria-label="État des services">
+        <article class="diagnostics-card">
+            <div class="diagnostics-card-heading">
+                <h2>Application</h2>
+                <span class="diagnostics-status">
+                    @(Model.ApplicationAvailable ? "Disponible" : "Indisponible")
+                </span>
+            </div>
+            <p>L’interface applicative répond à la présente vérification.</p>
+        </article>
+
+        <article class="diagnostics-card">
+            <div class="diagnostics-card-heading">
+                <h2>SQL Server</h2>
+                <span class="diagnostics-status">
+                    @(Model.DatabaseConnected ? "Accessible" : "Inaccessible")
+                </span>
+            </div>
+            <p>@Model.DatabaseMessage</p>
+        </article>
+
+        <article class="diagnostics-card">
+            <div class="diagnostics-card-heading">
+                <h2>Base de données</h2>
+                <span class="diagnostics-status">
+                    @(Model.DatabaseConnected ? "Accessible" : "Inaccessible")
+                </span>
+            </div>
+            <p>
+                @(Model.DatabaseConnected
+                    ? "La base de données répond à une vérification de connexion en lecture seule."
+                    : "La disponibilité de la base de données n’a pas pu être confirmée.")
+            </p>
+        </article>
+    </section>
+
+    <section class="diagnostics-context" aria-labelledby="diagnostics-context-heading">
+        <h2 id="diagnostics-context-heading">Informations d’exécution</h2>
+        <dl>
+            <div>
+                <dt>Environnement</dt>
+                <dd>@Model.EnvironmentName</dd>
+            </div>
+            <div>
+                <dt>Version de l’application</dt>
+                <dd>@Model.ApplicationVersion</dd>
+            </div>
         </dl>
-    </div>
+    </section>
+
+    <p class="diagnostics-note">
+        Cette page présente uniquement des états de disponibilité. Elle n’affiche ni identifiants,
+        ni chaîne de connexion, ni détails de topologie serveur.
+    </p>
 </div>

@@ -4,153 +4,333 @@
 
 @{
     ViewData["Title"] = "Performance conducteurs";
+    var summary = Model.Report.Summary;
+    var charts = Model.Report.Charts;
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div>
-        <h1 class="h3 mb-1">Performance conducteurs</h1>
-        <p class="text-muted mb-0">Indicateurs consolidés tous historiques depuis la vue SQL Server validée.</p>
-    </div>
-    <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Trucks">Performance camions</a>
+<div class="performance-page performance-driver-page">
+    <header class="performance-header">
+        <div>
+            <p class="performance-eyebrow">Analyse descriptive</p>
+            <h1 class="h3 mb-1">Performance conducteurs</h1>
+            <p class="text-muted mb-0">Analyse descriptive de l’activité et des voyages associés aux conducteurs.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Trucks">Performance camions</a>
+    </header>
+
+    <form method="get" class="card performance-filter-card" aria-label="Filtres performance conducteurs">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="Search">Recherche</label>
+                    <input class="form-control" id="Search" name="Search" value="@Model.Criteria.Search" placeholder="Code ou nom" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="Status">Statut</label>
+                    <select class="form-select" id="Status" name="Status">
+                        <option value="">Tous les statuts</option>
+                        @foreach (var status in Model.FilterOptions.DriverStatuses)
+                        {
+                            <option value="@status" selected="@(status == Model.Criteria.Status)">
+                                @PerformancePresentation.GetDriverStatusLabel(status)
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="Sort">Tri du tableau</label>
+                    <select class="form-select" id="Sort" name="Sort">
+                        <option value="@DriverPerformanceSort.TotalTripsDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.TotalTripsDesc)">Voyages décroissants</option>
+                        <option value="@DriverPerformanceSort.TotalTonnageDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.TotalTonnageDesc)">Tonnage décroissant</option>
+                        <option value="@DriverPerformanceSort.StopDurationDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.StopDurationDesc)">Durée arrêts décroissante</option>
+                        <option value="@DriverPerformanceSort.CompletionRateDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.CompletionRateDesc)">Taux de clôture décroissant</option>
+                        <option value="@DriverPerformanceSort.CodeAsc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.CodeAsc)">Code croissant</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="PageSize">Lignes</label>
+                    <select class="form-select" id="PageSize" name="PageSize">
+                        @foreach (var size in new[] { 10, 20, 50 })
+                        {
+                            <option value="@size" selected="@(Model.Criteria.PageSize == size)">@size</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                    <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Drivers">Réinitialiser</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.HasLoadError)
+    {
+        <div class="alert alert-danger performance-load-error" role="alert">
+            Les données de performance des conducteurs ne peuvent pas être chargées actuellement.
+        </div>
+    }
+    else
+    {
+        <section class="performance-section" aria-labelledby="driver-summary-heading">
+            <div class="performance-section-heading">
+                <div>
+                    <h2 id="driver-summary-heading" class="h4 mb-1">Synthèse filtrée</h2>
+                    <p class="text-muted mb-0">Calculée sur tous les conducteurs correspondant aux filtres, indépendamment de la page du tableau.</p>
+                </div>
+            </div>
+            <div class="performance-summary-grid">
+                <article class="performance-summary-card">
+                    <p>Conducteurs affichés</p>
+                    <strong>@PerformancePresentation.FormatNumber(summary.DisplayedDriverCount)</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Voyages</p>
+                    <strong>@PerformancePresentation.FormatNumber(summary.TripCount)</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Voyages terminés</p>
+                    <strong>@PerformancePresentation.FormatNumber(summary.CompletedTripCount)</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Tonnage transporté</p>
+                    <strong>@PerformancePresentation.FormatDecimal(summary.CompletedTonnage, " t")</strong>
+                </article>
+                <article class="performance-summary-card">
+                    <p>Arrêts associés</p>
+                    <strong>@PerformancePresentation.FormatNumber(summary.LinkedStopCount)</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="performance-section" aria-labelledby="driver-chart-heading">
+            <div class="performance-section-heading">
+                <div>
+                    <h2 id="driver-chart-heading" class="h4 mb-1">Comparaisons par conducteur</h2>
+                    <p class="text-muted mb-0">Les graphiques affichent tous les conducteurs filtrés et sont classés par valeur décroissante; le tri choisi ci-dessus s’applique au tableau.</p>
+                </div>
+            </div>
+            <div class="row g-3 performance-chart-grid">
+                <div class="col-12">
+                    <article class="performance-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Voyages par conducteur</h3>
+                            <p class="text-muted small mb-0">Nombre total de voyages et nombre de voyages terminés.</p>
+                        </header>
+                        @if (charts.TripsByDriver.Count > 0)
+                        {
+                            <div class="performance-chart-visual performance-chart-visual-drivers @(charts.TripsByDriver.Count <= 5 ? "performance-chart-visual-compact" : null)" hidden>
+                                <canvas id="driver-trips-chart" role="img" aria-label="Graphique du nombre total et du nombre de voyages terminés par conducteur"></canvas>
+                            </div>
+                            <details class="performance-chart-fallback" open data-chart-fallback="driverTrips">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Voyages par conducteur</caption>
+                                        <thead><tr><th scope="col">Conducteur</th><th scope="col" class="text-end">Voyages</th><th scope="col" class="text-end">Voyages terminés</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var point in charts.TripsByDriver)
+                                        {
+                                            <tr><th scope="row">@point.Category</th><td class="text-end">@PerformancePresentation.FormatNumber(point.TotalTrips)</td><td class="text-end">@PerformancePresentation.FormatNumber(point.CompletedTrips)</td></tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="performance-chart-empty mb-0" role="status">Aucune donnée de voyage pour les filtres sélectionnés.</p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12">
+                    <article class="performance-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Tonnage transporté par conducteur</h3>
+                            <p class="text-muted small mb-0">Tonnage des voyages terminés, en tonnes.</p>
+                        </header>
+                        @if (charts.TonnageByDriver.Count > 0)
+                        {
+                            <div class="performance-chart-visual performance-chart-visual-drivers @(charts.TonnageByDriver.Count <= 5 ? "performance-chart-visual-compact" : null)" hidden>
+                                <canvas id="driver-tonnage-chart" role="img" aria-label="Graphique du tonnage transporté par conducteur en tonnes"></canvas>
+                            </div>
+                            <details class="performance-chart-fallback" open data-chart-fallback="driverTonnage">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Tonnage transporté par conducteur</caption>
+                                        <thead><tr><th scope="col">Conducteur</th><th scope="col" class="text-end">Tonnage transporté (t)</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var point in charts.TonnageByDriver)
+                                        {
+                                            <tr><th scope="row">@point.Category</th><td class="text-end">@PerformancePresentation.FormatDecimal(point.Value)</td></tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="performance-chart-empty mb-0" role="status">Aucune donnée de tonnage pour les filtres sélectionnés.</p>
+                        }
+                    </article>
+                </div>
+
+                <div class="col-12">
+                    <article class="performance-chart-card">
+                        <header>
+                            <h3 class="h5 mb-1">Arrêts associés par conducteur</h3>
+                            <p class="text-muted small mb-0">Arrêts reliés à un voyage du conducteur; cette association n’attribue ni cause ni responsabilité.</p>
+                        </header>
+                        @if (charts.LinkedStopsByDriver.Count > 0)
+                        {
+                            <div class="performance-chart-visual performance-chart-visual-drivers @(charts.LinkedStopsByDriver.Count <= 5 ? "performance-chart-visual-compact" : null)" hidden>
+                                <canvas id="driver-stops-chart" role="img" aria-label="Graphique du nombre d’arrêts associés par conducteur"></canvas>
+                            </div>
+                            <details class="performance-chart-fallback" open data-chart-fallback="driverStops">
+                                <summary>Voir les données exactes du graphique</summary>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <caption class="visually-hidden">Arrêts associés par conducteur</caption>
+                                        <thead><tr><th scope="col">Conducteur</th><th scope="col" class="text-end">Arrêts associés</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var point in charts.LinkedStopsByDriver)
+                                        {
+                                            <tr><th scope="row">@point.Category</th><td class="text-end">@PerformancePresentation.FormatNumber(point.Value)</td></tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        }
+                        else
+                        {
+                            <p class="performance-chart-empty mb-0" role="status">Aucun arrêt associé n’est disponible pour les filtres sélectionnés.</p>
+                        }
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="performance-section" aria-labelledby="driver-detail-heading">
+            <div class="performance-section-heading">
+                <div>
+                    <h2 id="driver-detail-heading" class="h4 mb-1">Détail par conducteur</h2>
+                    <p class="text-muted mb-0">Valeurs agrégées exactes; le tableau reste paginé selon la sélection de lignes.</p>
+                </div>
+            </div>
+            <div class="performance-table-region table-responsive">
+                <table class="table align-middle fleet-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Conducteur</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="text-end">Voyages</th>
+                            <th scope="col" class="text-end">Terminés</th>
+                            <th scope="col" class="text-end">Tonnage transporté</th>
+                            <th scope="col" class="text-end">Durée des arrêts associés</th>
+                            <th scope="col" class="text-end">P2O5 moyen associé</th>
+                            <th scope="col">Dernier voyage</th>
+                            <th scope="col" class="text-end">Détail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Results.Items.Count == 0)
+                        {
+                            <tr><td colspan="9" class="text-center text-muted py-4">Aucune performance conducteur ne correspond aux filtres.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Results.Items)
+                            {
+                                <tr>
+                                    <td><div class="fw-semibold">@item.DriverCode</div><div class="text-muted small">@item.DriverFullName</div></td>
+                                    <td>@PerformancePresentation.GetDriverStatusLabel(item.DriverStatus)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatNumber(item.TotalTrips)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatNumber(item.CompletedTrips)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatDecimal(item.CompletedTonnage, " t")</td>
+                                    <td class="text-end">@PerformancePresentation.FormatMinutes(item.TotalLinkedStopDurationMinutes)</td>
+                                    <td class="text-end">@PerformancePresentation.FormatP2O5(item.AverageP2O5)</td>
+                                    <td>@PerformancePresentation.FormatDate(item.LastTripDate)</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           asp-controller="Performance"
+                                           asp-action="DriverDetails"
+                                           asp-route-id="@item.DriverId"
+                                           asp-route-Search="@Model.Criteria.Search"
+                                           asp-route-Status="@Model.Criteria.Status"
+                                           asp-route-Sort="@Model.Criteria.Sort"
+                                           asp-route-Page="@Model.Results.Page"
+                                           asp-route-PageSize="@Model.Criteria.PageSize">Voir</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
+                <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
+                <nav aria-label="Pagination des performances conducteurs">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
+                            @if (Model.Results.HasPreviousPage)
+                            {
+                                <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Précédent</span>
+                            }
+                        </li>
+                        @foreach (var pageNumber in Model.VisiblePages)
+                        {
+                            <li class="page-item @(pageNumber == Model.Results.Page ? "active" : null)">
+                                @if (pageNumber == Model.Results.Page)
+                                {
+                                    <span class="page-link" aria-current="page">@pageNumber</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(pageNumber)">@pageNumber</a>
+                                }
+                            </li>
+                        }
+                        <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
+                            @if (Model.Results.HasNextPage)
+                            {
+                                <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
+                            }
+                            else
+                            {
+                                <span class="page-link" aria-disabled="true">Suivant</span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+
+        @if (Model.HasAnyChartData)
+        {
+            <script id="driver-performance-chart-data" type="application/json">@Html.Raw(Model.ChartDataJson)</script>
+        }
+    }
 </div>
 
-<form method="get" class="filter-panel mb-4" aria-label="Filtres performance conducteurs">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label" for="Search">Recherche</label>
-            <input class="form-control" id="Search" name="Search" value="@Model.Criteria.Search" placeholder="Code ou nom" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label" for="Status">Statut</label>
-            <select class="form-select" id="Status" name="Status">
-                <option value="">Tous les statuts</option>
-                @foreach (var status in Model.FilterOptions.DriverStatuses)
-                {
-                    <option value="@status" selected="@(status == Model.Criteria.Status)">
-                        @PerformancePresentation.GetDriverStatusLabel(status)
-                    </option>
-                }
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label" for="Sort">Tri</label>
-            <select class="form-select" id="Sort" name="Sort">
-                <option value="@DriverPerformanceSort.TotalTripsDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.TotalTripsDesc)">Voyages décroissants</option>
-                <option value="@DriverPerformanceSort.TotalTonnageDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.TotalTonnageDesc)">Tonnage décroissant</option>
-                <option value="@DriverPerformanceSort.StopDurationDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.StopDurationDesc)">Durée arrêts décroissante</option>
-                <option value="@DriverPerformanceSort.CompletionRateDesc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.CompletionRateDesc)">Taux de clôture décroissant</option>
-                <option value="@DriverPerformanceSort.CodeAsc" selected="@(Model.Criteria.Sort == DriverPerformanceSort.CodeAsc)">Code croissant</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label" for="PageSize">Lignes</label>
-            <select class="form-select" id="PageSize" name="PageSize">
-                @foreach (var size in new[] { 10, 20, 50 })
-                {
-                    <option value="@size" selected="@(Model.Criteria.PageSize == size)">@size</option>
-                }
-            </select>
-        </div>
-        <div class="col-12 d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a class="btn btn-outline-secondary" asp-controller="Performance" asp-action="Drivers">Réinitialiser</a>
-        </div>
-    </div>
-</form>
+@section Styles {
+    <link rel="stylesheet" href="~/css/performance.css" asp-append-version="true" />
+}
 
-<div class="table-responsive">
-    <table class="table align-middle fleet-table">
-        <thead>
-            <tr>
-                <th>Conducteur</th>
-                <th>Statut</th>
-                <th class="text-end">Voyages</th>
-                <th class="text-end">Complétés</th>
-                <th class="text-end">Tonnage</th>
-                <th class="text-end">Durée arrêts</th>
-                <th class="text-end">P2O5 moyen</th>
-                <th>Dernier voyage</th>
-                <th class="text-end">Détail</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Results.Items.Count == 0)
-            {
-                <tr>
-                    <td colspan="9" class="text-center text-muted py-4">Aucune performance conducteur ne correspond aux filtres.</td>
-                </tr>
-            }
-            else
-            {
-                @foreach (var item in Model.Results.Items)
-                {
-                    <tr>
-                        <td>
-                            <div class="fw-semibold">@item.DriverCode</div>
-                            <div class="text-muted small">@item.DriverFullName</div>
-                        </td>
-                        <td>@PerformancePresentation.GetDriverStatusLabel(item.DriverStatus)</td>
-                        <td class="text-end">@PerformancePresentation.FormatNumber(item.TotalTrips)</td>
-                        <td class="text-end">@PerformancePresentation.FormatNumber(item.CompletedTrips)</td>
-                        <td class="text-end">@PerformancePresentation.FormatDecimal(item.TotalTonnage, " t")</td>
-                        <td class="text-end">@PerformancePresentation.FormatMinutes(item.TotalLinkedStopDurationMinutes)</td>
-                        <td class="text-end">@PerformancePresentation.FormatDecimal(item.AverageP2O5, " %")</td>
-                        <td>@PerformancePresentation.FormatDate(item.LastTripDate)</td>
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-outline-primary"
-                               asp-controller="Performance"
-                               asp-action="DriverDetails"
-                               asp-route-id="@item.DriverId"
-                               asp-route-Search="@Model.Criteria.Search"
-                               asp-route-Status="@Model.Criteria.Status"
-                               asp-route-Sort="@Model.Criteria.Sort"
-                               asp-route-Page="@Model.Results.Page"
-                               asp-route-PageSize="@Model.Criteria.PageSize">Voir</a>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
-</div>
-
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
-    <span class="text-muted small">Page @Model.Results.Page sur @Model.Results.TotalPages</span>
-    <nav aria-label="Pagination des performances conducteurs">
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item @(!Model.Results.HasPreviousPage ? "disabled" : null)">
-                @if (Model.Results.HasPreviousPage)
-                {
-                    <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page - 1)">Précédent</a>
-                }
-                else
-                {
-                    <span class="page-link" aria-disabled="true">Précédent</span>
-                }
-            </li>
-            @foreach (var pageNumber in Model.VisiblePages)
-            {
-                <li class="page-item @(pageNumber == Model.Results.Page ? "active" : null)">
-                    @if (pageNumber == Model.Results.Page)
-                    {
-                        <span class="page-link" aria-current="page">@pageNumber</span>
-                    }
-                    else
-                    {
-                        <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(pageNumber)">@pageNumber</a>
-                    }
-                </li>
-            }
-            <li class="page-item @(!Model.Results.HasNextPage ? "disabled" : null)">
-                @if (Model.Results.HasNextPage)
-                {
-                    <a class="page-link" asp-action="Drivers" asp-all-route-data="@Model.RouteValuesFor(Model.Results.Page + 1)">Suivant</a>
-                }
-                else
-                {
-                    <span class="page-link" aria-disabled="true">Suivant</span>
-                }
-            </li>
-        </ul>
-    </nav>
-</div>
+@section Scripts {
+    @if (!Model.HasLoadError && Model.HasAnyChartData)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+        <script src="~/js/chart-theme.js" asp-append-version="true"></script>
+        <script src="~/js/driver-performance.js" asp-append-version="true"></script>
+    }
+}

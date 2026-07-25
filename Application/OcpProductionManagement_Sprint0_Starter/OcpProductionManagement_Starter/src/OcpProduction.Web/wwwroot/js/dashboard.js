@@ -2,7 +2,10 @@
     "use strict";
 
     const dataElement = document.getElementById("dashboard-chart-data");
-    if (!dataElement || typeof window.Chart !== "function") {
+    const theme = window.OcpChartTheme;
+    if (!dataElement ||
+        typeof window.Chart !== "function" ||
+        !theme) {
         return;
     }
 
@@ -14,47 +17,12 @@
     }
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const locale = "fr-FR";
-    const colors = {
-        green: "#176b45",
-        greenSoft: "rgba(23, 107, 69, 0.24)",
-        blue: "#315c6f",
-        blueSoft: "rgba(49, 92, 111, 0.22)",
-        brown: "#806744",
-        brownSoft: "rgba(128, 103, 68, 0.24)",
-        slate: "#5f6f76",
-        slateSoft: "rgba(95, 111, 118, 0.22)",
-        olive: "#66705b",
-        oliveSoft: "rgba(102, 112, 91, 0.22)",
-        neutral: "#59635f",
-        neutralSoft: "rgba(89, 99, 95, 0.2)",
-        grid: "rgba(63, 82, 75, 0.08)",
-        text: "#42534d",
-        textStrong: "#24312d"
-    };
-    colors.statusPalette = [
-        colors.green,
-        colors.blue,
-        colors.brown,
-        colors.slate,
-        colors.olive,
-        colors.neutral
-    ];
-
-    const numberFormatter = new Intl.NumberFormat(locale);
-    const decimalFormatter = new Intl.NumberFormat(locale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-    const p2o5Formatter = new Intl.NumberFormat(locale, {
-        minimumFractionDigits: 3,
-        maximumFractionDigits: 3
-    });
-    const percentageFormatter = new Intl.NumberFormat(locale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-    const dateFormatter = new Intl.DateTimeFormat(locale, {
+    const colors = theme.colors;
+    const numberFormatter = theme.formatters.number;
+    const decimalFormatter = theme.formatters.decimal;
+    const p2o5Formatter = theme.formatters.p2o5;
+    const percentageFormatter = theme.formatters.percentage;
+    const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric"
@@ -66,6 +34,19 @@
 
     function formatPercentage(value, total) {
         return total > 0 ? value * 100 / total : 0;
+    }
+
+    function formatTripStatus(status) {
+        const labels = {
+            Completed: "Validé",
+            InProgress: "En cours",
+            PendingValidation: "À valider",
+            Incomplete: "Incomplet",
+            Planned: "Planifié",
+            Cancelled: "Annulé"
+        };
+
+        return labels[status] ?? status;
     }
 
     const statusCenterTextPlugin = {
@@ -95,80 +76,8 @@
         }
     };
 
-    const barValueLabelsPlugin = {
-        id: "dashboardBarValueLabels",
-        afterDatasetsDraw: function (chart, _args, options) {
-            if (chart.width < 560 ||
-                window.innerWidth < 768 ||
-                typeof options.formatter !== "function") {
-                return;
-            }
-
-            const metadata = chart.getDatasetMeta(0);
-            if (metadata.hidden) {
-                return;
-            }
-
-            const dataset = chart.data.datasets[0];
-            const context = chart.ctx;
-            context.save();
-            context.fillStyle = colors.textStrong;
-            context.font = "600 11px system-ui, sans-serif";
-            context.textBaseline = "middle";
-
-            metadata.data.forEach(function (bar, index) {
-                const value = Number(dataset.data[index]);
-                if (!Number.isFinite(value)) {
-                    return;
-                }
-
-                const label = options.formatter(value, index);
-                const labelWidth = context.measureText(label).width;
-                const outsideX = bar.x + 7;
-                const barWidth = Math.abs(bar.x - bar.base);
-
-                if (outsideX + labelWidth <= chart.width - 8) {
-                    context.textAlign = "left";
-                    context.fillText(label, outsideX, bar.y);
-                } else if (barWidth >= labelWidth + 18) {
-                    context.textAlign = "right";
-                    context.fillText(label, bar.x - 7, bar.y);
-                }
-            });
-
-            context.restore();
-        }
-    };
-
     function commonOptions() {
-        return {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: reducedMotion ? false : { duration: 300 },
-            layout: {
-                padding: {
-                    top: 6,
-                    right: 6,
-                    bottom: 2,
-                    left: 2
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: "nearest"
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    labels: {
-                        color: colors.text,
-                        usePointStyle: true,
-                        boxWidth: 10,
-                        padding: 16
-                    }
-                }
-            }
-        };
+        return theme.commonOptions(reducedMotion);
     }
 
     function initializeChart(canvasId, fallbackName, createConfiguration) {
@@ -197,52 +106,50 @@
     if (daily.length > 0) {
         initializeChart("daily-trips-chart", "dailyTrips", function () {
             const options = commonOptions();
-            options.plugins.tooltip = {
-                callbacks: {
-                    label: function (context) {
-                        if (context.dataset.yAxisID === "tonnage") {
-                            return `Tonnage complété : ${decimalFormatter.format(context.raw)} t`;
-                        }
-
-                        return `Voyages : ${numberFormatter.format(context.raw)}`;
+            options.plugins.tooltip = theme.tooltip({
+                label: function (context) {
+                    if (context.dataset.yAxisID === "tonnage") {
+                        return `Tonnage complété : ${decimalFormatter.format(context.raw)} t`;
                     }
+
+                    return `Voyages : ${numberFormatter.format(context.raw)}`;
                 }
-            };
+            });
             options.scales = {
                 x: {
                     grid: { display: false },
+                    border: { color: colors.border },
                     offset: true,
-                    ticks: {
+                    ticks: theme.ticks({
                         autoSkip: true,
                         maxTicksLimit: 12,
                         maxRotation: 0,
-                        minRotation: 0,
-                        padding: 8,
-                        color: colors.text
-                    }
+                        minRotation: 0
+                    })
                 },
                 trips: {
                     beginAtZero: true,
                     position: "left",
                     title: {
                         display: true,
-                        text: "Voyages"
+                        ...theme.axisTitle("Voyages")
                     },
                     grid: { color: colors.grid },
-                    ticks: {
-                        color: colors.text,
+                    border: { color: colors.border },
+                    ticks: theme.ticks({
                         precision: 0
-                    }
+                    })
                 },
                 tonnage: {
                     beginAtZero: true,
                     position: "right",
                     title: {
                         display: true,
-                        text: "Tonnage (t)"
+                        ...theme.axisTitle("Tonnage (t)")
                     },
                     grid: { drawOnChartArea: false },
-                    ticks: { color: colors.text }
+                    border: { color: colors.border },
+                    ticks: theme.ticks()
                 }
             };
 
@@ -256,23 +163,27 @@
                             label: "Tonnage complété (t)",
                             data: daily.map(point => point.completedTonnage),
                             yAxisID: "tonnage",
-                            backgroundColor: colors.greenSoft,
+                            backgroundColor: colors.greenFill,
+                            hoverBackgroundColor: colors.greenHover,
                             borderColor: colors.green,
-                            borderWidth: 1,
-                            barPercentage: 0.68,
-                            categoryPercentage: 0.82,
-                            maxBarThickness: 18
+                            hoverBorderColor: colors.green,
+                            borderWidth: 2,
+                            barPercentage: 0.72,
+                            categoryPercentage: 0.8,
+                            maxBarThickness: 20
                         },
                         {
                             type: "line",
                             label: "Voyages",
                             data: daily.map(point => point.tripCount),
                             yAxisID: "trips",
-                            borderColor: colors.blue,
-                            backgroundColor: colors.blueSoft,
-                            borderWidth: 2.5,
-                            pointStyle: "rectRot",
-                            pointRadius: 2,
+                            borderColor: colors.blueGray,
+                            backgroundColor: colors.blueGrayFill,
+                            borderWidth: 3,
+                            pointBackgroundColor: colors.blueGray,
+                            pointBorderColor: colors.white,
+                            pointStyle: "circle",
+                            pointRadius: 3,
                             pointHoverRadius: 5,
                             pointHitRadius: 10,
                             tension: 0,
@@ -296,30 +207,29 @@
             options.cutout = "68%";
             options.layout.padding = 10;
             options.plugins.dashboardStatusCenterText = { total };
-            options.plugins.tooltip = {
-                callbacks: {
-                    label: function (context) {
-                        const count = Number(context.raw);
-                        const percentage = formatPercentage(count, total);
-                        return `${context.label} : ${numberFormatter.format(count)} voyages (${percentageFormatter.format(percentage)} %)`;
-                    }
+            options.plugins.tooltip = theme.tooltip({
+                label: function (context) {
+                    const count = Number(context.raw);
+                    const percentage = formatPercentage(count, total);
+                    return `${context.label} : ${numberFormatter.format(count)} voyages (${percentageFormatter.format(percentage)} %)`;
                 }
-            };
+            });
 
             return {
                 type: "doughnut",
                 data: {
-                    labels: statuses.map(point => point.status),
+                    labels: statuses.map(point => formatTripStatus(point.status)),
                     datasets: [{
                         label: "Voyages",
                         data: statuses.map(point => point.tripCount),
                         backgroundColor: statuses.map(
                             (_point, index) =>
-                                colors.statusPalette[index % colors.statusPalette.length]),
+                                theme.statusPalette[index % theme.statusPalette.length]),
                         borderColor: "#ffffff",
-                        borderWidth: 1,
-                        hoverBorderWidth: 1,
-                        hoverOffset: 5
+                        borderWidth: 2,
+                        hoverBorderWidth: 2,
+                        hoverOffset: 4,
+                        spacing: 1
                     }]
                 },
                 options,
@@ -335,38 +245,39 @@
             options.indexAxis = "y";
             options.layout.padding.right = window.innerWidth >= 768 ? 76 : 6;
             options.plugins.legend.display = false;
-            options.plugins.dashboardBarValueLabels = {
+            options.plugins.ocpBarValueLabels = {
                 formatter: value => `${decimalFormatter.format(value)} h`
             };
-            options.plugins.tooltip = {
-                callbacks: {
-                    label: function (context) {
-                        const point = stopReasons[context.dataIndex];
-                        const stopLabel = point.stopCount === 1 ? "arrêt" : "arrêts";
-                        return `${decimalFormatter.format(point.durationHours)} h (${numberFormatter.format(point.durationMinutes)} min) — ${numberFormatter.format(point.stopCount)} ${stopLabel}`;
-                    }
+            options.plugins.tooltip = theme.tooltip({
+                label: function (context) {
+                    const point = stopReasons[context.dataIndex];
+                    const stopLabel = point.stopCount === 1 ? "arrêt" : "arrêts";
+                    return `${decimalFormatter.format(point.durationHours)} h (${numberFormatter.format(point.durationMinutes)} min) — ${numberFormatter.format(point.stopCount)} ${stopLabel}`;
                 }
-            };
+            });
             options.scales = {
                 x: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: "Durée (h)"
+                        ...theme.axisTitle("Durée (h)")
                     },
                     grid: { color: colors.grid },
-                    ticks: { color: colors.text }
+                    border: { color: colors.border },
+                    ticks: theme.ticks()
                 },
                 y: {
                     grid: { display: false },
-                    ticks: {
+                    border: { color: colors.border },
+                    ticks: theme.ticks({
                         autoSkip: false,
                         padding: 6,
-                        color: colors.text,
                         font: {
-                            size: window.innerWidth < 576 ? 10 : 12
+                            family: "system-ui, -apple-system, sans-serif",
+                            size: window.innerWidth < 576 ? 10 : 12,
+                            weight: "600"
                         }
-                    }
+                    })
                 }
             };
 
@@ -377,16 +288,18 @@
                     datasets: [{
                         label: "Durée (h)",
                         data: stopReasons.map(point => point.durationHours),
-                        backgroundColor: colors.brownSoft,
-                        borderColor: colors.brown,
-                        borderWidth: 1,
-                        barPercentage: 0.68,
-                        categoryPercentage: 0.82,
-                        maxBarThickness: 24
+                        backgroundColor: colors.beigeFill,
+                        hoverBackgroundColor: colors.beigeHover,
+                        borderColor: colors.beige,
+                        hoverBorderColor: colors.beige,
+                        borderWidth: 2,
+                        barPercentage: 0.72,
+                        categoryPercentage: 0.8,
+                        maxBarThickness: 26
                     }]
                 },
                 options,
-                plugins: [barValueLabelsPlugin]
+                plugins: [theme.barValueLabelsPlugin]
             };
         });
     }
@@ -398,37 +311,37 @@
             options.indexAxis = "y";
             options.layout.padding.right = window.innerWidth >= 768 ? 48 : 6;
             options.plugins.legend.display = false;
-            options.plugins.dashboardBarValueLabels = {
+            options.plugins.ocpBarValueLabels = {
                 formatter: value => numberFormatter.format(value)
             };
-            options.plugins.tooltip = {
-                callbacks: {
-                    label: context => `${numberFormatter.format(context.raw)} voyages`
-                }
-            };
+            options.plugins.tooltip = theme.tooltip({
+                label: context => `${numberFormatter.format(context.raw)} voyages`
+            });
             options.scales = {
                 x: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: "Voyages"
+                        ...theme.axisTitle("Voyages")
                     },
                     grid: { color: colors.grid },
-                    ticks: {
-                        color: colors.text,
+                    border: { color: colors.border },
+                    ticks: theme.ticks({
                         precision: 0
-                    }
+                    })
                 },
                 y: {
                     grid: { display: false },
-                    ticks: {
+                    border: { color: colors.border },
+                    ticks: theme.ticks({
                         autoSkip: false,
                         padding: 6,
-                        color: colors.text,
                         font: {
-                            size: window.innerWidth < 576 ? 10 : 12
+                            family: "system-ui, -apple-system, sans-serif",
+                            size: window.innerWidth < 576 ? 10 : 12,
+                            weight: "600"
                         }
-                    }
+                    })
                 }
             };
 
@@ -439,16 +352,18 @@
                     datasets: [{
                         label: "Voyages",
                         data: trucks.map(point => point.tripCount),
-                        backgroundColor: colors.blueSoft,
-                        borderColor: colors.blue,
-                        borderWidth: 1,
-                        barPercentage: 0.62,
+                        backgroundColor: colors.blueGrayFill,
+                        hoverBackgroundColor: colors.blueGrayHover,
+                        borderColor: colors.blueGray,
+                        hoverBorderColor: colors.blueGray,
+                        borderWidth: 2,
+                        barPercentage: 0.68,
                         categoryPercentage: 0.78,
-                        maxBarThickness: 18
+                        maxBarThickness: 22
                     }]
                 },
                 options,
-                plugins: [barValueLabelsPlugin]
+                plugins: [theme.barValueLabelsPlugin]
             };
         });
     }
@@ -457,31 +372,29 @@
     if (p2o5.length > 0) {
         initializeChart("p2o5-trend-chart", "p2o5Trend", function () {
             const options = commonOptions();
-            options.plugins.tooltip = {
-                callbacks: {
-                    label: context => `P2O5 : ${p2o5Formatter.format(context.raw)} %`
-                }
-            };
+            options.plugins.tooltip = theme.tooltip({
+                label: context => `P2O5 : ${p2o5Formatter.format(context.raw)} %`
+            });
             options.scales = {
                 x: {
                     grid: { display: false },
-                    ticks: {
+                    border: { color: colors.border },
+                    ticks: theme.ticks({
                         autoSkip: true,
                         maxTicksLimit: 12,
                         maxRotation: 0,
-                        minRotation: 0,
-                        padding: 8,
-                        color: colors.text
-                    }
+                        minRotation: 0
+                    })
                 },
                 y: {
                     grace: "5%",
                     title: {
                         display: true,
-                        text: "P2O5 (%)"
+                        ...theme.axisTitle("P2O5 (%)")
                     },
                     grid: { color: colors.grid },
-                    ticks: { color: colors.text }
+                    border: { color: colors.border },
+                    ticks: theme.ticks()
                 }
             };
 
@@ -493,10 +406,12 @@
                         label: "P2O5 moyen (%)",
                         data: p2o5.map(point => point.averageP2O5),
                         borderColor: colors.green,
-                        backgroundColor: colors.greenSoft,
-                        borderWidth: 2.5,
+                        backgroundColor: colors.greenFill,
+                        borderWidth: 3,
+                        pointBackgroundColor: colors.green,
+                        pointBorderColor: colors.white,
                         pointStyle: "circle",
-                        pointRadius: 2,
+                        pointRadius: 3,
                         pointHoverRadius: 5,
                         pointHitRadius: 10,
                         tension: 0,

@@ -10,12 +10,13 @@
     <a class="btn btn-primary" asp-action="CreateWorkShift">Nouveau poste</a>
 </div>
 <div class="table-responsive"><table class="table table-hover align-middle">
-<thead><tr><th>Code</th><th>Nom</th><th>Début</th><th>Fin</th><th>Usage</th><th>État</th><th class="text-end">Actions</th></tr></thead>
+<caption class="visually-hidden">Liste des postes</caption>
+<thead><tr><th scope="col">Code</th><th scope="col">Nom</th><th scope="col">Début</th><th scope="col">Fin</th><th scope="col">Usage</th><th scope="col">État</th><th scope="col" class="text-end">Actions</th></tr></thead>
 <tbody>
 @foreach (var item in Model.Items)
 {
     <tr>
-        <td>@item.Code</td><td>@item.Name</td><td>@item.StartTime</td><td>@item.EndTime</td><td>@(item.TripUsageCount + item.StopUsageCount)</td>
+        <th scope="row">@item.Code</th><td>@item.Name</td><td>@item.StartTime</td><td>@item.EndTime</td><td>@(item.TripUsageCount + item.StopUsageCount)</td>
         <td><span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">@(item.IsActive ? "Actif" : "Inactif")</span></td>
         <td class="text-end">
             @if (item.CanEdit) { <a class="btn btn-sm btn-outline-secondary" asp-action="EditWorkShift" asp-route-id="@item.Id">Modifier</a> }

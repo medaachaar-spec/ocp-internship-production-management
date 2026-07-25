@@ -1,7 +1,22 @@
 # OCP Production Management
 
-Technical foundation for the OCP Phosboucraa mining-production management
-internship prototype.
+Presentation-ready application foundation for the OCP Phosboucraa
+mining-production management internship project.
+
+## Current application scope
+
+The current application includes role-aware Home content, operational Trips and
+Stops workflows, Quality entry and review, supervisor validation, read-only
+Truck and Driver catalogs, controlled reference-data administration, a
+six-KPI/five-chart production Dashboard, factual Truck and Driver Performance
+pages, and an administrator-only Technical Diagnostic.
+
+The database schema and reporting definitions are frozen. The application does
+not create migrations at startup, reporting services remain read-only, and no
+quality threshold, performance score, or ranking is inferred.
+
+The sections below preserve the implementation history; they do not describe an
+unfinished application.
 
 ## Sprint 0 status
 
@@ -39,7 +54,7 @@ The integrated dashboard uses read-only reporting views, inclusive date
 filtering, six KPI cards, and five accessible Chart.js visualizations. Dashboard
 access uses its dedicated authorization policy.
 
-## Current scope
+## Technical scope
 
 - ASP.NET Core MVC on .NET 10;
 - Entity Framework Core Database-First;
@@ -49,7 +64,8 @@ access uses its dedicated authorization policy.
 - policy-based authorization;
 - role-aware sidebar;
 - Trips, Stops, Quality, Trucks, Drivers, and reference-data modules;
-- read-only operational dashboard;
+- read-only operational dashboard and performance reporting;
+- administrator-only runtime diagnostics;
 - xUnit automated tests.
 
 ## Prerequisites

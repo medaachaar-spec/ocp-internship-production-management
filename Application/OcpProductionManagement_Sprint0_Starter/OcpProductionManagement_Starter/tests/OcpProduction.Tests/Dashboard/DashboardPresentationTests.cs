@@ -124,6 +124,7 @@ public sealed class DashboardPresentationTests
             StringComparison.Ordinal);
         Assert.Contains("Voyages et tonnage par jour", source, StringComparison.Ordinal);
         Assert.Contains("Répartition des voyages par statut", source, StringComparison.Ordinal);
+        Assert.Contains("TripPresentation.GetStatusLabel(point.Status)", source, StringComparison.Ordinal);
         Assert.Contains("Durée des arrêts par motif", source, StringComparison.Ordinal);
         Assert.Contains("Nombre de voyages par camion", source, StringComparison.Ordinal);
         Assert.Contains("Évolution du P2O5", source, StringComparison.Ordinal);
@@ -137,10 +138,11 @@ public sealed class DashboardPresentationTests
         Assert.Contains("type=\"application/json\"", source, StringComparison.Ordinal);
         Assert.Contains("@Html.Raw(Model.ChartDataJson)", source, StringComparison.Ordinal);
         Assert.Contains("chart.js@4.4.7", source, StringComparison.Ordinal);
+        Assert.Contains("~/js/chart-theme.js", source, StringComparison.Ordinal);
         Assert.Contains("~/js/dashboard.js", source, StringComparison.Ordinal);
         Assert.Contains("@section Scripts", source, StringComparison.Ordinal);
         Assert.Contains("dashboard-status-legend", source, StringComparison.Ordinal);
-        Assert.Contains("@point.Status", source, StringComparison.Ordinal);
+        Assert.DoesNotContain(">@point.Status<", source, StringComparison.Ordinal);
         Assert.Contains(
             "point.TripCount * 100m / statusTripTotal",
             source,
@@ -159,6 +161,34 @@ public sealed class DashboardPresentationTests
         AssertConditionalCanvas(source, "Model.HasStopDurationByReason", "stop-reason-chart");
         AssertConditionalCanvas(source, "Model.HasTruckActivity", "truck-activity-chart");
         AssertConditionalCanvas(source, "Model.HasP2O5Trend", "p2o5-trend-chart");
+    }
+
+    [Fact]
+    public void Dashboard_date_filters_use_french_text_format_and_preserve_attempted_values()
+    {
+        var viewSource = File.ReadAllText(
+            GetWebFile("Views", "Dashboard", "Index.cshtml"));
+        var binderSource = File.ReadAllText(
+            GetWebFile("ModelBinding", "DashboardDateCriteriaModelBinder.cs"));
+
+        Assert.Equal(2, CountOccurrences(viewSource, "type=\"text\""));
+        Assert.Equal(2, CountOccurrences(viewSource, "placeholder=\"jj/mm/aaaa\""));
+        Assert.DoesNotContain("type=\"date\"", viewSource, StringComparison.Ordinal);
+        Assert.Contains("startDateState.AttemptedValue", viewSource, StringComparison.Ordinal);
+        Assert.Contains("endDateState.AttemptedValue", viewSource, StringComparison.Ordinal);
+        Assert.Contains("ToString(\"dd/MM/yyyy\")", viewSource, StringComparison.Ordinal);
+        Assert.Contains(
+            "DateOnly.TryParseExact(",
+            binderSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "public const string DateFormat = \"dd/MM/yyyy\";",
+            binderSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "La date doit respecter le format jj/mm/aaaa.",
+            binderSource,
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -259,18 +289,22 @@ public sealed class DashboardPresentationTests
         var viewSource = File.ReadAllText(GetWebFile("Views", "Dashboard", "Index.cshtml"));
         var layoutSource = File.ReadAllText(GetWebFile("Views", "Shared", "_Layout.cshtml"));
         var scriptSource = File.ReadAllText(GetWebFile("wwwroot", "js", "dashboard.js"));
+        var themeSource = File.ReadAllText(GetWebFile("wwwroot", "js", "chart-theme.js"));
         var cssSource = File.ReadAllText(GetWebFile("wwwroot", "css", "site.css"));
         var dashboardCss = cssSource[cssSource.IndexOf(".dashboard-page", StringComparison.Ordinal)..];
 
         Assert.DoesNotContain("chart.js", layoutSource, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("window.Chart", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("window.OcpChartTheme", scriptSource, StringComparison.Ordinal);
         Assert.Contains("JSON.parse(dataElement.textContent)", scriptSource, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", scriptSource, StringComparison.Ordinal);
         Assert.Contains("beginAtZero: true", scriptSource, StringComparison.Ordinal);
         Assert.Contains("fallback?.removeAttribute(\"open\")", scriptSource, StringComparison.Ordinal);
         Assert.Contains("visual.hidden = false", scriptSource, StringComparison.Ordinal);
         Assert.Contains("type: \"doughnut\"", scriptSource, StringComparison.Ordinal);
-        Assert.Contains("statuses.map(point => point.status)", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("statuses.map(point => formatTripStatus(point.status))", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("Completed: \"Validé\"", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("InProgress: \"En cours\"", scriptSource, StringComparison.Ordinal);
         Assert.Contains("statuses.reduce(", scriptSource, StringComparison.Ordinal);
         Assert.Contains("formatPercentage(count, total)", scriptSource, StringComparison.Ordinal);
         Assert.Contains("dashboardStatusCenterText", scriptSource, StringComparison.Ordinal);
@@ -301,12 +335,18 @@ public sealed class DashboardPresentationTests
             "p2o5.map(point => point.averageP2O5)",
             scriptSource,
             StringComparison.Ordinal);
-        Assert.Contains("dashboardBarValueLabels", scriptSource, StringComparison.Ordinal);
-        Assert.Contains("chart.width < 560", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("theme.barValueLabelsPlugin", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("id: \"ocpBarValueLabels\"", themeSource, StringComparison.Ordinal);
+        Assert.Contains("chart.width < 560", themeSource, StringComparison.Ordinal);
         Assert.Contains("point.stopCount", scriptSource, StringComparison.Ordinal);
         Assert.Contains("trucks.map(point => point.tripCount)", scriptSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ChartDataLabels", scriptSource, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("chartjs-plugin", scriptSource, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("devicePixelRatio", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("resizeDelay: 100", themeSource, StringComparison.Ordinal);
+        Assert.Contains("backgroundColor: colors.tooltip", themeSource, StringComparison.Ordinal);
+        Assert.Contains("borderWidth: 2", scriptSource, StringComparison.Ordinal);
+        Assert.Contains("borderWidth: 3", scriptSource, StringComparison.Ordinal);
         Assert.Contains("@section Scripts", viewSource, StringComparison.Ordinal);
         Assert.Contains("@media (max-width:", dashboardCss, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", dashboardCss, StringComparison.Ordinal);
@@ -362,6 +402,50 @@ public sealed class DashboardPresentationTests
         Assert.True(reportingGateIndex > dashboardLinkIndex);
         Assert.True(performanceLinkIndex > reportingGateIndex);
         Assert.Equal(1, CountOccurrences(source, "asp-controller=\"Dashboard\""));
+    }
+
+    [Fact]
+    public void Sidebar_uses_an_independent_accessible_scroll_region()
+    {
+        var sidebarSource = File.ReadAllText(GetWebFile("Views", "Shared", "_Sidebar.cshtml"));
+        var styleSource = File.ReadAllText(GetWebFile("wwwroot", "css", "site.css"));
+
+        Assert.Contains("aria-label=\"Navigation principale\"", sidebarSource, StringComparison.Ordinal);
+        Assert.Contains("navigation.scrollTop", sidebarSource, StringComparison.Ordinal);
+        Assert.Contains(".nav-link.active", sidebarSource, StringComparison.Ordinal);
+
+        Assert.Contains("height: 100vh; height: 100dvh", styleSource, StringComparison.Ordinal);
+        Assert.Contains("display: flex; flex-direction: column; overflow: hidden", styleSource, StringComparison.Ordinal);
+        Assert.Contains("flex: 0 0 auto", styleSource, StringComparison.Ordinal);
+        Assert.Contains("flex: 1 1 auto; min-height: 0; flex-wrap: nowrap", styleSource, StringComparison.Ordinal);
+        Assert.Contains("overflow-y: auto; overflow-x: hidden", styleSource, StringComparison.Ordinal);
+        Assert.Contains("overscroll-behavior: contain", styleSource, StringComparison.Ordinal);
+        Assert.Contains("scrollbar-width: thin", styleSource, StringComparison.Ordinal);
+        Assert.Contains(".sidebar-nav::-webkit-scrollbar", styleSource, StringComparison.Ordinal);
+        Assert.Contains(".sidebar-nav .nav-link:focus-visible", styleSource, StringComparison.Ordinal);
+        Assert.Contains("height: auto; min-height: auto; overflow: visible", styleSource, StringComparison.Ordinal);
+        Assert.Contains("max-height: calc(100dvh - 93px)", styleSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Sidebar_brand_uses_the_approved_Ocp_WebP_without_the_PM_placeholder()
+    {
+        var sidebarSource = File.ReadAllText(GetWebFile("Views", "Shared", "_Sidebar.cshtml"));
+        var styleSource = File.ReadAllText(GetWebFile("wwwroot", "css", "site.css"));
+        var logoPath = GetWebFile("wwwroot", "images", "branding", "OCP_logo.webp");
+
+        Assert.True(File.Exists(logoPath));
+        Assert.True(new FileInfo(logoPath).Length > 0);
+        Assert.Contains("src=\"~/images/branding/OCP_logo.webp\"", sidebarSource, StringComparison.Ordinal);
+        Assert.Contains("alt=\"Logo OCP\"", sidebarSource, StringComparison.Ordinal);
+        Assert.Contains("class=\"sidebar-brand-logo\"", sidebarSource, StringComparison.Ordinal);
+        Assert.Contains("OCP Production", sidebarSource, StringComparison.Ordinal);
+        Assert.Contains("Phosboucraa", sidebarSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("<div class=\"brand-mark\">PM</div>", sidebarSource, StringComparison.Ordinal);
+
+        Assert.Contains(".sidebar-brand-logo-wrap", styleSource, StringComparison.Ordinal);
+        Assert.Contains("width: 44px; height: 44px; padding: 4px", styleSource, StringComparison.Ordinal);
+        Assert.Contains(".sidebar-brand-logo { display: block; width: 100%; height: 100%; object-fit: contain; }", styleSource, StringComparison.Ordinal);
     }
 
     [Fact]

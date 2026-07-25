@@ -1,4 +1,5 @@
 @model OcpProduction.Web.ViewModels.Dashboard.DashboardViewModel
+@using OcpProduction.Web.ViewModels.Trips
 
 @{
     ViewData["Title"] = "Tableau de bord de production";
@@ -9,6 +10,12 @@
         ? Model.Kpis.Charts.P2O5Trend.Sum(
             point => point.AverageP2O5 * point.MeasurementCount) / p2o5MeasurementTotal
         : (decimal?)null;
+    var startDateValue = ViewData.ModelState.TryGetValue("StartDate", out var startDateState)
+        ? startDateState.AttemptedValue
+        : Model.Criteria.StartDate?.ToString("dd/MM/yyyy");
+    var endDateValue = ViewData.ModelState.TryGetValue("EndDate", out var endDateState)
+        ? endDateState.AttemptedValue
+        : Model.Criteria.EndDate?.ToString("dd/MM/yyyy");
 }
 
 <div class="dashboard-page">
@@ -34,16 +41,34 @@
                     <input class="form-control"
                            id="StartDate"
                            name="StartDate"
-                           type="date"
-                           value="@Model.Criteria.StartDate?.ToString("yyyy-MM-dd")" />
+                           type="text"
+                           inputmode="numeric"
+                           autocomplete="off"
+                           placeholder="jj/mm/aaaa"
+                           aria-describedby="StartDateHint"
+                           value="@startDateValue" />
+                    <span id="StartDateHint" class="form-text">Format attendu : jj/mm/aaaa.</span>
+                    @Html.ValidationMessage(
+                        "StartDate",
+                        null,
+                        new { @class = "text-danger small d-block mt-1" })
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="EndDate">Date de fin</label>
                     <input class="form-control"
                            id="EndDate"
                            name="EndDate"
-                           type="date"
-                           value="@Model.Criteria.EndDate?.ToString("yyyy-MM-dd")" />
+                           type="text"
+                           inputmode="numeric"
+                           autocomplete="off"
+                           placeholder="jj/mm/aaaa"
+                           aria-describedby="EndDateHint"
+                           value="@endDateValue" />
+                    <span id="EndDateHint" class="form-text">Format attendu : jj/mm/aaaa.</span>
+                    @Html.ValidationMessage(
+                        "EndDate",
+                        null,
+                        new { @class = "text-danger small d-block mt-1" })
                 </div>
                 <div class="col-md-4 d-flex flex-wrap gap-2 dashboard-filter-actions">
                     <button type="submit" class="btn btn-primary">Appliquer</button>
@@ -119,7 +144,7 @@
             <div class="dashboard-section-heading">
                 <div>
                     <h2 id="dashboard-chart-heading" class="h4 mb-1">Activité de la période</h2>
-                    <p class="text-muted mb-0">Données descriptives issues des vues de reporting détaillées.</p>
+                    <p class="text-muted mb-0">Données descriptives calculées pour la période sélectionnée.</p>
                 </div>
             </div>
 
@@ -201,7 +226,7 @@
                                         <li>
                                             <span class="dashboard-status-swatch dashboard-status-swatch-@(statusIndex % 6)"
                                                   aria-hidden="true"></span>
-                                            <span class="dashboard-status-name">@point.Status</span>
+                                            <span class="dashboard-status-name">@TripPresentation.GetStatusLabel(point.Status)</span>
                                             <span class="dashboard-status-value">
                                                 @point.TripCount.ToString("N0")
                                                 <span aria-hidden="true">·</span>
@@ -231,7 +256,7 @@
                                                     ? point.TripCount * 100m / statusTripTotal
                                                     : 0m;
                                                 <tr>
-                                                    <th scope="row">@point.Status</th>
+                                                    <th scope="row">@TripPresentation.GetStatusLabel(point.Status)</th>
                                                     <td class="text-end">@point.TripCount.ToString("N0")</td>
                                                     <td class="text-end">@statusPercentage.ToString("N2") %</td>
                                                 </tr>
@@ -417,6 +442,7 @@
     @if (!Model.HasLoadError && ViewData.ModelState.IsValid && Model.HasAnyChartData)
     {
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+        <script src="~/js/chart-theme.js" asp-append-version="true"></script>
         <script src="~/js/dashboard.js" asp-append-version="true"></script>
     }
 }

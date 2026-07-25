@@ -10,6 +10,7 @@ public sealed class TruckPerformanceListItemDto
     public long CompletedTrips { get; init; }
     public decimal? CompletionRatePercent { get; init; }
     public decimal? TotalTonnage { get; init; }
+    public decimal CompletedTonnage { get; init; }
     public decimal? AveragePayloadUtilizationPercent { get; init; }
     public long? TotalStopCount { get; init; }
     public long? TotalDowntimeMinutes { get; init; }

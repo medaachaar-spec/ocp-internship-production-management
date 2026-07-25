@@ -55,7 +55,7 @@ DashboardController
 - Entity Framework Core 10, approche Database-First ;
 - SQL Server ;
 - Razor et Bootstrap 5 ;
-- Chart.js, chargé uniquement sur la page du tableau de bord ;
+- Chart.js 4.4.7, chargé sur les pages analytiques qui en ont besoin ;
 - xUnit pour les tests automatisés ;
 - Power BI Desktop pour le modèle analytique.
 
@@ -95,12 +95,14 @@ Les requêtes du tableau de bord sont en lecture seule, utilisent les vues de re
 ## État actuel
 
 - architecture en couches et modèle Database-First en place ;
-- modules opérationnels des Sprints 0 à 4 documentés dans le dépôt applicatif ;
-- tableau de bord Sprint 5 implémenté localement et encore non validé par un commit ;
-- politique dédiée `CanViewDashboard` préparée localement ;
+- modules opérationnels, validation, qualité, parc et référentiels implémentés ;
+- tableau de bord et pages de performance camion/conducteur disponibles ;
+- politiques dédiées de reporting et de diagnostic appliquées ;
+- suite automatisée complète au niveau de référence attendu ;
 - scripts SQL et reporting disponibles ;
-- dossier Power BI présent, mais aucun fichier PBIX n'a été trouvé lors de l'audit du 24 juillet 2026 ;
-- une référence d'intégration attend encore une mise à jour contrôlée après la correction autorisée de `TruckStopID 153`.
+- projet Power BI PBIP présent sous `reporting/` ; aucun fichier PBIX n'est suivi ;
+- correction autorisée de `TruckStopID 153` intégrée aux références et tests ;
+- vérification manuelle multi-rôle et multi-viewport requise avant la soutenance.
 
 ## Structure actuelle
 
@@ -111,8 +113,8 @@ OCP Internship/
 │       └── OcpProductionManagement_Starter/  # dépôt Git et solution .NET
 ├── backups/                                  # archives historiques à revoir
 ├── docs/                                     # documentation fonctionnelle et technique
-├── Power BI/                                 # documentation Power BI ; PBIX absent
-├── reporting/                                # vues SQL et validations reporting
+├── Power BI/                                 # documentation Power BI
+├── reporting/                                # vues SQL, validations et projet PBIP
 ├── Research/                                 # documents de recherche à revoir avant publication
 ├── sql/                                      # création, données synthétiques et validation SQL
 └── OCP_Mining_Prototype_Schema.sql            # export de schéma à conserver sous revue
@@ -183,10 +185,10 @@ Les identifiants de comptes locaux ne doivent pas être documentés dans le dép
 - prototype de stage, sans preuve de préparation à une production réelle ;
 - base SQL Server locale requise pour les tests d'intégration ;
 - données et classifications de démonstration non officielles ;
-- PBIX absent du dossier audité ;
+- projet PBIP disponible, avec vérification visuelle à effectuer dans Power BI Desktop ;
 - absence de pipeline CI/CD et de procédure de déploiement validée ;
 - archives historiques et documents de recherche à examiner manuellement ;
-- secrets de démonstration actuellement présents dans le dépôt applicatif et à retirer ou externaliser avant publication.
+- vérification manuelle des rôles, viewports et captures requise avant présentation.
 
 ## Sécurité
 
@@ -212,4 +214,3 @@ Les scripts de restauration de corrections unitaires doivent être relus avant p
 6. exécuter `git diff --check` et relire les fichiers à publier ;
 7. utiliser une branche et une revue avant fusion ;
 8. ne publier qu'après résolution des éléments de sécurité et de revue manuelle.
-

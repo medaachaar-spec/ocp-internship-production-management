@@ -1,0 +1,15 @@
+@model int
+@{
+    var isNotFound = Model == 404;
+    ViewData["Title"] = isNotFound ? "Page introuvable" : "Requête non aboutie";
+}
+
+<div class="page-header">
+    <h1>@(isNotFound ? "Page introuvable" : "La requête n’a pas pu aboutir")</h1>
+    <p class="text-muted">
+        @(isNotFound
+            ? "La page demandée n’existe pas ou n’est plus disponible."
+            : "La ressource demandée ne peut pas être affichée.")
+    </p>
+</div>
+<a asp-controller="Home" asp-action="Index" class="btn btn-primary">Retour à l’accueil</a>

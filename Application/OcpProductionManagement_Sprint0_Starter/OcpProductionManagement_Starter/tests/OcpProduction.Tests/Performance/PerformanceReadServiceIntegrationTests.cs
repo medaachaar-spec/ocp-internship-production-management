@@ -34,9 +34,113 @@ public sealed class PerformanceReadServiceIntegrationTests
         Assert.NotNull(await service.GetDriverAsync(driver.DriverId));
         Assert.Null(await service.GetDriverAsync(int.MaxValue));
 
+        var truckReport = await service.GetTruckReportAsync(
+            new TruckPerformanceSearchCriteria { PageSize = 10 });
+        Assert.Equal(12, truckReport.FilteredItems.Count);
+        Assert.Equal(12, truckReport.Summary.DisplayedTruckCount);
+        Assert.Equal(801, truckReport.Summary.TripCount);
+        Assert.Equal(54533.80m, truckReport.Summary.CompletedTonnage);
+        Assert.Equal(150, truckReport.Summary.StopCount);
+        Assert.Equal(24984, truckReport.Summary.TotalStopDurationMinutes);
+        Assert.Equal(10, truckReport.TableRows.Items.Count);
+        Assert.Equal(12, truckReport.Charts.TripsByTruck.Count);
+        Assert.Equal(
+            truckReport.Summary.TripCount,
+            truckReport.Charts.TripsByTruck.Sum(point => point.Value));
+        Assert.Equal(
+            truckReport.Summary.CompletedTonnage,
+            truckReport.Charts.TonnageByTruck.Sum(point => point.Value));
+        Assert.Equal(
+            truckReport.Summary.StopCount,
+            truckReport.Charts.StopsByTruck.Sum(point => point.Value));
+        Assert.All(
+            truckReport.Charts.P2O5ByTruck,
+            point => Assert.True(point.Value >= 0));
+
+        var filteredTruckReport = await service.GetTruckReportAsync(
+            new TruckPerformanceSearchCriteria
+            {
+                Search = truck.TruckCode,
+                PageSize = 10
+            });
+        Assert.Single(filteredTruckReport.FilteredItems);
+        Assert.Single(filteredTruckReport.Charts.TripsByTruck);
+        Assert.Equal(
+            filteredTruckReport.FilteredItems.Sum(item => item.TotalTrips),
+            filteredTruckReport.Summary.TripCount);
+        Assert.Equal(
+            filteredTruckReport.FilteredItems.Sum(item => item.CompletedTonnage),
+            filteredTruckReport.Summary.CompletedTonnage);
+        Assert.Equal(
+            filteredTruckReport.FilteredItems.Sum(item => item.TotalStopCount ?? 0),
+            filteredTruckReport.Summary.StopCount);
+
+        var driverReport = await service.GetDriverReportAsync(
+            new DriverPerformanceSearchCriteria { PageSize = 10 });
+        Assert.Equal(20, driverReport.FilteredItems.Count);
+        Assert.Equal(20, driverReport.Summary.DisplayedDriverCount);
+        Assert.Equal(801, driverReport.Summary.TripCount);
+        Assert.Equal(783, driverReport.Summary.CompletedTripCount);
+        Assert.Equal(54533.80m, driverReport.Summary.CompletedTonnage);
+        Assert.Equal(120, driverReport.Summary.LinkedStopCount);
+        Assert.Equal(10, driverReport.TableRows.Items.Count);
+        Assert.Equal(20, driverReport.Charts.TripsByDriver.Count);
+        Assert.Equal(20, driverReport.Charts.TonnageByDriver.Count);
+        Assert.Equal(20, driverReport.Charts.LinkedStopsByDriver.Count);
+        Assert.Equal(
+            driverReport.Summary.TripCount,
+            driverReport.Charts.TripsByDriver.Sum(point => point.TotalTrips));
+        Assert.Equal(
+            driverReport.Summary.CompletedTripCount,
+            driverReport.Charts.TripsByDriver.Sum(point => point.CompletedTrips));
+        Assert.Equal(
+            driverReport.Summary.CompletedTonnage,
+            driverReport.Charts.TonnageByDriver.Sum(point => point.Value));
+        Assert.Equal(
+            driverReport.Summary.LinkedStopCount,
+            driverReport.Charts.LinkedStopsByDriver.Sum(point => point.Value));
+
+        var filteredDriverReport = await service.GetDriverReportAsync(
+            new DriverPerformanceSearchCriteria
+            {
+                Search = driver.DriverCode,
+                PageSize = 10
+            });
+        Assert.Single(filteredDriverReport.FilteredItems);
+        Assert.Single(filteredDriverReport.Charts.TripsByDriver);
+        Assert.Equal(
+            filteredDriverReport.FilteredItems.Sum(item => item.TotalTrips),
+            filteredDriverReport.Summary.TripCount);
+        Assert.Equal(
+            filteredDriverReport.FilteredItems.Sum(item => item.CompletedTonnage),
+            filteredDriverReport.Summary.CompletedTonnage);
+        Assert.Equal(
+            filteredDriverReport.FilteredItems.Sum(item => item.TotalLinkedStopCount ?? 0),
+            filteredDriverReport.Summary.LinkedStopCount);
+
         var filters = await service.GetFilterOptionsAsync();
         Assert.NotEmpty(filters.TruckStatuses);
         Assert.NotEmpty(filters.DriverStatuses);
+        var truckStatusReport = await service.GetTruckReportAsync(
+            new TruckPerformanceSearchCriteria
+            {
+                Status = filters.TruckStatuses[0],
+                PageSize = 10
+            });
+        Assert.NotEmpty(truckStatusReport.FilteredItems);
+        Assert.All(
+            truckStatusReport.FilteredItems,
+            item => Assert.Equal(filters.TruckStatuses[0], item.TruckStatus));
+        var driverStatusReport = await service.GetDriverReportAsync(
+            new DriverPerformanceSearchCriteria
+            {
+                Status = filters.DriverStatuses[0],
+                PageSize = 10
+            });
+        Assert.NotEmpty(driverStatusReport.FilteredItems);
+        Assert.All(
+            driverStatusReport.FilteredItems,
+            item => Assert.Equal(filters.DriverStatuses[0], item.DriverStatus));
         Assert.Equal(before, await GetFingerprintAsync(context));
     }
 
@@ -65,7 +169,16 @@ public sealed class PerformanceReadServiceIntegrationTests
                 (SELECT COUNT_BIG(*) FROM dbo.Driver),
                 (SELECT CHECKSUM_AGG(BINARY_CHECKSUM(*)) FROM dbo.Driver),
                 (SELECT COUNT_BIG(*) FROM dbo.Trip),
-                (SELECT CHECKSUM_AGG(BINARY_CHECKSUM(*)) FROM dbo.Trip);
+                (SELECT CHECKSUM_AGG(BINARY_CHECKSUM(*)) FROM dbo.Trip),
+                (SELECT COUNT_BIG(*) FROM dbo.TruckStop),
+                (SELECT CHECKSUM_AGG(BINARY_CHECKSUM(*)) FROM dbo.TruckStop),
+                (SELECT COUNT_BIG(*) FROM dbo.QualityResult),
+                (SELECT CHECKSUM_AGG(BINARY_CHECKSUM(*)) FROM dbo.QualityResult),
+                CHECKSUM(OBJECT_DEFINITION(OBJECT_ID(N'dbo.vw_TruckPerformance'))),
+                CHECKSUM(OBJECT_DEFINITION(OBJECT_ID(N'dbo.vw_DriverPerformance'))),
+                CHECKSUM(OBJECT_DEFINITION(OBJECT_ID(N'dbo.vw_TripSummary'))),
+                CHECKSUM(OBJECT_DEFINITION(OBJECT_ID(N'dbo.vw_StopAnalysis'))),
+                CHECKSUM(OBJECT_DEFINITION(OBJECT_ID(N'dbo.vw_QualityAnalysis')));
             """;
         await using var reader = await command.ExecuteReaderAsync();
         Assert.True(await reader.ReadAsync());
@@ -75,7 +188,16 @@ public sealed class PerformanceReadServiceIntegrationTests
             reader.GetInt64(2),
             reader.GetInt32(3),
             reader.GetInt64(4),
-            reader.GetInt32(5));
+            reader.GetInt32(5),
+            reader.GetInt64(6),
+            reader.GetInt32(7),
+            reader.GetInt64(8),
+            reader.GetInt32(9),
+            reader.GetInt32(10),
+            reader.GetInt32(11),
+            reader.GetInt32(12),
+            reader.GetInt32(13),
+            reader.GetInt32(14));
     }
 
     private sealed record PerformanceFingerprint(
@@ -84,5 +206,14 @@ public sealed class PerformanceReadServiceIntegrationTests
         long DriverCount,
         int DriverChecksum,
         long TripCount,
-        int TripChecksum);
+        int TripChecksum,
+        long TruckStopCount,
+        int TruckStopChecksum,
+        long QualityResultCount,
+        int QualityResultChecksum,
+        int TruckPerformanceViewChecksum,
+        int DriverPerformanceViewChecksum,
+        int TripSummaryViewChecksum,
+        int StopAnalysisViewChecksum,
+        int QualityAnalysisViewChecksum);
 }

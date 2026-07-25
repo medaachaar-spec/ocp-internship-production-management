@@ -26,7 +26,7 @@ public sealed class StopWorkflowServiceIntegrationTests
             NullLogger<StopWorkflowService>.Instance);
         var options = await writeService.GetFormOptionsAsync();
         var before = await GetDatabaseFingerprintAsync(context);
-        var marker = $"CODEX-Sprint2-Part3-{Guid.NewGuid():N}";
+        var marker = $"OCP-STOP-WORKFLOW-ROLLBACK-{Guid.NewGuid():N}";
         var createdStopIds = new List<long>();
 
         await using (var transaction = await context.Database.BeginTransactionAsync())

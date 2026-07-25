@@ -130,7 +130,7 @@ public sealed class TripWriteServiceIntegrationTests
         var service = CreateService(context);
         var options = await service.GetFormOptionsAsync();
         var before = await GetFingerprintAsync(context);
-        var marker = $"CODEx-Sprint1-Part2-{Guid.NewGuid():N}";
+        var marker = $"OCP-TRIP-WRITE-ROLLBACK-{Guid.NewGuid():N}";
         long createdTripId = 0;
 
         await using (var transaction = await context.Database.BeginTransactionAsync())

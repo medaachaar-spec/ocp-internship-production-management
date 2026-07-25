@@ -9,4 +9,5 @@ public static class PolicyNames
     public const string CanViewDashboard = nameof(CanViewDashboard);
     public const string CanViewReporting = nameof(CanViewReporting);
     public const string CanAdminister = nameof(CanAdminister);
+    public const string CanViewTechnicalDiagnostics = nameof(CanViewTechnicalDiagnostics);
 }

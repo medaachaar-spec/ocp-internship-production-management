@@ -10,6 +10,7 @@ public sealed class DriverPerformanceListItemDto
     public long CompletedTrips { get; init; }
     public decimal? CompletionRatePercent { get; init; }
     public decimal? TotalTonnage { get; init; }
+    public decimal CompletedTonnage { get; init; }
     public decimal? AverageTripDurationMinutes { get; init; }
     public long? TotalLinkedStopCount { get; init; }
     public long? TotalLinkedStopDurationMinutes { get; init; }
